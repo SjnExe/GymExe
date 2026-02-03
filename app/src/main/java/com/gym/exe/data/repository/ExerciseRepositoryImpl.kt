@@ -13,7 +13,8 @@ import java.io.InputStreamReader
 
 class ExerciseRepositoryImpl(
     private val context: Context,
-    private val exerciseDao: ExerciseDao
+    private val exerciseDao: ExerciseDao,
+    private val json: Json = Json { ignoreUnknownKeys = true } // Default or injected if modified constructor
 ) : ExerciseRepository {
 
     override fun getAllExercises(): Flow<List<ExerciseEntity>> {
@@ -30,7 +31,6 @@ class ExerciseRepositoryImpl(
                 val inputStream = context.assets.open("exercises.json")
                 val jsonString = BufferedReader(InputStreamReader(inputStream)).use { it.readText() }
 
-                val json = Json { ignoreUnknownKeys = true }
                 val exercises = json.decodeFromString<List<ExerciseEntity>>(jsonString)
 
                 // Merge logic: Upsert all. Official exercises have fixed IDs, so they update.

@@ -62,11 +62,24 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideSessionDao(db: GymDatabase): com.gym.exe.data.local.dao.SessionDao {
+        return db.sessionDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSetDao(db: GymDatabase): com.gym.exe.data.local.dao.SetDao {
+        return db.setDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideExerciseRepository(
         @ApplicationContext context: Context,
-        exerciseDao: ExerciseDao
+        exerciseDao: ExerciseDao,
+        json: Json
     ): ExerciseRepository {
-        return ExerciseRepositoryImpl(context, exerciseDao)
+        return ExerciseRepositoryImpl(context, exerciseDao, json)
     }
 
     @Provides

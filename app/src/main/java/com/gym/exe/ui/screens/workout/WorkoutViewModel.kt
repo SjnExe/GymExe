@@ -17,7 +17,9 @@ import javax.inject.Inject
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
     private val programRepository: ProgramRepository,
-    private val timerManager: TimerManager
+    private val timerManager: TimerManager,
+    private val sessionDao: com.gym.exe.data.local.dao.SessionDao,
+    private val setDao: com.gym.exe.data.local.dao.SetDao
 ) : ViewModel() {
 
     // Ideally we'd get the active program and its current workout.
@@ -48,6 +50,29 @@ class WorkoutViewModel @Inject constructor(
     }
 
     fun finishWorkout() {
-        // Save session logic would go here
+        viewModelScope.launch {
+            val sets = _currentSets.value
+            if (sets.isNotEmpty()) {
+                val program = activeProgram.value
+                val sessionName = program?.name ?: "Quick Workout"
+
+                val start = sets.firstOrNull()?.timestamp ?: System.currentTimeMillis()
+                val end = System.currentTimeMillis()
+
+                val session = com.gym.exe.data.local.entity.SessionEntity(
+                    workoutName = sessionName,
+                    startTime = start,
+                    endTime = end
+                )
+
+                val sessionId = sessionDao.insertSession(session)
+
+                val setsWithSessionId = sets.map { it.copy(sessionId = sessionId) }
+                setDao.insertSets(setsWithSessionId)
+
+                // Clear state
+                _currentSets.value = emptyList()
+            }
+        }
     }
 }

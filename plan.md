@@ -23,9 +23,11 @@
 
 ## 2. CI/CD & Release Strategy
 *   **Runner:** `ubuntu-24.04-arm` (ARM64).
-*   **Workflows:**
-    *   `beta_rolling.yml`: Runs on push to `Dev`. Lints, Builds `beta`, Updates `beta` tag (Rolling Release).
-    *   `release_stable.yml`: Runs on tag `v*`. Builds `prod`. Creates GitHub Release.
+*   **Workflow:** `build.yml` (Consolidated Pipeline)
+    *   **Triggers:** Push to `dev`, Tag `v*`, Manual (`workflow_dispatch`).
+    *   **Logic:**
+        *   `dev` push -> Lints, Builds `beta`, Updates `beta` tag (Rolling Release).
+        *   `v*` tag -> Builds `prod`, Creates GitHub Release.
 *   **Signing:** Single `debug.keystore` used for BOTH Debug and Release to ensure signature consistency (allows upgrading Beta -> Stable).
 *   **Update System:**
     *   Checks GitHub Releases.
@@ -52,7 +54,7 @@
 - [x] Create `README.md`, `LICENSE`, `CODE_OF_CONDUCT.md`.
 - [x] Generate `debug.keystore` and place in `Dev/`.
 - [x] Configure `build.gradle.kts` (Signing Config, Flavors: `dev`, `prod`).
-- [x] Configure GitHub Actions (`beta_rolling.yml`, `release_stable.yml`).
+- [x] Configure GitHub Actions (`build.yml`).
 - [x] **Update:** Fixed Gradle Wrapper (`gradlew`) and `.gitignore` to ensure clean build and repo hygiene.
 
 ### Phase 2: Core Architecture (Data & Domain)
@@ -79,13 +81,13 @@
 - [x] Implement Navigation (Compose Navigation).
 - [x] **Screens:**
     - [x] Dashboard (Current Split status, Quick Start).
-    - [ ] Workout Player (Logger, Timer UI, Supersets UI).
+    - [x] Workout Player (Basic Logging, Timer Overlay).
     - [x] Exercise List (Search, Filter, Add Custom).
     - [x] Settings (Backup/Restore, Theme, Feedback Button, Update Check).
 
 ### Phase 5: Polishing & Validation
 - [x] Add Feedback button (Link to GitHub Issues/Template).
-- [ ] Verify CI/CD pipeline.
+- [x] Verify CI/CD pipeline (Workflows consolidated).
 - [ ] Final Code Review & Lint check.
 
 ## 5. Context Log
@@ -93,4 +95,4 @@
 *   **Database Strategy:** Adopted "Option B" for exercise updates - merging JSON assets into DB on every update to keep official exercises fresh while preserving custom ones.
 *   **Backup Format:** Decided on `.gymexe` (ZIP) for branding and efficiency.
 *   **Build Issues:** Encountered missing Gradle Wrapper and polluted repo with `.gradle` cache files. Action taken: Generated wrapper, updated `.gitignore`, and cleaned cache.
-*   **Next Steps:** Prioritizing build stability (fixing the wrapper) and then completing the Workout Player UI.
+*   **CI/CD Refactor:** Consolidated `beta_rolling` and `release_stable` into single `build.yml` for better maintenance. Trigger logic separates Beta (Branch push) and Stable (Tag push).
