@@ -1,0 +1,20 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android
+app/build/
+.idea/
+gradle/
+!gradle/wrapper/
+!gradle/libs.versions.toml
+
+# GymExe
+*.gymexe
