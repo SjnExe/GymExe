@@ -1,10 +1,11 @@
 name: Build & Release
 
 on:
+  pull_request:
+    branches: [ "dev" ] # Lint & Beta Build on PR commits
   push:
-    branches: [ "dev" ] # Beta builds on push to dev
-    tags: [ "v*" ]      # Stable builds on version tags
-  workflow_dispatch:    # Manual trigger option
+    tags: [ "v*" ]      # Stable Release on tags
+  workflow_dispatch:    # Manual Beta Trigger
 
 jobs:
   lint_and_test:
@@ -28,16 +29,19 @@ jobs:
         continue-on-error: true
         run: ./gradlew ktlintCheck
 
-      # Only auto-fix on dev branch pushes, not tags
+      # Auto-fix lint errors only on PRs (commits back to the PR branch)
       - name: Auto-Fix Lint Errors
-        if: steps.lint_check.outcome == 'failure' && github.ref_type == 'branch'
+        if: steps.lint_check.outcome == 'failure' && github.event_name == 'pull_request'
         run: |
           ./gradlew ktlintFormat
           git config --global user.name 'GymExe Bot'
           git config --global user.email 'bot@gymexe.com'
+          # Fetch the PR branch reference to commit back to it
+          git fetch origin ${{ github.head_ref }}
+          git checkout ${{ github.head_ref }}
           git add .
           git commit -m "style: auto-fix linting errors"
-          git push
+          git push origin ${{ github.head_ref }}
           echo "Lint errors were found and fixed. Failing job to notify."
           exit 1
 
@@ -58,27 +62,28 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # --- BETA / DEV FLOW ---
-      - name: Build Beta (Dev Branch)
-        if: github.ref == 'refs/heads/dev'
+      # --- BETA / PR / MANUAL FLOW ---
+      # Runs on Pull Requests OR Manual Dispatch
+      - name: Build Beta (ARM64 & Universal)
+        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
         run: ./gradlew assembleDevRelease
 
       - name: Prepare Beta Artifacts
-        if: github.ref == 'refs/heads/dev'
+        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
         run: |
           mv app/build/outputs/apk/dev/release/app-dev-release.apk GymExe-Beta-Universal.apk
           cp GymExe-Beta-Universal.apk GymExe-Beta-ARM64.apk
 
-      - name: Update Beta Tag
-        if: github.ref == 'refs/heads/dev'
+      - name: Update Beta Tag (Manual Only)
+        if: github.event_name == 'workflow_dispatch'
         run: |
           git config --global user.name 'GymExe Bot'
           git config --global user.email 'bot@gymexe.com'
           git tag -f beta
           git push -f origin beta
 
-      - name: Release Beta (Rolling)
-        if: github.ref == 'refs/heads/dev'
+      - name: Release Beta (Rolling - Manual Only)
+        if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: beta
@@ -88,6 +93,16 @@ jobs:
             GymExe-Beta-Universal.apk
             GymExe-Beta-ARM64.apk
           prerelease: true
+
+      # For PRs, we just upload artifacts to the Action Run (no GitHub Release)
+      - name: Upload PR Artifacts
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: beta-apks
+          path: |
+            GymExe-Beta-Universal.apk
+            GymExe-Beta-ARM64.apk
 
       # --- STABLE / TAG FLOW ---
       - name: Build Stable
