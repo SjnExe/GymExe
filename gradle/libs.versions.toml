@@ -12,11 +12,12 @@ hilt = "2.51.1"
 room = "2.6.1"
 ksp = "2.0.21-1.0.25"
 ktlint = "12.1.1"
-detekt = "1.23.6"
+detekt = "1.23.7"
 appcompat = "1.7.0"
 material = "1.12.0"
 navigationCompose = "2.8.3"
 serialization = "1.7.3"
+benManesVersions = "0.53.0"
 
 [libraries]
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.0.1" }
@@ -58,3 +59,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }

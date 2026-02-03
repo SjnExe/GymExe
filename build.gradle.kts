@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ben.manes.versions)
 }
 
 subprojects {

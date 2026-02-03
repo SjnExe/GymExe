@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.gym.exe"
+    namespace = "com.sjn.gymexe"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.gym.exe"
+        applicationId = "com.sjn.gymexe"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
