@@ -5,8 +5,8 @@
 # directive in build.gradle.
 
 # Hilt
--keep class com.gym.exe.Hilt_** { *; }
--keep interface com.gym.exe.Hilt_** { *; }
+-keep class com.sjn.gymexe.Hilt_** { *; }
+-keep interface com.sjn.gymexe.Hilt_** { *; }
 
 # Room
 -keep class androidx.room.RoomDatabase { *; }

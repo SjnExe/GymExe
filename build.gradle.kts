@@ -6,16 +6,26 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ben.manes.versions)
 }
 
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "io.gitlab.arturbosch.detekt")
 
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         debug.set(false)
         android.set(true)
         outputToConsole.set(true)
         outputColorName.set("RED")
+    }
+
+    detekt {
+        buildUponDefaultConfig = true
+        allRules = false
+        config.setFrom(file("$rootDir/config/detekt/detekt.yml"))
+        parallel = true
     }
 }

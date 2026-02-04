@@ -8,12 +8,12 @@ plugins {
 }
 
 android {
-    namespace = "com.gym.exe"
+    namespace = "com.sjn.gymexe"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.gym.exe"
-        minSdk = 29
+        applicationId = "com.sjn.gymexe"
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -57,15 +57,21 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    lint {
+        // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
+        // and we cannot update it further without breaking the build (e.g. Hilt requires AGP 9.0).
+        disable += "ObsoleteLintCustomCheck"
     }
 }
 
