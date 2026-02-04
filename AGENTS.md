@@ -23,13 +23,9 @@ sudo apt full-upgrade -y
 
 ## Signing Configuration
 
-For Release builds, the project uses a Keystore.
-*   **Local Development**: Uses `Dev/debug.keystore` (insecure, for dev only).
-*   **CI/CD / Production**: Should use Environment Variables to inject the Keystore securely.
-    *   `KEYSTORE_BASE64`: Base64 encoded content of the keystore file.
-    *   `KEY_ALIAS`: Key alias.
-    *   `KEY_PASSWORD`: Key password.
-    *   `KEYSTORE_PASSWORD`: Keystore password.
+For Release builds, the project uses a Keystore included in the repository.
+*   **Keystore File**: `Dev/release.keystore`
+*   **Credentials**: Hardcoded in `app/build.gradle.kts` (Alias: `gymexe`, Password: `gymexe`).
 
 ## Code Style
 
