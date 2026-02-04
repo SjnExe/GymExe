@@ -2,7 +2,7 @@
 
 ## 1. Project Summary
 *   **App Name:** GymExe
-*   **Package Name:** `com.gym.exe`
+*   **Package Name:** `com.sjn.gymexe`
 *   **Repository:** `https://github.com/SjnExe/GymExe`
 *   **Architecture:** MVVM with Clean Architecture (Data, Domain, Presentation layers).
 *   **Tech Stack:**
@@ -12,7 +12,7 @@
     *   Database: Room (Offline-first)
     *   Async: Coroutines & Flow
     *   Build System: Gradle (Kotlin DSL)
-*   **SDK Versions:** Min: 29 (Android 10), Target: 35 (Android 15).
+*   **SDK Versions:** Min: 26 (Android 8.0), Target: 35 (Android 15).
 *   **Theming:**
     *   Dark Mode: Pure Black (`#000000`)
     *   Light Mode: Material You (Dynamic Colors)

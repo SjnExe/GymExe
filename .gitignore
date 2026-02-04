@@ -17,3 +17,7 @@ app/build/
 
 # GymExe
 *.gymexe
+
+# Logs and Temps
+*.log
+deps.txt

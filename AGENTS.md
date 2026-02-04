@@ -9,10 +9,10 @@ Namespace: `com.sjn.gymexe`
 The following script is already ran on Jules environment. This ensures all system dependencies are updated.
 
 ```bash
+sudo apt update -y
+sudo apt full-upgrade -y
 sudo apt autoremove -y
 sudo apt clean
-sudo apt update
-sudo apt full-upgrade -y
 ```
 
 ## Build & Verify
