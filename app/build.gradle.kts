@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+import java.io.File
+import java.util.Base64
+
 android {
     namespace = "com.sjn.gymexe"
     compileSdk = 35
@@ -26,10 +29,20 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("${project.rootDir}/Dev/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            val envKeystore = System.getenv("KEYSTORE_BASE64")
+            if (!envKeystore.isNullOrEmpty()) {
+                val keystoreFile = File(layout.buildDirectory.get().asFile, "release.keystore")
+                keystoreFile.writeBytes(Base64.getDecoder().decode(envKeystore))
+                storeFile = keystoreFile
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            } else {
+                storeFile = file("${project.rootDir}/Dev/debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
         }
     }
 
@@ -60,9 +73,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -72,6 +83,12 @@ android {
         // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
         // and we cannot update it further without breaking the build (e.g. Hilt requires AGP 9.0).
         disable += "ObsoleteLintCustomCheck"
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 

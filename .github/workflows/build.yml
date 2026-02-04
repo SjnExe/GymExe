@@ -45,6 +45,9 @@ jobs:
           echo "Lint errors were found and fixed. Failing job to notify."
           exit 1
 
+      - name: Run Unit Tests
+        run: ./gradlew test
+
   build_and_release:
     needs: lint_and_test
     runs-on: ubuntu-24.04-arm
