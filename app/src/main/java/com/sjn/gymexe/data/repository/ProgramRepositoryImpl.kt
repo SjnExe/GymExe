@@ -13,12 +13,9 @@ class ProgramRepositoryImpl(
 
     override fun getActiveProgram(): Flow<ProgramEntity?> = programDao.getActiveProgram()
 
-    override fun getProgramWithWorkouts(programId: Long): Flow<ProgramWithWorkouts> =
-        programDao.getProgramWithWorkouts(programId)
+    override fun getProgramWithWorkouts(programId: Long): Flow<ProgramWithWorkouts> = programDao.getProgramWithWorkouts(programId)
 
-    override suspend fun createProgram(program: ProgramEntity): Long {
-        return programDao.insertProgram(program)
-    }
+    override suspend fun createProgram(program: ProgramEntity): Long = programDao.insertProgram(program)
 
     override suspend fun setActiveProgram(programId: Long) {
         programDao.clearActivePrograms()

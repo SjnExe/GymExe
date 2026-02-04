@@ -29,48 +29,39 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideJson(): Json {
-        return Json {
+    fun provideJson(): Json =
+        Json {
             ignoreUnknownKeys = true
             encodeDefaults = true
         }
-    }
 
     @Provides
     @Singleton
     fun provideGymDatabase(
         @ApplicationContext context: Context,
-    ): GymDatabase {
-        return Room.databaseBuilder(
-            context,
-            GymDatabase::class.java,
-            "gym_exe.db",
-        ).build()
-    }
+    ): GymDatabase =
+        Room
+            .databaseBuilder(
+                context,
+                GymDatabase::class.java,
+                "gym_exe.db",
+            ).build()
 
     @Provides
     @Singleton
-    fun provideExerciseDao(db: GymDatabase): ExerciseDao {
-        return db.exerciseDao()
-    }
+    fun provideExerciseDao(db: GymDatabase): ExerciseDao = db.exerciseDao()
 
     @Provides
     @Singleton
-    fun provideProgramDao(db: GymDatabase): ProgramDao {
-        return db.programDao()
-    }
+    fun provideProgramDao(db: GymDatabase): ProgramDao = db.programDao()
 
     @Provides
     @Singleton
-    fun provideSessionDao(db: GymDatabase): com.sjn.gymexe.data.local.dao.SessionDao {
-        return db.sessionDao()
-    }
+    fun provideSessionDao(db: GymDatabase): com.sjn.gymexe.data.local.dao.SessionDao = db.sessionDao()
 
     @Provides
     @Singleton
-    fun provideSetDao(db: GymDatabase): com.sjn.gymexe.data.local.dao.SetDao {
-        return db.setDao()
-    }
+    fun provideSetDao(db: GymDatabase): com.sjn.gymexe.data.local.dao.SetDao = db.setDao()
 
     @Provides
     @Singleton
@@ -78,9 +69,7 @@ object AppModule {
         @ApplicationContext context: Context,
         exerciseDao: ExerciseDao,
         json: Json,
-    ): ExerciseRepository {
-        return ExerciseRepositoryImpl(context, exerciseDao, json)
-    }
+    ): ExerciseRepository = ExerciseRepositoryImpl(context, exerciseDao, json)
 
     @Provides
     @Singleton
@@ -88,28 +77,20 @@ object AppModule {
         @ApplicationContext context: Context,
         db: GymDatabase,
         json: Json,
-    ): BackupManager {
-        return BackupManagerImpl(context, db, json)
-    }
+    ): BackupManager = BackupManagerImpl(context, db, json)
 
     @Provides
     @Singleton
     fun provideUpdateManager(
         @ApplicationContext context: Context,
         json: Json,
-    ): UpdateManager {
-        return UpdateManagerImpl(context, json)
-    }
+    ): UpdateManager = UpdateManagerImpl(context, json)
 
     @Provides
     @Singleton
-    fun provideProgramRepository(programDao: ProgramDao): ProgramRepository {
-        return ProgramRepositoryImpl(programDao)
-    }
+    fun provideProgramRepository(programDao: ProgramDao): ProgramRepository = ProgramRepositoryImpl(programDao)
 
     @Provides
     @Singleton
-    fun provideTimerManager(): TimerManager {
-        return TimerManagerImpl()
-    }
+    fun provideTimerManager(): TimerManager = TimerManagerImpl()
 }

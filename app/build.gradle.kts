@@ -67,6 +67,10 @@ android {
         compose = true
         buildConfig = true
     }
+
+    lint {
+        disable += "ObsoleteLintCustomCheck"
+    }
 }
 
 dependencies {

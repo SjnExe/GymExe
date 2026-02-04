@@ -15,7 +15,8 @@ class ExercisesViewModel
         private val repository: ExerciseRepository,
     ) : ViewModel() {
         val exercises =
-            repository.getAllExercises()
+            repository
+                .getAllExercises()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), emptyList())
 
         companion object {

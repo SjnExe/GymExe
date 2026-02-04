@@ -18,13 +18,9 @@ class ExerciseRepositoryImpl(
     // Default or injected if modified constructor
     private val json: Json = Json { ignoreUnknownKeys = true },
 ) : ExerciseRepository {
-    override fun getAllExercises(): Flow<List<ExerciseEntity>> {
-        return exerciseDao.getAllExercises()
-    }
+    override fun getAllExercises(): Flow<List<ExerciseEntity>> = exerciseDao.getAllExercises()
 
-    override suspend fun getExerciseById(id: String): ExerciseEntity? {
-        return exerciseDao.getExerciseById(id)
-    }
+    override suspend fun getExerciseById(id: String): ExerciseEntity? = exerciseDao.getExerciseById(id)
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun syncExercisesFromAssets() {
