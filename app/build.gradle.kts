@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.sjn.gymexe"
-        minSdk = 29
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -69,6 +69,8 @@ android {
     }
 
     lint {
+        // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
+        // and we cannot update it further without breaking the build (e.g. Hilt requires AGP 9.0).
         disable += "ObsoleteLintCustomCheck"
     }
 }
