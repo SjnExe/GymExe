@@ -6,24 +6,13 @@ Namespace: `com.sjn.gymexe`
 
 ## Environment Setup
 
-To set up the development environment, run the following script. This ensures all system dependencies are updated and the project is ready to build.
+The following script is already ran on Jules environment. This ensures all system dependencies are updated.
 
 ```bash
-# Cleans unnecessary packages
 sudo apt autoremove -y
 sudo apt clean
-# Update system packages
-sudo apt-get update && sudo apt-get upgrade -y
-
-# Install Java 17 (Required for this project's Gradle configuration)
-# Note: The environment might have Java 21, but we ensure compat with 17 as per build config.
-sudo apt-get install -y openjdk-17-jdk-headless
-
-# Ensure Gradlew is executable
-chmod +x gradlew
-
-# Initial Clean Build
-./gradlew clean assembleDebug
+sudo apt update
+sudo apt full-upgrade -y
 ```
 
 ## Build & Verify
