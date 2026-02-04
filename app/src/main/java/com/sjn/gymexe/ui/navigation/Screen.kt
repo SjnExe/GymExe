@@ -1,6 +1,8 @@
 package com.sjn.gymexe.ui.navigation
 
-sealed class Screen(val route: String) {
+sealed class Screen(
+    val route: String,
+) {
     object Dashboard : Screen("dashboard")
 
     object Workout : Screen("workout")

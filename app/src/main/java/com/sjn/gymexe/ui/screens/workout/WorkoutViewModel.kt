@@ -25,7 +25,8 @@ class WorkoutViewModel
         // Ideally we'd get the active program and its current workout.
         // For simplicity in this demo, we'll just fetch the first available workout or empty.
         val activeProgram =
-            programRepository.getActiveProgram()
+            programRepository
+                .getActiveProgram()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 
         // In a real app, we'd have a SessionManager to hold current sets.

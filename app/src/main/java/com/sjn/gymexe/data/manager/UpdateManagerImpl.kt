@@ -131,7 +131,8 @@ class UpdateManagerImpl(
     ) {
         try {
             val request =
-                DownloadManager.Request(Uri.parse(url))
+                DownloadManager
+                    .Request(Uri.parse(url))
                     .setTitle("GymExe Update")
                     .setDescription("Downloading version...")
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
