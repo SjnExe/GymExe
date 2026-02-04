@@ -12,7 +12,6 @@ local.properties
 # Android
 app/build/
 .idea/
-gradle/
 !gradle/wrapper/
 !gradle/libs.versions.toml
 
