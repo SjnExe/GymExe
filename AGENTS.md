@@ -9,6 +9,9 @@ Namespace: `com.sjn.gymexe`
 To set up the development environment, run the following script. This ensures all system dependencies are updated and the project is ready to build.
 
 ```bash
+# Cleans unnecessary packages
+sudo apt autoremove -y
+sudo apt clean
 # Update system packages
 sudo apt-get update && sudo apt-get upgrade -y
 
