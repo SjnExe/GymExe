@@ -70,6 +70,8 @@ android {
         // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
         // and we cannot update it further without breaking the build (e.g. Hilt requires AGP 9.0).
         disable += "ObsoleteLintCustomCheck"
+        // Suppress LintError to prevent the build from failing when a lint detector crashes
+        disable += "LintError"
     }
 }
 
@@ -95,7 +97,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     ksp(libs.hilt.compiler)
 
     // Room
