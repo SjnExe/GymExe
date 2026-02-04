@@ -7,9 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-import java.io.File
-import java.util.Base64
-
 android {
     namespace = "com.sjn.gymexe"
     compileSdk = 35
@@ -29,20 +26,10 @@ android {
 
     signingConfigs {
         create("release") {
-            val envKeystore = System.getenv("KEYSTORE_BASE64")
-            if (!envKeystore.isNullOrEmpty()) {
-                val keystoreFile = File(layout.buildDirectory.get().asFile, "release.keystore")
-                keystoreFile.writeBytes(Base64.getDecoder().decode(envKeystore))
-                storeFile = keystoreFile
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
-            } else {
-                storeFile = file("${project.rootDir}/Dev/debug.keystore")
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
-            }
+            storeFile = file("${project.rootDir}/Dev/release.keystore")
+            storePassword = "gymexe"
+            keyAlias = "gymexe"
+            keyPassword = "gymexe"
         }
     }
 
