@@ -20,6 +20,9 @@ subprojects {
         android.set(true)
         outputToConsole.set(true)
         outputColorName.set("RED")
+        filter {
+            exclude("**.kts")
+        }
     }
 
     detekt {
