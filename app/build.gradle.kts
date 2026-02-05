@@ -92,6 +92,8 @@ android {
         disable += "ObsoleteLintCustomCheck"
         // Suppress LintError to prevent the build from failing when a lint detector crashes
         disable += "LintError"
+        // Suppress NullSafeMutableLiveData due to crash in androidx.lifecycle lint check with Kotlin 2.1
+        disable += "NullSafeMutableLiveData"
     }
 }
 
