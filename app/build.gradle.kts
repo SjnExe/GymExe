@@ -7,6 +7,26 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+fun getCommitCount(): Int {
+    return try {
+        val process = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim().toInt()
+    } catch (e: Exception) {
+        1 // Fallback
+    }
+}
+
+fun getVersionName(): String {
+    val envVersion = System.getenv("VERSION_NAME")
+    return if (!envVersion.isNullOrEmpty()) {
+        envVersion
+    } else {
+        "1.0-dev"
+    }
+}
+
 android {
     namespace = "com.sjn.gymexe"
     compileSdk = 35
@@ -15,8 +35,8 @@ android {
         applicationId = "com.sjn.gymexe"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = getCommitCount()
+        versionName = getVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
