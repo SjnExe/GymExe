@@ -37,21 +37,6 @@ jobs:
           name: lint-report
           path: app/build/reports/lint-results*
 
-      # Auto-fix lint errors only on PRs
-      - name: Auto-Fix Lint Errors
-        if: steps.lint_check.outcome == 'failure' && github.event_name == 'pull_request'
-        run: |
-          ./gradlew ktlintFormat
-          git config --global user.name 'GymExe Bot'
-          git config --global user.email 'bot@gymexe.com'
-          git fetch origin ${{ github.head_ref }}
-          git checkout ${{ github.head_ref }}
-          git add .
-          git commit -m "style: auto-fix linting errors"
-          git push origin ${{ github.head_ref }}
-          echo "Lint errors were found and fixed. Failing job to notify."
-          exit 1
-
       - name: Run Unit Tests
         run: ./gradlew testDevDebugUnitTest
 
@@ -120,7 +105,6 @@ jobs:
           body: |
             Rolling beta release.
             Version: ${{ env.VERSION_NAME }}
-            Built at: $(date)
             Commit: ${{ github.sha }}
           files: |
             app/build/outputs/apk/dev/release/app-dev-release.apk
