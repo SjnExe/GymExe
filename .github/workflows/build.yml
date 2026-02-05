@@ -71,9 +71,9 @@ jobs:
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # PR Build: v{Tag}-beta-PR{Number}.{CommitCount}
             PR_NUM="${{ github.event.number }}"
-            # Calculate commits in PR (HEAD vs origin/dev)
-            git fetch origin dev
-            COMMIT_COUNT=$(git rev-list --count HEAD ^origin/dev)
+            # Calculate commits in PR (PR Head vs Base Branch)
+            git fetch origin "${{ github.base_ref }}"
+            COMMIT_COUNT=$(git rev-list --count "${{ github.event.pull_request.head.sha }}" "^origin/${{ github.base_ref }}")
             VERSION_NAME="${LATEST_TAG}-beta-PR${PR_NUM}.${COMMIT_COUNT}"
           else
             # Manual Build: v{Tag}-beta-r{RunId}
