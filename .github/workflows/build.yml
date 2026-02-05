@@ -83,12 +83,26 @@ jobs:
           echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
           echo "Calculated Version: ${VERSION_NAME}"
 
-      - name: Build Beta (Universal) & Capture Log
+      - name: Build Beta (Splits) & Capture Log
         run: |
           ./gradlew assembleDevRelease > build.log 2>&1 || (tail -n 200 build.log; exit 1)
           tail -n 200 build.log > build_summary.log
         env:
           VERSION_NAME: ${{ env.VERSION_NAME }}
+
+      - name: Rename and Prepare Artifacts
+        run: |
+          mkdir -p artifacts
+          cp build_summary.log artifacts/
+
+          # Rename Universal
+          find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Universal.apk \;
+          # Rename ARM64
+          find app/build/outputs/apk/dev/release -name "app-dev-arm64-v8a-release.apk" -exec cp {} artifacts/GymExe-Beta-ARM64.apk \;
+          # Rename ARMV7
+          find app/build/outputs/apk/dev/release -name "app-dev-armeabi-v7a-release.apk" -exec cp {} artifacts/GymExe-Beta-ARMv7.apk \;
+          # Rename X86_64
+          find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-x86_64.apk \;
 
       - name: Update Beta Tag
         run: |
@@ -106,9 +120,7 @@ jobs:
             Rolling beta release.
             Version: ${{ env.VERSION_NAME }}
             Commit: ${{ github.sha }}
-          files: |
-            app/build/outputs/apk/dev/release/app-dev-release.apk
-            build_summary.log
+          files: artifacts/*
           prerelease: true
 
   release_stable:

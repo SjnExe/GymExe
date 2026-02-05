@@ -1,5 +1,13 @@
 package com.sjn.gymexe.ui.navigation
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
@@ -7,13 +15,18 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -33,7 +46,7 @@ sealed class Screen(
 
     data object Exercises : Screen("exercises", "Exercises", Icons.Default.List)
 
-    data object History : Screen("history", "History", Icons.Default.Person)
+    data object Profile : Screen("profile", "You", Icons.Default.Person)
 
     data object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
@@ -46,11 +59,28 @@ fun MainScreen() {
             Screen.Dashboard,
             Screen.Workout,
             Screen.Exercises,
-            Screen.History,
-            Screen.Settings,
+            Screen.Profile,
         )
 
     Scaffold(
+        topBar = {
+            // Settings is accessed via Top Bar, not Bottom Bar
+            // Only show on main tabs? For now, show everywhere for simplicity.
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+                    Icon(Screen.Settings.icon, contentDescription = "Settings")
+                }
+                Text("GymExe", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.width(48.dp)) // Balance the layout (icon size approx)
+            }
+        },
         bottomBar = {
             NavigationBar {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -75,11 +105,35 @@ fun MainScreen() {
         },
     ) { innerPadding ->
         NavHost(navController, startDestination = Screen.Dashboard.route, builder = {
-            composable(Screen.Dashboard.route) { Text("Dashboard Placeholder") } // TODO
-            composable(Screen.Workout.route) { Text("Workout Placeholder") } // TODO
-            composable(Screen.Exercises.route) { Text("Exercises Placeholder") } // TODO
-            composable(Screen.History.route) { Text("History Placeholder") } // TODO
+            composable(Screen.Dashboard.route) {
+                PlaceholderScreen("Dashboard", innerPadding.calculateBottomPadding())
+            }
+            composable(Screen.Workout.route) {
+                PlaceholderScreen("Workout", innerPadding.calculateBottomPadding())
+            }
+            composable(Screen.Exercises.route) {
+                PlaceholderScreen("Exercises", innerPadding.calculateBottomPadding())
+            }
+            composable(Screen.Profile.route) {
+                PlaceholderScreen("You / Profile", innerPadding.calculateBottomPadding())
+            }
             composable(Screen.Settings.route) { SettingsScreen() }
         })
+    }
+}
+
+@Composable
+fun PlaceholderScreen(
+    text: String,
+    bottomPadding: androidx.compose.ui.unit.Dp,
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = bottomPadding),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = MaterialTheme.typography.headlineMedium)
     }
 }

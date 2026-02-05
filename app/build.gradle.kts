@@ -86,6 +86,15 @@ android {
         buildConfig = true
     }
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     lint {
         // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
         // and we cannot update it further without breaking the build (e.g. Hilt requires AGP 9.0).
@@ -129,6 +138,9 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
