@@ -91,7 +91,7 @@
 ### Phase 1: Foundation (In Progress)
 - [x] **CI/CD:** Split APKs, Dynamic Versioning, Rolling Beta.
 - [x] **Skeleton:** Navigation, Theme, Settings UI.
-- [ ] **Fix:** Add `hilt-navigation-compose` dependency to `libs.versions.toml` and `app/build.gradle.kts`.
+- [x] **Fix:** Add `hilt-navigation-compose` dependency to `libs.versions.toml` and `app/build.gradle.kts`.
 - [ ] **Feature:** Finish Settings Logic (Theme/Unit toggle persistence).
 
 ### Phase 2: The Workout Engine

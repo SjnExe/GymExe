@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -44,7 +44,7 @@ sealed class Screen(
 
     data object Workout : Screen("workout", "Workout", Icons.Default.Edit)
 
-    data object Exercises : Screen("exercises", "Exercises", Icons.Default.List)
+    data object Exercises : Screen("exercises", "Exercises", Icons.AutoMirrored.Filled.List)
 
     data object Profile : Screen("profile", "You", Icons.Default.Person)
 
