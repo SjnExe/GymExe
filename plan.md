@@ -13,7 +13,7 @@
 ---
 
 ## 1. Vision & Architecture
-**GymExe** is an offline-first, open-source workout tracker for Android. It prioritizes efficiency, deep data logging, and "Power User" features.
+**GymExe** is an offline-first, open-source workout tracker for Android (Kotlin, Compose, Hilt, Room). Focus: Efficiency, Data Depth, Power User features.
 
 *   **Package:** `com.sjn.gymexe`
 *   **Min/Target SDK:** 26 / 35.
@@ -91,7 +91,7 @@
 ### Phase 1: Foundation (In Progress)
 - [x] **CI/CD:** Split APKs, Dynamic Versioning, Rolling Beta.
 - [x] **Skeleton:** Navigation, Theme, Settings UI.
-- [ ] **Fix:** Add `hilt-navigation-compose` dependency.
+- [ ] **Fix:** Add `hilt-navigation-compose` dependency to `libs.versions.toml` and `app/build.gradle.kts`.
 - [ ] **Feature:** Finish Settings Logic (Theme/Unit toggle persistence).
 
 ### Phase 2: The Workout Engine
