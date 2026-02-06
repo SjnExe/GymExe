@@ -1,97 +1,75 @@
-# GymExe Project Blueprint
+# GymExe Project Blueprint & Handover
+
+## 🚨 Handover Status (Current State)
+*   **Active Branch:** `feat/apk-splits-settings-ui-refactor` (or similar).
+*   **CI Status:** **Failing Build.**
+    *   **Error:** `Unresolved reference 'hiltViewModel'` in `SettingsScreen.kt`.
+    *   **Cause:** The `hiltViewModel()` Composable function requires the `androidx.hilt:hilt-navigation-compose` dependency, which is currently missing from `libs.versions.toml` and `app/build.gradle.kts`.
+    *   **Immediate Action Required:** Add `androidx.hilt:hilt-navigation-compose` to dependencies to fix the build.
+*   **Implemented:**
+    *   **CI/CD:** `build.yml` is refactored for `ubuntu-latest`, Split APKs, and Rolling Beta releases.
+    *   **UI Skeleton:** `Navigation.kt` (Bottom Bar + Top Settings), `Theme.kt` (Pure Black/Dynamic), `SettingsScreen.kt` (UI Layout).
+    *   **Preferences:** `UserPreferencesRepository` (DataStore) and `SettingsViewModel` are implemented.
+*   **Pending (Phase 1):**
+    *   Fix the build error.
+    *   Connect `SettingsScreen` UI to `SettingsViewModel` logic (currently placeholders).
+    *   Implement "Check for Updates" logic (GitHub API).
+    *   Implement "Copy Logs" logic.
+
+---
 
 ## 1. Vision & Architecture
-**GymExe** is an offline-first, open-source workout tracker for Android, built with modern tech (Kotlin, Compose, Hilt, Room). It focuses on efficiency, deep data logging, and "Power User" features like math-input fields and intelligent pre-fills.
+**GymExe** is an offline-first, open-source workout tracker for Android (Kotlin, Compose, Hilt, Room). Focus: Efficiency, Data Depth, Power User features.
 
-*   **Package Name:** `com.sjn.gymexe`
-*   **Min SDK:** 26 (Android 8.0) | **Target SDK:** 35
-*   **Architecture:** MVVM + Clean Architecture (Data -> Domain -> UI).
-*   **Theming:**
-    *   **Default:** Material You + System Mode (Follows OS Light/Dark).
-    *   **Dark Mode:** Option for Pure Black (`#000000`) for OLED efficiency.
-    *   **Light Mode:** Material You / Brand Colors.
-*   **Localization:** System Default (English fallback).
+*   **Package:** `com.sjn.gymexe`
+*   **Min/Target SDK:** 26 / 35.
+*   **Theme:** Material You + System Default. **Dark Mode:** Pure Black (`#000000`).
 
-## 2. Core Features
+## 2. Core Features (Blueprint)
 
 ### 2.1 Update System
-*   **Source:** GitHub Releases API.
-*   **Channels:**
-    *   **Stable:** Checks `latest` release tag.
-    *   **Beta:** Checks `beta` tag (Rolling Release).
-*   **Trigger:** On App Open (Foreground Check). Interval: Once every 4 hours.
-*   **UI:** "Update Available" Badge/Prompt -> Download -> Install.
+*   **Source:** GitHub Releases.
+*   **Trigger:** On App Open (Foreground, 4h interval).
+*   **Logic:** Beta checks `beta` tag. Stable checks `latest`.
+*   **UI:** Badge -> Download -> Install Intent.
 
-### 2.2 Data & Storage (Room DB)
-*   **Offline First:** All data stored locally. Internet used only for Updates/Tutorials.
-*   **Units:** Stored as **SI Units** (Metric - kg, meters) in DB. Displayed in User Preference (lbs, miles) with smart rounding (2 decimal places). **Default: SI.**
-*   **Missing Data:** No placeholders (e.g., 0 height). UI handles missing data gracefully.
-*   **Backup:** `.gymexe` (ZIP containing JSONs).
-*   **Exercises Database:**
-    *   Pre-populated from `assets/exercises.json`.
-    *   **Versioning:** `exercises.json` has a version. App launch merges updates (adds new exercises/fields) without overwriting user customizations.
-    *   **Custom Exercises:** Flagged `is_custom=true`. Mergeable with Official if names collide.
+### 2.2 Data & Storage
+*   **Units:** Store as **SI (Metric)**. Display as User Preference (Smart Rounding 2 decimals).
+*   **Backup:** `.gymexe` (ZIP of JSONs).
+*   **Exercise DB:** Pre-populated `assets/exercises.json`. Versioned merging (preserve `is_custom=true`).
 
-### 2.3 Workout Logging Engine
-*   **Input Handling (Power User Math):**
-    *   **Operators:** `+` (Addition), `*` / `x` / `×` (Multiplication).
-    *   **Implicit Addition:** Space acts as `+`.
-    *   **Logic:** Standard Order of Operations (Multiply then Add).
-    *   **Examples:**
-        *   `20+7.5` -> `27.5`
-        *   `5 5 12.5` -> `22.5`
-        *   `4*5 2*2.5` -> `20 + 5` -> `25`
-*   **Log Types:**
-    *   `Standard`: Weight + Reps.
-    *   `Assisted`: Negative Weight (Lower = Harder).
-    *   `Weighted Bodyweight`, `Duration` (Time), `Cardio` (Dist/Time/Speed - flexible).
-*   **Smart Prefill:** "Most Used", "Last Used", "PR". Heatmap UI.
-*   **Timers:** Target Rest vs Actual Rest (Auto-logged).
+### 2.3 Workout Engine
+*   **Math Input:** `20+5` -> `25`. Space=`+`. `*`/`x`=`Multiply`. PEMDAS.
+*   **Log Types:** Standard, Assisted (Negative Weight), Weighted Bodyweight, Duration, Cardio.
+*   **Smart Prefill:** Heatmap colors (Light->Heavy). Logic: Most Used / Last Used.
+*   **Timers:** Actual vs Target rest tracking.
 
-### 2.4 Domain Logic: Body Stats & Progress
-*   **Daily Log:** Body Weight (Morning/Night tags).
-*   **Stats:** Height (Profile).
-*   **Analytics:**
-    *   **Comparisons:** "This Week" vs "Last Week" overlays.
-    *   **Handling Missing Data:** Partial weeks/months shown accurately. No interpolation of fake zeros.
-    *   **Emergency Rest:** Support for flagging forced rest days.
+### 2.4 Domain Logic
+*   **Stats:** Height (Profile), Weight (Daily).
+*   **Charts:** "This Week" vs "Last Week" overlay. Handle missing data (gaps) gracefully.
+*   **Emergency Rest:** Flagging days.
 
-## 3. UI/UX Structure (Material 3)
-
-### 3.1 Navigation (Bottom Bar)
-1.  **Dashboard (Home):**
-    *   Active Split Status (e.g., "Push Day").
-    *   Quick Actions: "Start Scheduled", "Quick Log".
-    *   Weekly Streak / Consistency Graph.
-2.  **Workout (Player):**
-    *   **Active Session UI:** List of exercises in current workout.
-    *   **Exercise Card:** Set List, Math Input Rows, Timer Overlay.
-3.  **Exercises (Library):**
-    *   Searchable, Filterable (Muscle, Equipment).
-    *   **Detail View:** Instructions, History, Merge Tools.
-4.  **History (Logs):**
-    *   Calendar View / List View.
-5.  **Settings:**
-    *   **Theme:** Dark/Light/System + Material You Toggle.
-    *   **Units:** "Display Units" Selector.
-    *   **Backup:** Export/Import/Schedule.
-    *   **Update:** Check for Update (Badge).
-    *   **Debug:** "Copy Error Logs" (Errors/Warnings only).
+## 3. UI Structure
+1.  **Dashboard:** Split status, Streak.
+2.  **Workout:** Active Session, Input Rows, Timer Overlay.
+3.  **Exercises:** Library, Search, Merge Tools.
+4.  **Profile (You):** History, Stats, Charts.
+5.  **Settings (Top Bar):** Theme, Units, Backup, Update, Debug Logs.
 
 ## 4. Roadmap
 
-### Phase 1: Foundation & UI Skeleton
-- [ ] **Scaffold:** Bottom Navigation, Theme Setup (Material You + Pure Black).
-- [ ] **Settings:** Theme Toggle, Unit Logic, Update Checker UI.
-- [ ] **Database:** Room Entities (Exercise, Workout, Set).
-- [ ] **Exercise Repo:** JSON Asset Loader & Merge Logic.
+### Phase 1: Foundation (In Progress)
+- [x] **CI/CD:** Split APKs, Dynamic Versioning (`v{Tag}-beta-PR{Num}`), Rolling Beta.
+- [x] **Skeleton:** Navigation, Theme, Settings UI.
+- [ ] **Fix:** `hilt-navigation-compose` dependency.
+- [ ] **Feature:** Settings Logic (Theme/Unit toggle persistence).
 
 ### Phase 2: The Workout Engine
-- [ ] **Exercise List:** Search, Filter, Add Custom.
-- [ ] **Active Workout UI:** Input rows, Math Evaluator, Timer Service.
-- [ ] **Logging Logic:** Save sets, Handle Metric/Imperial conversion.
+- [ ] **Database:** Room Entities (Exercise, Workout, Set).
+- [ ] **Exercise Repo:** JSON Loader & Merge.
+- [ ] **Active Workout UI:** Math Input, Timer Service.
 
 ### Phase 3: Intelligence & Polish
-- [ ] **Smart Prefill:** "Most Used" algorithms & Heatmap UI.
-- [ ] **History:** Calendar & Charts (Missing Data handling).
-- [ ] **Release:** Beta Tagging & Feedback loop.
+- [ ] **Smart Prefill:** Algorithms.
+- [ ] **History:** Charts & Calendars.
+- [ ] **Release:** Beta Tagging loop verification.
