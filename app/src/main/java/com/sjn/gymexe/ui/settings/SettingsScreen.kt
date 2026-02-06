@@ -46,7 +46,8 @@ import java.io.InputStreamReader
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val themeMode by viewModel.themeMode.collectAsState()
     val useDynamicColors by viewModel.useDynamicColors.collectAsState()
-    val useMetricDisplay by viewModel.useMetricDisplay.collectAsState()
+    val weightUnit by viewModel.weightUnit.collectAsState()
+    val distanceUnit by viewModel.distanceUnit.collectAsState()
     val context = LocalContext.current
 
     LazyColumn(
@@ -71,8 +72,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
 
         item {
             UnitSettingsCard(
-                useMetric = useMetricDisplay,
-                onUnitChange = viewModel::setUseMetricDisplay,
+                weightUnit = weightUnit,
+                distanceUnit = distanceUnit,
+                onWeightUnitChange = viewModel::setWeightUnit,
+                onDistanceUnitChange = viewModel::setDistanceUnit,
             )
         }
 
@@ -141,30 +144,49 @@ fun ThemeSettingsCard(
 
 @Composable
 fun UnitSettingsCard(
-    useMetric: Boolean,
-    onUnitChange: (Boolean) -> Unit,
+    weightUnit: String,
+    distanceUnit: String,
+    onWeightUnitChange: (String) -> Unit,
+    onDistanceUnitChange: (String) -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier =
-                Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Column {
-                Text("Display Units", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    if (useMetric) "Metric (kg, km)" else "Imperial (lbs, miles)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Units", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Weight Unit
+            Text("Weight", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                val options = listOf("KG", "LBS")
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                        onClick = { onWeightUnitChange(label) },
+                        selected = weightUnit == label,
+                    ) {
+                        Text(label)
+                    }
+                }
             }
-            Switch(
-                checked = useMetric,
-                onCheckedChange = onUnitChange,
-            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Distance Unit
+            Text("Distance", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                val options = listOf("KM", "MILES")
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                        onClick = { onDistanceUnitChange(label) },
+                        selected = distanceUnit == label,
+                    ) {
+                        Text(label)
+                    }
+                }
+            }
         }
     }
 }

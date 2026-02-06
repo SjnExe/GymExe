@@ -24,9 +24,13 @@ class SettingsViewModel
             userPreferencesRepository.useDynamicColors
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-        val useMetricDisplay: StateFlow<Boolean> =
-            userPreferencesRepository.useMetricDisplay
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+        val weightUnit: StateFlow<String> =
+            userPreferencesRepository.weightUnit
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "KG")
+
+        val distanceUnit: StateFlow<String> =
+            userPreferencesRepository.distanceUnit
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "KM")
 
         fun setThemeMode(mode: String) {
             viewModelScope.launch {
@@ -40,9 +44,15 @@ class SettingsViewModel
             }
         }
 
-        fun setUseMetricDisplay(useMetric: Boolean) {
+        fun setWeightUnit(unit: String) {
             viewModelScope.launch {
-                userPreferencesRepository.setUseMetricDisplay(useMetric)
+                userPreferencesRepository.setWeightUnit(unit)
+            }
+        }
+
+        fun setDistanceUnit(unit: String) {
+            viewModelScope.launch {
+                userPreferencesRepository.setDistanceUnit(unit)
             }
         }
     }
