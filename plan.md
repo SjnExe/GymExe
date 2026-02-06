@@ -92,10 +92,12 @@
 - [x] **CI/CD:** Split APKs, Dynamic Versioning, Rolling Beta.
 - [x] **Skeleton:** Navigation, Theme, Settings UI.
 - [x] **Fix:** Add `hilt-navigation-compose` dependency to `libs.versions.toml` and `app/build.gradle.kts`.
-- [ ] **Feature:** Finish Settings Logic (Theme/Unit toggle persistence).
+- [x] **Feature:** Finish Settings Logic (Theme/Unit toggle persistence).
+- [x] **UI:** Refactor Settings navigation (Move to Profile, fix back stack).
+- [x] **CI/CD:** Fix Version Name duplication and Artifact sorting.
 
 ### Phase 2: The Workout Engine
-- [ ] **Database:** Define Room Entities (Exercise, Workout, Set, Log).
+- [x] **Database:** Define Room Entities (Exercise, Workout, Set, Log).
 - [ ] **Exercise Repo:** Implement JSON Loader & Versioned Merge Logic.
 - [ ] **Active Workout UI:** Implement Input rows with Math Parser.
 
