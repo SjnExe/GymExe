@@ -7,6 +7,26 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+fun getCommitCount(): Int {
+    return try {
+        val process = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim().toInt()
+    } catch (e: Exception) {
+        1 // Fallback
+    }
+}
+
+fun getVersionName(): String {
+    val envVersion = System.getenv("VERSION_NAME")
+    return if (!envVersion.isNullOrEmpty()) {
+        envVersion
+    } else {
+        "1.0-dev"
+    }
+}
+
 android {
     namespace = "com.sjn.gymexe"
     compileSdk = 35
@@ -15,8 +35,8 @@ android {
         applicationId = "com.sjn.gymexe"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = getCommitCount()
+        versionName = getVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -66,12 +86,23 @@ android {
         buildConfig = true
     }
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     lint {
         // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
         // and we cannot update it further without breaking the build (e.g. Hilt requires AGP 9.0).
         disable += "ObsoleteLintCustomCheck"
         // Suppress LintError to prevent the build from failing when a lint detector crashes
         disable += "LintError"
+        // Suppress NullSafeMutableLiveData due to crash in androidx.lifecycle lint check with Kotlin 2.1
+        disable += "NullSafeMutableLiveData"
     }
 }
 
@@ -107,6 +138,9 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

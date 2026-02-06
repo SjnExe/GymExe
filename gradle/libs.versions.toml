@@ -18,6 +18,7 @@ material = "1.12.0"
 navigationCompose = "2.8.5"
 serialization = "1.8.0"
 benManesVersions = "0.53.0"
+datastore = "1.1.2"
 
 [libraries]
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.1.0" }
@@ -36,6 +37,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

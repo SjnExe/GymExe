@@ -2,59 +2,18 @@ name: Build & Release
 
 on:
   pull_request:
-    branches: [ "dev" ] # Lint & Beta Build on PR commits
+    branches: [ "dev" ] # Rolling Beta Build on PR commits
   push:
     tags: [ "v*" ]      # Stable Release on tags
-  workflow_dispatch:    # Manual Beta Trigger
+  workflow_dispatch:    # Manual Rolling Beta Trigger
 
 jobs:
-  lint_and_test:
-    runs-on: ubuntu-24.04-arm
+  quality_check:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run KtLint Check
-        id: lint_check
-        continue-on-error: true
-        run: ./gradlew ktlintCheck
-
-      # Auto-fix lint errors only on PRs (commits back to the PR branch)
-      - name: Auto-Fix Lint Errors
-        if: steps.lint_check.outcome == 'failure' && github.event_name == 'pull_request'
-        run: |
-          ./gradlew ktlintFormat
-          git config --global user.name 'GymExe Bot'
-          git config --global user.email 'bot@gymexe.com'
-          # Fetch the PR branch reference to commit back to it
-          git fetch origin ${{ github.head_ref }}
-          git checkout ${{ github.head_ref }}
-          git add .
-          git commit -m "style: auto-fix linting errors"
-          git push origin ${{ github.head_ref }}
-          echo "Lint errors were found and fixed. Failing job to notify."
-          exit 1
-
-      - name: Run Unit Tests
-        run: ./gradlew test
-
-  build_and_release:
-    needs: lint_and_test
-    runs-on: ubuntu-24.04-arm
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -66,55 +25,137 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # --- BETA / PR / MANUAL FLOW ---
-      # Runs on Pull Requests OR Manual Dispatch
-      - name: Build Beta (ARM64 & Universal)
-        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-        run: ./gradlew assembleDevRelease
+      - name: Run KtLint Check
+        id: lint_check
+        continue-on-error: true
+        run: ./gradlew ktlintCheck
 
-      - name: Prepare Beta Artifacts
-        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+      - name: Upload Lint Report (On Failure)
+        if: steps.lint_check.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results*
+
+      - name: Run Unit Tests
+        run: ./gradlew testDevDebugUnitTest
+
+  build_beta:
+    # Runs on Manual OR PR (Rolling Beta Logic)
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    needs: quality_check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed for creating Releases and updating tags
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for calculating commit count
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Calculate Version Name
+        id: version
         run: |
-          mv app/build/outputs/apk/dev/release/app-dev-release.apk GymExe-Beta-Universal.apk
-          cp GymExe-Beta-Universal.apk GymExe-Beta-ARM64.apk
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 
-      - name: Update Beta Tag (Manual Only)
-        if: github.event_name == 'workflow_dispatch'
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # PR Build: v{Tag}-beta-PR{Number}.{CommitCount}
+            PR_NUM="${{ github.event.number }}"
+            # Calculate commits in PR (PR Head vs Base Branch)
+            git fetch origin "${{ github.base_ref }}"
+            COMMIT_COUNT=$(git rev-list --count "${{ github.event.pull_request.head.sha }}" "^origin/${{ github.base_ref }}")
+            VERSION_NAME="${LATEST_TAG}-beta-PR${PR_NUM}.${COMMIT_COUNT}"
+          else
+            # Manual Build: v{Tag}-beta-r{RunId}
+            VERSION_NAME="${LATEST_TAG}-beta-r${{ github.run_number }}"
+          fi
+
+          echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
+          echo "Calculated Version: ${VERSION_NAME}"
+
+      - name: Build Beta (Splits) & Capture Log
+        run: |
+          ./gradlew assembleDevRelease > build.log 2>&1 || (tail -n 200 build.log; exit 1)
+          tail -n 200 build.log > build_summary.log
+        env:
+          VERSION_NAME: ${{ env.VERSION_NAME }}
+
+      - name: Rename and Prepare Artifacts
+        run: |
+          mkdir -p artifacts
+          cp build_summary.log artifacts/
+
+          # Rename Universal
+          find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Universal.apk \;
+          # Rename ARM64
+          find app/build/outputs/apk/dev/release -name "app-dev-arm64-v8a-release.apk" -exec cp {} artifacts/GymExe-Beta-ARM64.apk \;
+          # Rename ARMV7
+          find app/build/outputs/apk/dev/release -name "app-dev-armeabi-v7a-release.apk" -exec cp {} artifacts/GymExe-Beta-ARMv7.apk \;
+          # Rename X86_64
+          find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-x86_64.apk \;
+
+      - name: Update Beta Tag
         run: |
           git config --global user.name 'GymExe Bot'
           git config --global user.email 'bot@gymexe.com'
           git tag -f beta
           git push -f origin beta
 
-      - name: Release Beta (Rolling - Manual Only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Release Rolling Beta
         uses: softprops/action-gh-release@v1
         with:
           tag_name: beta
           name: GymExe Beta (Rolling)
-          body: "Rolling beta release. Built at $(date)"
-          files: |
-            GymExe-Beta-Universal.apk
-            GymExe-Beta-ARM64.apk
+          body: |
+            Rolling beta release.
+            Version: ${{ env.VERSION_NAME }}
+            Commit: ${{ github.sha }}
+          files: artifacts/*
           prerelease: true
 
-      # For PRs, we just upload artifacts to the Action Run (no GitHub Release)
-      - name: Upload PR Artifacts
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+  release_stable:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: quality_check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
         with:
-          name: beta-apks
-          path: |
-            GymExe-Beta-Universal.apk
-            GymExe-Beta-ARM64.apk
+          fetch-depth: 0
 
-      # --- STABLE / TAG FLOW ---
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Set Version Name from Tag
+        run: |
+          # Strip 'refs/tags/v' to get '1.0.0'
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "VERSION_NAME=${TAG_NAME}" >> $GITHUB_ENV
+
       - name: Build Stable
-        if: startsWith(github.ref, 'refs/tags/v')
         run: ./gradlew assembleProdRelease
+        env:
+          VERSION_NAME: ${{ env.VERSION_NAME }}
 
-      - name: Release Stable
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: app/build/outputs/apk/prod/release/app-prod-release.apk
