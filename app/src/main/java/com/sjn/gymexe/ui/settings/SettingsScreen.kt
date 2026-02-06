@@ -1,7 +1,13 @@
 package com.sjn.gymexe.ui.settings
 
+import android.app.Activity
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,13 +29,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sjn.gymexe.ui.settings.viewmodel.SettingsViewModel
-import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
@@ -160,6 +171,18 @@ fun UnitSettingsCard(
 
 @Composable
 fun SystemActionsCard(context: Context) {
+    val scope = rememberCoroutineScope()
+
+    val exportLogLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri: Uri? ->
+        uri?.let {
+            scope.launch {
+                saveLogsToFile(context, it)
+            }
+        }
+    }
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Button(
@@ -176,14 +199,67 @@ fun SystemActionsCard(context: Context) {
 
             Button(
                 onClick = {
-                    val logFile = File(context.cacheDir, "app_logs.txt")
-                    logFile.writeText("Mock Log Data: Error 404\nWarning: Low Battery")
-                    Toast.makeText(context, "Logs saved to Cache", Toast.LENGTH_SHORT).show()
-                    // TODO: Implement actual log dump and share intent
+                    scope.launch {
+                        copyLogsToClipboard(context)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Copy Debug Logs")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                   exportLogLauncher.launch("GymExe_Log_${System.currentTimeMillis()}.log")
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Save Debug Logs")
+            }
+        }
+    }
+}
+
+private suspend fun getLogcatOutput(): String {
+    return withContext(Dispatchers.IO) {
+        try {
+            val process = Runtime.getRuntime().exec("logcat -d")
+            val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
+            val log = StringBuilder()
+            var line: String?
+            while (bufferedReader.readLine().also { line = it } != null) {
+                log.append(line).append("\n")
+            }
+            log.toString()
+        } catch (e: Exception) {
+            "Failed to retrieve logs: ${e.message}"
+        }
+    }
+}
+
+private suspend fun copyLogsToClipboard(context: Context) {
+    val logs = getLogcatOutput()
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = android.content.ClipData.newPlainText("GymExe Debug Logs", logs)
+    clipboard.setPrimaryClip(clip)
+    Toast.makeText(context, "Logs copied to clipboard", Toast.LENGTH_SHORT).show()
+}
+
+private suspend fun saveLogsToFile(context: Context, uri: Uri) {
+    withContext(Dispatchers.IO) {
+        try {
+            val logs = getLogcatOutput()
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(logs.toByteArray())
+            }
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Logs saved successfully", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Failed to save logs: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

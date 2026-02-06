@@ -69,7 +69,6 @@ android {
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".beta"
-            versionNameSuffix = "-beta"
         }
         create("prod") {
             dimension = "env"
