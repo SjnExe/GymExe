@@ -2,13 +2,19 @@
 
 ## 🚨 Handover Status (Current State)
 *   **CI Status:** **Failing Build.**
-    *   **Error:** `Unresolved reference 'hiltViewModel'` in `SettingsScreen.kt`.
-    *   **Cause:** The `hiltViewModel()` Composable function requires the `androidx.hilt:hilt-navigation-compose` dependency, which is currently missing from `libs.versions.toml` and `app/build.gradle.kts`.
-    *   **Immediate Action Required:** Add `androidx.hilt:hilt-navigation-compose` to dependencies to fix the build.
+    *   **Error:** `java.lang.IllegalStateException: unexpected jvm signature V` in `kspDevDebugKotlin` task.
+    *   **Cause:** Compatibility issue between KSP2 (`2.3.5`) and Kotlin (`2.3.10`) or specific library interactions (Hilt/Room).
+    *   **Constraints:**
+        *   **DO NOT DOWNGRADE** dependencies (Kotlin 2.3.10, KSP 2.3.5, AGP 9.0.0, Hilt 2.59.1 must remain).
+        *   **DO NOT DISABLE KSP2** (`ksp.useKsp2=false` is NOT allowed).
+    *   **Next Steps:** The goal is to debug and fix KSP2 configuration to resolve the build crash without downgrading. Investigate `jvmTarget` interactions or specific Hilt/Room KSP2 flags.
+
 *   **Implemented:**
-    *   **CI/CD:** `build.yml` is refactored for `ubuntu-latest`, Split APKs (`arm64`, `universal`), and Rolling Beta releases.
-    *   **UI Skeleton:** `Navigation.kt` (Bottom Bar + Top Settings), `Theme.kt` (Pure Black/Dynamic), `SettingsScreen.kt`.
-    *   **Preferences:** `UserPreferencesRepository` (DataStore) implemented.
+    *   **CI/CD:** `build.yml` updated for AGP 9.0, Artifact sorting, and Versioning fixes.
+    *   **Dependencies:** Updated to latest stable: AGP 9.0.0, Kotlin 2.3.10, Hilt 2.59.1, Compose 2026.01.01.
+    *   **Dev Tools:** Added LeakCanary, Timber (FileLoggingTree), StrictMode.
+    *   **UI:** Settings moved to Profile, Units UI refactored (Weight/Distance segments).
+    *   **Logic:** `ExerciseRepository` (JSON sync), `MathInputParser` (exp4j).
 
 ---
 
@@ -16,7 +22,7 @@
 **GymExe** is an offline-first, open-source workout tracker for Android (Kotlin, Compose, Hilt, Room). Focus: Efficiency, Data Depth, Power User features.
 
 *   **Package:** `com.sjn.gymexe`
-*   **Min/Target SDK:** 26 / 35.
+*   **Min/Target SDK:** 26 / 36.
 *   **Architecture:** MVVM + Clean Architecture + Hilt + Room.
 *   **Theming:**
     *   **Default:** Material You + System Mode (Follows OS).
@@ -95,10 +101,11 @@
 - [x] **Feature:** Finish Settings Logic (Theme/Unit toggle persistence).
 - [x] **UI:** Refactor Settings navigation (Move to Profile, fix back stack).
 - [x] **CI/CD:** Fix Version Name duplication and Artifact sorting.
+- [x] **Dev:** Add Timber, LeakCanary, Dependency Analysis.
 
 ### Phase 2: The Workout Engine
 - [x] **Database:** Define Room Entities (Exercise, Workout, Set, Log).
-- [ ] **Exercise Repo:** Implement JSON Loader & Versioned Merge Logic.
+- [x] **Exercise Repo:** Implement JSON Loader & Versioned Merge Logic.
 - [ ] **Active Workout UI:** Implement Input rows with Math Parser.
 
 ### Phase 3: Intelligence & Polish
