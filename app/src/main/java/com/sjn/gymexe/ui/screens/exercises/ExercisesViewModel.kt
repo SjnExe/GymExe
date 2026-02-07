@@ -14,9 +14,9 @@ class ExercisesViewModel
     constructor(
         private val repository: ExerciseRepository,
     ) : ViewModel() {
+        // Placeholder until getAllExercises is implemented in Repository
         val exercises =
-            repository
-                .getAllExercises()
+             kotlinx.coroutines.flow.flowOf(emptyList<com.sjn.gymexe.data.local.entity.ExerciseEntity>())
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), emptyList())
 
         companion object {

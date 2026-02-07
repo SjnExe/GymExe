@@ -24,7 +24,9 @@ class UserPreferencesRepository
         private object Keys {
             val THEME_MODE = stringPreferencesKey("theme_mode") // System, Dark, Light
             val USE_DYNAMIC_COLORS = booleanPreferencesKey("use_dynamic_colors")
-            val USE_METRIC_DISPLAY = booleanPreferencesKey("use_metric_display") // True = Metric, False = Imperial
+            // Replaced generic boolean with specific string keys
+            val WEIGHT_UNIT = stringPreferencesKey("weight_unit") // "KG" or "LBS"
+            val DISTANCE_UNIT = stringPreferencesKey("distance_unit") // "KM" or "MILES"
         }
 
         val themeMode: Flow<String> =
@@ -35,9 +37,13 @@ class UserPreferencesRepository
             context.dataStore.data
                 .map { preferences -> preferences[Keys.USE_DYNAMIC_COLORS] ?: true }
 
-        val useMetricDisplay: Flow<Boolean> =
+        val weightUnit: Flow<String> =
             context.dataStore.data
-                .map { preferences -> preferences[Keys.USE_METRIC_DISPLAY] ?: true }
+                .map { preferences -> preferences[Keys.WEIGHT_UNIT] ?: "KG" }
+
+        val distanceUnit: Flow<String> =
+            context.dataStore.data
+                .map { preferences -> preferences[Keys.DISTANCE_UNIT] ?: "KM" }
 
         suspend fun setThemeMode(mode: String) {
             context.dataStore.edit { preferences ->
@@ -51,9 +57,15 @@ class UserPreferencesRepository
             }
         }
 
-        suspend fun setUseMetricDisplay(useMetric: Boolean) {
+        suspend fun setWeightUnit(unit: String) {
             context.dataStore.edit { preferences ->
-                preferences[Keys.USE_METRIC_DISPLAY] = useMetric
+                preferences[Keys.WEIGHT_UNIT] = unit
+            }
+        }
+
+        suspend fun setDistanceUnit(unit: String) {
+            context.dataStore.edit { preferences ->
+                preferences[Keys.DISTANCE_UNIT] = unit
             }
         }
     }

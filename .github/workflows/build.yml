@@ -76,8 +76,8 @@ jobs:
             COMMIT_COUNT=$(git rev-list --count "${{ github.event.pull_request.head.sha }}" "^origin/${{ github.base_ref }}")
             VERSION_NAME="${LATEST_TAG}-beta-PR${PR_NUM}.${COMMIT_COUNT}"
           else
-            # Manual Build: v{Tag}-beta-r{RunId}
-            VERSION_NAME="${LATEST_TAG}-beta-r${{ github.run_number }}"
+            # Manual Build: v{Tag}-beta-{RunId}
+            VERSION_NAME="${LATEST_TAG}-beta-${{ github.run_number }}"
           fi
 
           echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
@@ -111,6 +111,14 @@ jobs:
           git tag -f beta
           git push -f origin beta
 
+      - name: Delete Old Release
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        with:
+          delete_release: true
+          tag_name: beta
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Release Rolling Beta
         uses: softprops/action-gh-release@v1
         with:
@@ -120,7 +128,12 @@ jobs:
             Rolling beta release.
             Version: ${{ env.VERSION_NAME }}
             Commit: ${{ github.sha }}
-          files: artifacts/*
+          files: |
+            artifacts/GymExe-Beta-Universal.apk
+            artifacts/GymExe-Beta-ARM64.apk
+            artifacts/GymExe-Beta-ARMv7.apk
+            artifacts/GymExe-Beta-x86_64.apk
+            artifacts/build_summary.log
           prerelease: true
 
   release_stable:

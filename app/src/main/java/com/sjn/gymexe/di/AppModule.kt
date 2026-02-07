@@ -67,9 +67,7 @@ object AppModule {
     @Singleton
     fun provideExerciseRepository(
         @ApplicationContext context: Context,
-        exerciseDao: ExerciseDao,
-        json: Json,
-    ): ExerciseRepository = ExerciseRepositoryImpl(context, exerciseDao, json)
+    ): ExerciseRepository = ExerciseRepositoryImpl(context)
 
     @Provides
     @Singleton
