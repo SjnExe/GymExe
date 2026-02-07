@@ -14,9 +14,11 @@ interface SessionDao {
     fun getAllSessions(): Flow<List<SessionEntity>>
 
     @Query("SELECT * FROM sessions")
+    @JvmSuppressWildcards
     suspend fun getAllSessionsList(): List<SessionEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @JvmSuppressWildcards
     suspend fun insertSession(session: SessionEntity): Long
 }
 
@@ -26,8 +28,10 @@ interface SetDao {
     fun getSetsForSession(sessionId: Long): Flow<List<SetEntity>>
 
     @Query("SELECT * FROM sets")
+    @JvmSuppressWildcards
     suspend fun getAllSetsList(): List<SetEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @JvmSuppressWildcards
     suspend fun insertSets(sets: List<SetEntity>): List<Long>
 }

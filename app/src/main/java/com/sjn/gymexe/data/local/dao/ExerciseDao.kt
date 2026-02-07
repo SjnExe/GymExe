@@ -13,17 +13,22 @@ interface ExerciseDao {
     fun getAllExercises(): Flow<List<ExerciseEntity>>
 
     @Query("SELECT * FROM exercises")
+    @JvmSuppressWildcards
     suspend fun getAllExercisesList(): List<ExerciseEntity>
 
     @Query("SELECT * FROM exercises WHERE id = :id")
+    @JvmSuppressWildcards
     suspend fun getExerciseById(id: String): ExerciseEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @JvmSuppressWildcards
     suspend fun insertExercises(exercises: List<ExerciseEntity>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @JvmSuppressWildcards
     suspend fun insertExercise(exercise: ExerciseEntity): Long
 
     @Query("SELECT COUNT(*) FROM exercises")
+    @JvmSuppressWildcards
     suspend fun getExerciseCount(): Int
 }
