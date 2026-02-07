@@ -29,5 +29,5 @@ interface SetDao {
     suspend fun getAllSetsList(): List<SetEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSets(sets: List<SetEntity>)
+    suspend fun insertSets(sets: List<SetEntity>): List<Long>
 }

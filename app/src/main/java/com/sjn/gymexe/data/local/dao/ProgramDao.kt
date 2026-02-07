@@ -48,11 +48,11 @@ interface ProgramDao {
     suspend fun insertWorkout(workout: WorkoutEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWorkoutExercise(workoutExercise: WorkoutExerciseEntity)
+    suspend fun insertWorkoutExercise(workoutExercise: WorkoutExerciseEntity): Long
 
     @Query("UPDATE programs SET isActive = 0")
-    suspend fun clearActivePrograms()
+    suspend fun clearActivePrograms(): Int
 
     @Query("UPDATE programs SET isActive = 1 WHERE id = :programId")
-    suspend fun setActiveProgram(programId: Long)
+    suspend fun setActiveProgram(programId: Long): Int
 }
