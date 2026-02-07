@@ -1,14 +1,9 @@
 # GymExe Project Blueprint & Handover
 
 ## 🚨 Handover Status (Current State)
-*   **CI Status:** **Failing Build.**
-    *   **Error:** `java.lang.IllegalStateException: unexpected jvm signature V` in `kspDevDebugKotlin` task.
-    *   **Cause:** Compatibility issue between KSP2 (`2.3.5`) and Kotlin (`2.3.10`) or specific library interactions (Hilt/Room).
-    *   **Constraints:**
-        *   **DO NOT DOWNGRADE** dependencies (Kotlin 2.3.10, KSP 2.3.5, AGP 9.0.0, Hilt 2.59.1 must remain).
-        *   **DO NOT DISABLE KSP2** (`ksp.useKsp2=false` is NOT allowed).
-    *   **Next Steps:** The goal is to debug and fix KSP2 configuration to resolve the build crash without downgrading. Investigate `jvmTarget` interactions or specific Hilt/Room KSP2 flags.
-
+*   **CI Status:** **Passing.**
+    *   **Fixed:** `kspDevDebugKotlin` build failure resolved by updating DAOs to explicit `suspend` return types and adding `@JvmSuppressWildcards`.
+    *   **Fixed:** `icons` resolution error resolved by adding `androidx.compose.material:material-icons-extended`.
 *   **Implemented:**
     *   **CI/CD:** `build.yml` updated for AGP 9.0, Artifact sorting, and Versioning fixes.
     *   **Dependencies:** Updated to latest stable: AGP 9.0.0, Kotlin 2.3.10, Hilt 2.59.1, Compose 2026.01.01.
@@ -28,12 +23,15 @@
     *   **Default:** Material You + System Mode (Follows OS).
     *   **Dark Mode:** Option for **Pure Black** (`#000000`) for OLED efficiency.
     *   **Light Mode:** Material You / Brand Colors.
+    *   **Edge-to-Edge:** Must be fully enabled with correct `WindowInsets` handling (status bar/navigation bar).
 
 ## 2. Core Features (Detailed)
 
 ### 2.1 Update System
 *   **Source:** GitHub Releases API.
-*   **Trigger:** **On App Open** (Foreground Check). Interval: Once every **4 hours**.
+*   **Trigger:**
+    *   **Automatic:** On App Open (Foreground Check). Interval: Once every **4 hours**.
+    *   **Manual:** "Check for Update" button in Settings. **Must provide immediate feedback** (Downloading / No Update Found Toast).
 *   **Channels:**
     *   **Stable:** Checks `latest` release tag.
     *   **Beta:** Checks `beta` tag (Rolling Release).
@@ -90,7 +88,16 @@
     *   **Theme:** Segmented Button (System/Light/Dark) + Material You Toggle.
     *   **Units:** Toggle.
     *   **Data:** Backup/Restore, Copy Debug Logs.
-    *   **Update:** Check for Update.
+    *   **Update:** Check for Update (with explicit feedback).
+
+### 3.1 Adaptive UI Strategy
+*   **Core Principle:** UI must adapt to Window Size Class and Aspect Ratio (Split Screen/Floating Window).
+*   **Floating Window:** Optimized for compact/small windows. Must handle overlap gracefully.
+*   **Split Screen:** Detect variants (Top/Bottom vs Left/Right) and adjust layout density/navigation.
+*   **Navigation Modes:**
+    *   **Standard (Portrait):** Bottom Navigation Bar.
+    *   **Wide / Landscape (Split Top-Bottom):** Navigation Rail (Left) or Drawer.
+    *   **Floating (Small):** Compact Bottom Bar or Drawer.
 
 ## 4. Roadmap
 
@@ -102,8 +109,12 @@
 - [x] **UI:** Refactor Settings navigation (Move to Profile, fix back stack).
 - [x] **CI/CD:** Fix Version Name duplication and Artifact sorting.
 - [x] **Dev:** Add Timber, LeakCanary, Dependency Analysis.
+- [x] **Fix:** KSP2 Build Failure & Missing Icons.
 
 ### Phase 2: The Workout Engine
+- [ ] **UI:** Fix Edge-to-Edge overlaps (Status/Nav bars).
+- [ ] **Feature:** Implement Update Check Feedback (Toast/Dialog).
+- [ ] **UI:** Implement Adaptive Layouts (Floating/Split Screen logic).
 - [x] **Database:** Define Room Entities (Exercise, Workout, Set, Log).
 - [x] **Exercise Repo:** Implement JSON Loader & Versioned Merge Logic.
 - [ ] **Active Workout UI:** Implement Input rows with Math Parser.

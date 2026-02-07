@@ -27,6 +27,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +50,25 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val weightUnit by viewModel.weightUnit.collectAsState()
     val distanceUnit by viewModel.distanceUnit.collectAsState()
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.updateEvents.collect { event ->
+            when (event) {
+                is SettingsViewModel.UpdateEvent.Checking -> {
+                    Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show()
+                }
+                is SettingsViewModel.UpdateEvent.NoUpdate -> {
+                    Toast.makeText(context, "No update available", Toast.LENGTH_SHORT).show()
+                }
+                is SettingsViewModel.UpdateEvent.UpdateAvailable -> {
+                    Toast.makeText(context, "Downloading update: ${event.update.version}", Toast.LENGTH_LONG).show()
+                }
+                is SettingsViewModel.UpdateEvent.Error -> {
+                    Toast.makeText(context, "Update check failed: ${event.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     LazyColumn(
         modifier =
@@ -88,7 +108,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            SystemActionsCard(context = context)
+            SystemActionsCard(
+                context = context,
+                onCheckUpdate = viewModel::checkForUpdates
+            )
         }
     }
 }
@@ -192,7 +215,10 @@ fun UnitSettingsCard(
 }
 
 @Composable
-fun SystemActionsCard(context: Context) {
+fun SystemActionsCard(
+    context: Context,
+    onCheckUpdate: () -> Unit
+) {
     val scope = rememberCoroutineScope()
 
     val exportLogLauncher = rememberLauncherForActivityResult(
@@ -208,10 +234,7 @@ fun SystemActionsCard(context: Context) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Button(
-                onClick = {
-                    Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show()
-                    // TODO: Implement actual update check
-                },
+                onClick = onCheckUpdate,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Check for Updates")

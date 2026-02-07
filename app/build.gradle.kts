@@ -122,6 +122,8 @@ dependencies {
     implementation(libs.androidx.material3)
     // Add Extended Icons (includes Core)
     implementation(libs.androidx.compose.material.icons.extended)
+    // Window Size Class for Adaptive UI
+    implementation(libs.androidx.material3.window.size)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
