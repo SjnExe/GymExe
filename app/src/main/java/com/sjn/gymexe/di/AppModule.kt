@@ -65,9 +65,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideExerciseRepository(
-        @ApplicationContext context: Context,
-    ): ExerciseRepository = ExerciseRepositoryImpl(context)
+    fun provideExerciseRepository(): ExerciseRepository = ExerciseRepositoryImpl()
 
     @Provides
     @Singleton

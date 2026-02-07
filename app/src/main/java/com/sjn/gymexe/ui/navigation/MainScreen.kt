@@ -3,9 +3,11 @@ package com.sjn.gymexe.ui.navigation
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -37,14 +40,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sjn.gymexe.ui.screens.profile.ProfileScreen
 import com.sjn.gymexe.ui.settings.SettingsScreen
+
+private const val MIN_WIDTH_TABLET_DP = 480
 
 sealed class Screen(
     val route: String,
@@ -81,104 +88,157 @@ fun MainScreen() {
 
     val context = LocalContext.current
     val activity = context.findActivity()
-    // Fallback to Compact if activity not found (shouldn't happen in normal app run)
     val windowSizeClass = if (activity != null) calculateWindowSizeClass(activity) else null
-    val widthSizeClass = windowSizeClass?.widthSizeClass ?: WindowWidthSizeClass.Compact
-
     val config = LocalConfiguration.current
-    // Use Navigation Rail if Width is NOT Compact (Medium/Expanded)
-    // OR if Height is very small (Split Screen Top/Bottom / Landscape) but Width is decent
-    val useNavRail = widthSizeClass != WindowWidthSizeClass.Compact ||
-                     (config.screenHeightDp < 480 && config.screenWidthDp >= 480)
 
+    val useNavRail = shouldUseNavRail(windowSizeClass, config)
+
+    if (useNavRail) {
+        MainScreenWithRail(
+            navController = navController,
+            screens = screens,
+            showNav = showNav,
+            showTopBar = showTopBar,
+            currentDestination = currentDestination
+        )
+    } else {
+        MainScreenWithBottomBar(
+            navController = navController,
+            screens = screens,
+            showNav = showNav,
+            showTopBar = showTopBar,
+            currentDestination = currentDestination
+        )
+    }
+}
+
+private fun shouldUseNavRail(windowSizeClass: WindowSizeClass?, config: Configuration): Boolean {
+    val widthSizeClass = windowSizeClass?.widthSizeClass ?: WindowWidthSizeClass.Compact
+    return widthSizeClass != WindowWidthSizeClass.Compact ||
+            (config.screenHeightDp < MIN_WIDTH_TABLET_DP && config.screenWidthDp >= MIN_WIDTH_TABLET_DP)
+}
+
+@Composable
+private fun MainScreenWithRail(
+    navController: NavHostController,
+    screens: List<Screen>,
+    showNav: Boolean,
+    showTopBar: Boolean,
+    currentDestination: NavDestination?
+) {
+    Row(modifier = Modifier.fillMaxSize()) {
+        if (showNav) {
+            NavigationRail {
+                Spacer(Modifier.weight(1f))
+                screens.forEach { screen ->
+                    NavigationRailItem(
+                        icon = { Icon(screen.icon, contentDescription = null) },
+                        label = { Text(screen.label) },
+                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        onClick = { navController.navigateToScreen(screen.route) },
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+            }
+        }
+
+        Scaffold(
+            contentWindowInsets = WindowInsets.safeDrawing,
+            topBar = { if (showTopBar) GymExeTopBar() }
+        ) { innerPadding ->
+            GymExeNavHost(
+                navController = navController,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainScreenWithBottomBar(
+    navController: NavHostController,
+    screens: List<Screen>,
+    showNav: Boolean,
+    showTopBar: Boolean,
+    currentDestination: NavDestination?
+) {
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
-        topBar = {
-            if (showTopBar) {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .padding(16.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("GymExe", style = MaterialTheme.typography.titleLarge)
-                }
-            }
-        },
+        topBar = { if (showTopBar) GymExeTopBar() },
         bottomBar = {
-            if (showNav && !useNavRail) {
+            if (showNav) {
                 NavigationBar {
                     screens.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = null) },
                             label = { Text(screen.label) },
                             selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            onClick = { navController.navigateToScreen(screen.route) },
                         )
                     }
                 }
             }
-        },
+        }
     ) { innerPadding ->
-        Row(
+        GymExeNavHost(
+            navController = navController,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-        ) {
-            if (showNav && useNavRail) {
-                NavigationRail {
-                    screens.forEach { screen ->
-                        NavigationRailItem(
-                            icon = { Icon(screen.icon, contentDescription = null) },
-                            label = { Text(screen.label) },
-                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                        )
-                    }
-                }
-            }
+        )
+    }
+}
 
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Dashboard.route,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize()
-            ) {
-                composable(Screen.Dashboard.route) {
-                    PlaceholderScreen("Dashboard")
-                }
-                composable(Screen.Workout.route) {
-                    PlaceholderScreen("Workout")
-                }
-                composable(Screen.Exercises.route) {
-                    PlaceholderScreen("Exercises")
-                }
-                composable(Screen.Profile.route) {
-                    ProfileScreen(navController)
-                }
-                composable(Screen.Settings.route) { SettingsScreen() }
-            }
+@Composable
+fun GymExeTopBar() {
+    Row(
+        modifier =
+        Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("GymExe", style = MaterialTheme.typography.titleLarge)
+    }
+}
+
+@Composable
+fun GymExeNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Dashboard.route,
+        modifier = modifier
+    ) {
+        composable(Screen.Dashboard.route) {
+            PlaceholderScreen("Dashboard")
         }
+        composable(Screen.Workout.route) {
+            PlaceholderScreen("Workout")
+        }
+        composable(Screen.Exercises.route) {
+            PlaceholderScreen("Exercises")
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(navController)
+        }
+        composable(Screen.Settings.route) { SettingsScreen() }
+    }
+}
+
+private fun NavHostController.navigateToScreen(route: String) {
+    this.navigate(route) {
+        popUpTo(this@navigateToScreen.graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 
@@ -188,8 +248,8 @@ fun PlaceholderScreen(
 ) {
     Box(
         modifier =
-            Modifier
-                .fillMaxSize(),
+        Modifier
+            .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(text, style = MaterialTheme.typography.headlineMedium)

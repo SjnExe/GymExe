@@ -9,5 +9,5 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
-}
+@Suppress("EmptyClassBlock")
+object DataModule

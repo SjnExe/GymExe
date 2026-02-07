@@ -6,19 +6,28 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.core.content.FileProvider
 import com.sjn.gymexe.BuildConfig
+import com.sjn.gymexe.domain.manager.DownloadStatus
 import com.sjn.gymexe.domain.manager.UpdateManager
 import com.sjn.gymexe.domain.manager.UpdateResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
+import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.Instant
+
+private const val BUFFER_SIZE = 8192
 
 class UpdateManagerImpl(
     private val context: Context,
@@ -45,7 +54,7 @@ class UpdateManagerImpl(
                 connection.requestMethod = "GET"
                 connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
 
-                if (connection.responseCode != HTTP_OK) {
+                if (connection.responseCode != HttpURLConnection.HTTP_OK) {
                     // If 404, maybe no release yet
                     return@withContext UpdateResult.NoUpdate
                 }
@@ -86,10 +95,8 @@ class UpdateManagerImpl(
         isBeta: Boolean,
     ): UpdateResult {
         val assets = json["assets"]?.jsonArray ?: return UpdateResult.Error(Exception("No assets found"))
-        val supportedAbis = Build.SUPPORTED_ABIS
-        val isArm64 = supportedAbis.contains("arm64-v8a")
 
-        val targetUrl = findBestUrl(assets, isArm64)
+        val targetUrl = findBestUrl(assets)
 
         return if (targetUrl != null) {
             val version = json["tag_name"]?.jsonPrimitive?.content ?: "Unknown"
@@ -101,16 +108,21 @@ class UpdateManagerImpl(
 
     private fun findBestUrl(
         assets: kotlinx.serialization.json.JsonArray,
-        isArm64: Boolean,
     ): String? {
         val entries = assets.asSequence().mapNotNull { getNameAndUrl(it) }
+        val abis = Build.SUPPORTED_ABIS.toList()
 
-        return if (isArm64) {
-            entries.find { it.first.contains("ARM64", ignoreCase = true) }?.second
-        } else {
-            null
-        } ?: entries.find { it.first.contains("Universal", ignoreCase = true) }?.second
-            ?: entries.find { it.first.endsWith(".apk") }?.second
+        val searchKeys = sequenceOf(
+            abis.firstOrNull(),
+            "arm64-v8a".takeIf { abis.contains(it) },
+            "armeabi-v7a".takeIf { abis.contains(it) },
+            "x86_64".takeIf { abis.contains(it) },
+            "Universal"
+        ).filterNotNull()
+
+        return searchKeys
+            .mapNotNull { key -> entries.find { it.first.contains(key, ignoreCase = true) }?.second }
+            .firstOrNull() ?: entries.find { it.first.endsWith(".apk", ignoreCase = true) }?.second
     }
 
     private fun getNameAndUrl(asset: kotlinx.serialization.json.JsonElement): Pair<String, String>? {
@@ -118,10 +130,6 @@ class UpdateManagerImpl(
         val name = obj["name"]?.jsonPrimitive?.content
         val url = obj["browser_download_url"]?.jsonPrimitive?.content
         return if (name != null && url != null) name to url else null
-    }
-
-    companion object {
-        private const val HTTP_OK = 200
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -145,4 +153,52 @@ class UpdateManagerImpl(
             Log.e("UpdateManager", "Download failed", e)
         }
     }
+
+    @Suppress("TooGenericExceptionCaught")
+    override fun downloadUpdateFlow(
+        url: String,
+        fileName: String,
+    ): Flow<DownloadStatus> = flow {
+        emit(DownloadStatus.Downloading(0f))
+        try {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            connection.connect()
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                emit(DownloadStatus.Error("Server returned ${connection.responseCode}"))
+                return@flow
+            }
+
+            val length = connection.contentLength
+            val input = connection.inputStream
+
+            // Use internal files dir for provider compatibility
+            val updateDir = File(context.filesDir, "updates")
+            if (!updateDir.exists()) updateDir.mkdirs()
+            val file = File(updateDir, fileName)
+
+            val output = FileOutputStream(file)
+            val buffer = ByteArray(BUFFER_SIZE)
+            var bytesRead: Int
+            var totalBytesRead = 0L
+
+            while (input.read(buffer).also { bytesRead = it } != -1) {
+                output.write(buffer, 0, bytesRead)
+                totalBytesRead += bytesRead
+                if (length > 0) {
+                    val progress = totalBytesRead.toFloat() / length
+                    emit(DownloadStatus.Downloading(progress))
+                }
+            }
+            output.close()
+            input.close()
+
+            val authority = "${context.packageName}.provider"
+            val uri = FileProvider.getUriForFile(context, authority, file)
+
+            emit(DownloadStatus.Completed(uri.toString()))
+        } catch (e: Exception) {
+            Log.e("UpdateManager", "Download failed", e)
+            emit(DownloadStatus.Error(e.message ?: "Download failed"))
+        }
+    }.flowOn(Dispatchers.IO)
 }
