@@ -134,7 +134,8 @@ jobs:
             artifacts/GymExe-Beta-ARMv7.apk
             artifacts/GymExe-Beta-x86_64.apk
             artifacts/build_summary.log
-          prerelease: true
+          prerelease: false
+          draft: false
 
   release_stable:
     if: startsWith(github.ref, 'refs/tags/v')
