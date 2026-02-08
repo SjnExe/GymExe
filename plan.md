@@ -2,14 +2,11 @@
 
 ## 🚨 Handover Status (Current State)
 *   **CI Status:** **Passing.**
-    *   **Fixed:** `kspDevDebugKotlin` build failure resolved by updating DAOs to explicit `suspend` return types and adding `@JvmSuppressWildcards`.
-    *   **Fixed:** `icons` resolution error resolved by adding `androidx.compose.material:material-icons-extended`.
 *   **Implemented:**
-    *   **CI/CD:** `build.yml` updated for AGP 9.0, Artifact sorting, and Versioning fixes.
-    *   **Dependencies:** Updated to latest stable: AGP 9.0.0, Kotlin 2.3.10, Hilt 2.59.1, Compose 2026.01.01.
-    *   **Dev Tools:** Added LeakCanary, Timber (FileLoggingTree), StrictMode.
-    *   **UI:** Settings moved to Profile, Units UI refactored (Weight/Distance segments).
-    *   **Logic:** `ExerciseRepository` (JSON sync), `MathInputParser` (exp4j).
+    *   **Core Logic:** `MathInputParser` (Custom Parser), `ExerciseRepository` (JSON sync).
+    *   **Database:** `GymDatabase` v2 (Schema updated for Equipment/Duration). *Note: Migration reverted for pre-release simplicity.*
+    *   **UI:** `ActiveSessionScreen`, `SmartInputRow` (Dynamic Equipment Chips).
+    *   **Preferences:** Custom Equipment Lists (Plates/Dumbbells).
 
 ---
 
@@ -101,7 +98,7 @@
 
 ## 4. Roadmap
 
-### Phase 1: Foundation (In Progress)
+### Phase 1: Foundation (Completed)
 - [x] **CI/CD:** Split APKs, Dynamic Versioning, Rolling Beta.
 - [x] **Skeleton:** Navigation, Theme, Settings UI.
 - [x] **Fix:** Add `hilt-navigation-compose` dependency to `libs.versions.toml` and `app/build.gradle.kts`.
@@ -111,13 +108,14 @@
 - [x] **Dev:** Add Timber, LeakCanary, Dependency Analysis.
 - [x] **Fix:** KSP2 Build Failure & Missing Icons.
 
-### Phase 2: The Workout Engine
+### Phase 2: The Workout Engine (In Progress)
 - [x] **UI:** Fix Edge-to-Edge overlaps (Status/Nav bars).
 - [x] **Feature:** Implement Update Check Feedback (Toast/Dialog).
 - [x] **UI:** Implement Adaptive Layouts (Floating/Split Screen logic).
 - [x] **Database:** Define Room Entities (Exercise, Workout, Set, Log).
 - [x] **Exercise Repo:** Implement JSON Loader & Versioned Merge Logic.
-- [ ] **Active Workout UI:** Implement Input rows with Math Parser.
+- [x] **Active Workout UI:** Implement Input rows with Math Parser.
+- [x] **Smart Input:** Dynamic Equipment Chips (Plates/Dumbbells).
 
 ### Phase 3: Intelligence & Polish
 - [ ] **Smart Prefill:** Implement "Most Used" algorithms & Heatmap UI.

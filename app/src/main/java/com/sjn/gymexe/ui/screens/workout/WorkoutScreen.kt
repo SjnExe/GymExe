@@ -45,6 +45,8 @@ fun WorkoutScreen(
     val availablePlates by viewModel.availablePlates.collectAsState()
     val availableDumbbells by viewModel.availableDumbbells.collectAsState()
 
+    val exerciseStats by viewModel.exerciseStats.collectAsState()
+
     var showFinishDialog by remember { mutableStateOf(false) }
 
     var weightInput by remember { mutableStateOf("") }
@@ -104,7 +106,8 @@ fun WorkoutScreen(
                             availableDumbbells = availableDumbbells,
                             equipmentCategory = selectedEquipmentCategory,
                             machineIncrement = machineIncrement,
-                            machineMax = machineMax
+                            machineMax = machineMax,
+                            exerciseStats = exerciseStats
                         )
 
                         Button(

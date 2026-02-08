@@ -8,18 +8,23 @@ import com.sjn.gymexe.data.local.entity.SessionEntity
 import com.sjn.gymexe.data.local.entity.SetEntity
 import com.sjn.gymexe.data.preferences.UserPreferencesRepository
 import com.sjn.gymexe.domain.manager.TimerManager
+import com.sjn.gymexe.domain.repository.HistoryRepository
 import com.sjn.gymexe.domain.repository.ProgramRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class WorkoutViewModel @Inject constructor(
     private val programRepository: ProgramRepository,
+    private val historyRepository: HistoryRepository,
     private val timerManager: TimerManager,
     private val sessionDao: SessionDao,
     private val setDao: SetDao,
@@ -27,7 +32,6 @@ class WorkoutViewModel @Inject constructor(
 ) : ViewModel() {
 
     // Ideally we'd get the active program and its current workout.
-    // For simplicity in this demo, we'll just fetch the first available workout or empty.
     val activeProgram = programRepository.getActiveProgram()
         .stateIn(
             viewModelScope,
@@ -49,8 +53,20 @@ class WorkoutViewModel @Inject constructor(
             emptyList()
         )
 
+    // Current selected exercise ID (In a real app, this would be dynamic)
+    private val _selectedExerciseId = MutableStateFlow("bench_press_barbell")
+    val selectedExerciseId = _selectedExerciseId.asStateFlow()
+
+    // Exercise Stats (Last Used, PR)
+    val exerciseStats = _selectedExerciseId.flatMapLatest { id ->
+        historyRepository.getExerciseStats(id)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        null
+    )
+
     // In a real app, we'd have a SessionManager to hold current sets.
-    // Here we'll just keep a local list of sets being logged.
     private val _currentSets = MutableStateFlow<List<SetEntity>>(emptyList())
     val currentSets = _currentSets.asStateFlow()
 
@@ -98,6 +114,10 @@ class WorkoutViewModel @Inject constructor(
                 _currentSets.value = emptyList()
             }
         }
+    }
+
+    fun selectExercise(id: String) {
+        _selectedExerciseId.value = id
     }
 
     companion object {

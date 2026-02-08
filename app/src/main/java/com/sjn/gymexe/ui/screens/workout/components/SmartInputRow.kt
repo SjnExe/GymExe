@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.sjn.gymexe.domain.logic.MathInputParser
+import com.sjn.gymexe.domain.model.ExerciseStats
 
 @Composable
 fun SmartInputRow(
@@ -34,6 +36,7 @@ fun SmartInputRow(
     equipmentCategory: String, // "BARBELL", "DUMBBELL", "MACHINE", "CABLE", "BODYWEIGHT"
     machineIncrement: Float?,
     machineMax: Float?,
+    exerciseStats: ExerciseStats?,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -53,13 +56,13 @@ fun SmartInputRow(
                 val max = machineMax ?: 100f
                 generateSequence(step) { it + step }.takeWhile { it <= max }.toList()
             }
-            "BODYWEIGHT" -> listOf(0f, 2.5f, 5f, 10f, 15f, 20f) // Weighted vest increments?
+            "BODYWEIGHT" -> listOf(0f, 2.5f, 5f, 10f, 15f, 20f)
             else -> emptyList()
         }
     }
 
     Column(modifier = modifier) {
-        // Accessory Bar (Scrollable Row of Chips)
+        // Row 1: Weight Increments (Plates/Dumbbells)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,7 +73,6 @@ fun SmartInputRow(
             accessoryWeights.forEach { weight ->
                 SuggestionChip(
                     onClick = {
-                        // Smart Append Logic
                         val newValue = parser.smartAppend(weightInput, weight)
                         onWeightInputChange(newValue)
                     },
@@ -80,6 +82,42 @@ fun SmartInputRow(
                         )
                     }
                 )
+            }
+        }
+
+        // Row 2: History Suggestions (Last Used, PR)
+        if (exerciseStats != null && (exerciseStats.lastUsedWeight != null || exerciseStats.personalBest != null)) {
+             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                // Last Used Chip
+                exerciseStats.lastUsedWeight?.let { weight ->
+                    FilterChip(
+                        selected = false,
+                        onClick = {
+                            // Replace current input with Last Used? Or Append?
+                            // Usually "Last Used" implies "I want to do this weight again".
+                            // So let's replace.
+                            onWeightInputChange(if (weight % 1.0 == 0.0) weight.toInt().toString() else weight.toString())
+                        },
+                        label = { Text("Last: ${if (weight % 1.0 == 0.0) weight.toInt() else weight}kg") }
+                    )
+                }
+
+                // PR Chip
+                exerciseStats.personalBest?.let { weight ->
+                    FilterChip(
+                        selected = false,
+                        onClick = {
+                             onWeightInputChange(if (weight % 1.0 == 0.0) weight.toInt().toString() else weight.toString())
+                        },
+                        label = { Text("PR: ${if (weight % 1.0 == 0.0) weight.toInt() else weight}kg") }
+                    )
+                }
             }
         }
 
@@ -95,7 +133,6 @@ fun SmartInputRow(
                     }
                 },
                 keyboardOptions = KeyboardOptions(
-                    // Use Text to allow 'x' or spaces easily, though Number usually allows basic punctuation
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
                 ),
@@ -108,7 +145,6 @@ fun SmartInputRow(
             OutlinedTextField(
                 value = repsInput,
                 onValueChange = { newValue ->
-                    // Only allow numeric input for reps
                     if (newValue.all { it.isDigit() }) {
                         onRepsInputChange(newValue)
                     }
