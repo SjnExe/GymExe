@@ -96,20 +96,28 @@ class UpdateManagerImpl(
         isBeta: Boolean,
     ): UpdateResult {
         val assets = json["assets"]?.jsonArray ?: return UpdateResult.Error(Exception("No assets found"))
+        val releaseNotes = json["body"]?.jsonPrimitive?.content ?: "No release notes available."
 
-        val targetUrl = findBestUrl(assets)
+        val target = findBestAsset(assets)
 
-        return if (targetUrl != null) {
+        return if (target != null) {
+            val (url, arch) = target
             val version = json["tag_name"]?.jsonPrimitive?.content ?: "Unknown"
-            UpdateResult.UpdateAvailable(version, targetUrl, isBeta)
+            UpdateResult.UpdateAvailable(
+                version = version,
+                url = url,
+                isBeta = isBeta,
+                releaseNotes = releaseNotes,
+                architecture = arch
+            )
         } else {
             UpdateResult.Error(Exception("No suitable APK found"))
         }
     }
 
-    private fun findBestUrl(
+    private fun findBestAsset(
         assets: kotlinx.serialization.json.JsonArray,
-    ): String? {
+    ): Pair<String, String>? {
         val entries = assets.asSequence().mapNotNull { getNameAndUrl(it) }
         val abis = Build.SUPPORTED_ABIS.toList()
 
@@ -121,9 +129,19 @@ class UpdateManagerImpl(
             "Universal"
         ).filterNotNull()
 
-        return searchKeys
-            .mapNotNull { key -> entries.find { it.first.contains(key, ignoreCase = true) }?.second }
-            .firstOrNull() ?: entries.find { it.first.endsWith(".apk", ignoreCase = true) }?.second
+        // Log keys for verification
+        Log.d("UpdateManager", "Supported ABIs: $abis")
+        Log.d("UpdateManager", "Search Keys: ${searchKeys.toList()}")
+
+        val match = searchKeys
+            .mapNotNull { key ->
+                entries.find { it.first.contains(key, ignoreCase = true) }?.let {
+                    it.second to key
+                }
+            }
+            .firstOrNull()
+
+        return match ?: entries.find { it.first.endsWith(".apk", ignoreCase = true) }?.let { it.second to "Unknown" }
     }
 
     private fun getNameAndUrl(asset: kotlinx.serialization.json.JsonElement): Pair<String, String>? {

@@ -23,6 +23,8 @@ sealed class UpdateResult {
         val version: String,
         val url: String,
         val isBeta: Boolean,
+        val releaseNotes: String,
+        val architecture: String
     ) : UpdateResult()
 
     data class Error(

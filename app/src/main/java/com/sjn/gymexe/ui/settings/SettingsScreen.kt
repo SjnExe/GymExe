@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber")
+@file:Suppress("MagicNumber", "TooManyFunctions")
 
 package com.sjn.gymexe.ui.settings
 
@@ -9,6 +9,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,11 +19,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -40,9 +47,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sjn.gymexe.BuildConfig
 import com.sjn.gymexe.domain.manager.DownloadStatus
 import com.sjn.gymexe.domain.manager.UpdateResult
 import com.sjn.gymexe.ui.settings.viewmodel.SettingsViewModel
@@ -192,18 +202,10 @@ fun UpdateDialogs(
     onDownloadComplete: (String) -> Unit
 ) {
     if (showUpdateDialog != null) {
-        AlertDialog(
-            onDismissRequest = onDismissUpdateDialog,
-            title = { Text("Update Available") },
-            text = { Text("Version ${showUpdateDialog.version} is available. Download now?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    onDownload(showUpdateDialog.url, showUpdateDialog.version)
-                }) { Text("Download") }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissUpdateDialog) { Text("Cancel") }
-            }
+        UpdateAvailableDialog(
+            update = showUpdateDialog,
+            onDismiss = onDismissUpdateDialog,
+            onDownload = { onDownload(showUpdateDialog.url, showUpdateDialog.version) }
         )
     }
 
@@ -231,6 +233,109 @@ fun UpdateDialogs(
         if (downloadStatus is DownloadStatus.Completed) {
              onDownloadComplete(downloadStatus.fileUri)
         }
+    }
+}
+
+@Suppress("LongMethod")
+@Composable
+fun UpdateAvailableDialog(
+    update: UpdateResult.UpdateAvailable,
+    onDismiss: () -> Unit,
+    onDownload: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Update Available") },
+        text = {
+            Column {
+                // Version Comparison
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = PADDING_SMALL)
+                ) {
+                    VersionChip(label = "Current", version = BuildConfig.VERSION_NAME)
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "to",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    VersionChip(
+                        label = "New",
+                        version = update.version,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        textColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                AssistChip(
+                    onClick = {},
+                    label = { Text(update.architecture) },
+                    modifier = Modifier.padding(bottom = PADDING_SMALL)
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = PADDING_SMALL))
+
+                // Release Notes
+                Text(
+                    text = "Release Notes",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Column(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .verticalScroll(rememberScrollState())
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            shape = MaterialTheme.shapes.small
+                        )
+                        .padding(PADDING_SMALL)
+                ) {
+                    Text(
+                        text = update.releaseNotes,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDownload) {
+                Text("Download & Install")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Later")
+            }
+        }
+    )
+}
+
+@Composable
+fun VersionChip(
+    label: String,
+    version: String,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(containerColor, shape = MaterialTheme.shapes.small)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor.copy(alpha = 0.7f)
+        )
+        Text(
+            text = version,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = textColor
+        )
     }
 }
 
