@@ -2,6 +2,8 @@ package com.sjn.gymexe.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.sjn.gymexe.data.local.dao.ExerciseDao
 import com.sjn.gymexe.data.local.dao.ProgramDao
 import com.sjn.gymexe.data.local.dao.SessionDao
@@ -22,7 +24,7 @@ import com.sjn.gymexe.data.local.entity.WorkoutExerciseEntity
         SessionEntity::class,
         SetEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class GymDatabase : RoomDatabase() {
@@ -33,4 +35,22 @@ abstract class GymDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
 
     abstract fun setDao(): SetDao
+
+    companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Update sets table
+                db.execSQL("ALTER TABLE sets ADD COLUMN duration INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE sets ADD COLUMN distance REAL DEFAULT NULL")
+                db.execSQL("ALTER TABLE sets ADD COLUMN inputString TEXT DEFAULT NULL")
+
+                // Update exercises table
+                // Adding columns with default values to avoid null issues where not nullable
+                // equipmentCategory is not nullable in Entity, so we must provide default
+                db.execSQL("ALTER TABLE exercises ADD COLUMN equipmentCategory TEXT NOT NULL DEFAULT 'BARBELL'")
+                db.execSQL("ALTER TABLE exercises ADD COLUMN machineIncrement REAL DEFAULT NULL")
+                db.execSQL("ALTER TABLE exercises ADD COLUMN machineMax REAL DEFAULT NULL")
+            }
+        }
+    }
 }

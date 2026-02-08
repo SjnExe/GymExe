@@ -45,7 +45,9 @@ object AppModule {
                 context,
                 GymDatabase::class.java,
                 "gym_exe.db",
-            ).build()
+            )
+            .addMigrations(GymDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     @Singleton
@@ -65,7 +67,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideExerciseRepository(): ExerciseRepository = ExerciseRepositoryImpl()
+    fun provideExerciseRepository(
+        @ApplicationContext context: Context,
+        exerciseDao: ExerciseDao,
+    ): ExerciseRepository = ExerciseRepositoryImpl(context, exerciseDao)
 
     @Provides
     @Singleton

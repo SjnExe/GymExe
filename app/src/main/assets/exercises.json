@@ -1,138 +1,98 @@
 [
   {
-    "id": "chest_bench_press_barbell",
-    "name": "Bench Press (Barbell)",
-    "targetMuscle": "Chest",
+    "id": "squat_barbell",
+    "name": "Squat",
+    "target": "Legs",
+    "type": "Strength",
     "equipment": "Barbell",
-    "type": "Weighted",
-    "version": 1
+    "equipmentCategory": "BARBELL",
+    "isCustom": false
   },
   {
-    "id": "chest_incline_bench_press_dumbell",
-    "name": "Incline Bench Press (Dumbbell)",
-    "targetMuscle": "Chest",
+    "id": "bench_press_barbell",
+    "name": "Bench Press",
+    "target": "Chest",
+    "type": "Strength",
+    "equipment": "Barbell",
+    "equipmentCategory": "BARBELL",
+    "isCustom": false
+  },
+  {
+    "id": "deadlift_barbell",
+    "name": "Deadlift",
+    "target": "Back",
+    "type": "Strength",
+    "equipment": "Barbell",
+    "equipmentCategory": "BARBELL",
+    "isCustom": false
+  },
+  {
+    "id": "overhead_press_barbell",
+    "name": "Overhead Press",
+    "target": "Shoulders",
+    "type": "Strength",
+    "equipment": "Barbell",
+    "equipmentCategory": "BARBELL",
+    "isCustom": false
+  },
+  {
+    "id": "dumbbell_curl",
+    "name": "Bicep Curl",
+    "target": "Biceps",
+    "type": "Strength",
     "equipment": "Dumbbell",
-    "type": "Weighted",
-    "version": 1
+    "equipmentCategory": "DUMBBELL",
+    "isCustom": false
   },
   {
-    "id": "chest_push_up",
-    "name": "Push Up",
-    "targetMuscle": "Chest",
-    "equipment": "Bodyweight",
-    "type": "WeightedBodyweight",
-    "version": 1
+    "id": "dumbbell_lateral_raise",
+    "name": "Lateral Raise",
+    "target": "Shoulders",
+    "type": "Strength",
+    "equipment": "Dumbbell",
+    "equipmentCategory": "DUMBBELL",
+    "isCustom": false
   },
   {
-    "id": "chest_dip",
-    "name": "Chest Dip",
-    "targetMuscle": "Chest",
-    "equipment": "Bodyweight",
-    "type": "WeightedBodyweight",
-    "version": 1
-  },
-  {
-    "id": "back_pull_up",
-    "name": "Pull Up",
-    "targetMuscle": "Lats",
-    "equipment": "Bodyweight",
-    "type": "WeightedBodyweight",
-    "version": 1
-  },
-  {
-    "id": "back_row_barbell",
-    "name": "Bent Over Row (Barbell)",
-    "targetMuscle": "Back",
-    "equipment": "Barbell",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "back_lat_pulldown",
-    "name": "Lat Pulldown (Cable)",
-    "targetMuscle": "Lats",
+    "id": "cable_tricep_pushdown",
+    "name": "Tricep Pushdown",
+    "target": "Triceps",
+    "type": "Strength",
     "equipment": "Cable",
-    "type": "Weighted",
-    "version": 1
+    "equipmentCategory": "CABLE",
+    "isCustom": false,
+    "machineIncrement": 5.0,
+    "machineMax": 80.0
   },
   {
-    "id": "legs_squat_barbell",
-    "name": "Squat (Barbell)",
-    "targetMuscle": "Quads",
-    "equipment": "Barbell",
-    "type": "Weighted",
-    "version": 1
+    "id": "cable_face_pull",
+    "name": "Face Pull",
+    "target": "Shoulders",
+    "type": "Strength",
+    "equipment": "Cable",
+    "equipmentCategory": "CABLE",
+    "isCustom": false,
+    "machineIncrement": 2.5,
+    "machineMax": 50.0
   },
   {
-    "id": "legs_deadlift_barbell",
-    "name": "Deadlift (Barbell)",
-    "targetMuscle": "Hamstrings",
-    "equipment": "Barbell",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "legs_leg_press",
+    "id": "leg_press_machine",
     "name": "Leg Press",
-    "targetMuscle": "Legs",
+    "target": "Legs",
+    "type": "Strength",
     "equipment": "Machine",
-    "type": "Weighted",
-    "version": 1
+    "equipmentCategory": "MACHINE",
+    "isCustom": false,
+    "machineIncrement": 10.0,
+    "machineMax": 200.0
   },
   {
-    "id": "legs_lunge_dumbbell",
-    "name": "Walking Lunge (Dumbbell)",
-    "targetMuscle": "Legs",
-    "equipment": "Dumbbell",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "shoulders_overhead_press_barbell",
-    "name": "Overhead Press (Barbell)",
-    "targetMuscle": "Shoulders",
-    "equipment": "Barbell",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "shoulders_lateral_raise_dumbbell",
-    "name": "Lateral Raise (Dumbbell)",
-    "targetMuscle": "Shoulders",
-    "equipment": "Dumbbell",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "arms_bicep_curl_barbell",
-    "name": "Bicep Curl (Barbell)",
-    "targetMuscle": "Biceps",
-    "equipment": "Barbell",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "arms_tricep_extension_cable",
-    "name": "Tricep Pushdown (Cable)",
-    "targetMuscle": "Triceps",
-    "equipment": "Cable",
-    "type": "Weighted",
-    "version": 1
-  },
-  {
-    "id": "core_plank",
+    "id": "plank",
     "name": "Plank",
-    "targetMuscle": "Core",
-    "equipment": "Bodyweight",
+    "target": "Core",
     "type": "Duration",
-    "version": 1
-  },
-  {
-    "id": "cardio_treadmill",
-    "name": "Running (Treadmill)",
-    "targetMuscle": "Cardio",
-    "equipment": "Machine",
-    "type": "Cardio",
-    "version": 1
+    "equipment": "Bodyweight",
+    "equipmentCategory": "BODYWEIGHT",
+    "isCustom": false
   }
 ]
