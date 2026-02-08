@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sjn.gymexe.BuildConfig
@@ -247,30 +248,32 @@ fun UpdateAvailableDialog(
         onDismissRequest = onDismiss,
         title = { Text("Update Available") },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 // Version Comparison
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = PADDING_SMALL)
-                ) {
-                    VersionChip(label = "Current", version = BuildConfig.VERSION_NAME)
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "to",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    VersionChip(
-                        label = "New",
-                        version = update.version,
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        textColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
+                VersionChip(label = "Current", version = BuildConfig.VERSION_NAME)
+
+                Icon(
+                    imageVector = Icons.Default.ArrowDownward,
+                    contentDescription = "to",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+
+                VersionChip(
+                    label = "New",
+                    version = update.version,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(PADDING_SMALL))
 
                 AssistChip(
                     onClick = {},
-                    label = { Text(update.architecture) },
+                    label = { Text("Type: ${update.architecture}") },
                     modifier = Modifier.padding(bottom = PADDING_SMALL)
                 )
 
@@ -280,11 +283,13 @@ fun UpdateAvailableDialog(
                 Text(
                     text = "Release Notes",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.Start)
                 )
                 Column(
                     modifier = Modifier
                         .height(200.dp)
+                        .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                         .background(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
@@ -322,8 +327,9 @@ fun VersionChip(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .fillMaxWidth()
             .background(containerColor, shape = MaterialTheme.shapes.small)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
         Text(
             text = label,
@@ -332,9 +338,10 @@ fun VersionChip(
         )
         Text(
             text = version,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = textColor
+            color = textColor,
+            textAlign = TextAlign.Center
         )
     }
 }

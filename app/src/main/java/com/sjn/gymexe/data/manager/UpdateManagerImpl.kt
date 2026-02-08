@@ -121,22 +121,27 @@ class UpdateManagerImpl(
         val entries = assets.asSequence().mapNotNull { getNameAndUrl(it) }
         val abis = Build.SUPPORTED_ABIS.toList()
 
-        val searchKeys = sequenceOf(
-            abis.firstOrNull(),
-            "arm64-v8a".takeIf { abis.contains(it) },
-            "armeabi-v7a".takeIf { abis.contains(it) },
-            "x86_64".takeIf { abis.contains(it) },
-            "Universal"
-        ).filterNotNull()
+        // Map ABI to display name and search token
+        // Use lowercase tokens for case-insensitive matching
+        val abiMap = mapOf(
+            "arm64-v8a" to Pair("ARM64", "arm64"),
+            "armeabi-v7a" to Pair("ARMv7", "armeabi"),
+            "x86_64" to Pair("x86_64", "x86_64"),
+            "x86" to Pair("x86", "x86")
+        )
 
-        // Log keys for verification
+        // Generate search keys based on device supported ABIs
+        val searchKeys = abis.mapNotNull { abi ->
+            abiMap[abi]
+        } + Pair("Universal", "universal")
+
         Log.d("UpdateManager", "Supported ABIs: $abis")
-        Log.d("UpdateManager", "Search Keys: ${searchKeys.toList()}")
+        Log.d("UpdateManager", "Search Keys: $searchKeys")
 
         val match = searchKeys
-            .mapNotNull { key ->
-                entries.find { it.first.contains(key, ignoreCase = true) }?.let {
-                    it.second to key
+            .mapNotNull { (displayName, token) ->
+                entries.find { it.first.contains(token, ignoreCase = true) }?.let {
+                    it.second to displayName
                 }
             }
             .firstOrNull()
