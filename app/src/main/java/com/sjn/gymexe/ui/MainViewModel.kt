@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val SHARING_TIMEOUT = 5000L
+
 @HiltViewModel
 class MainViewModel
     @Inject
@@ -20,11 +22,11 @@ class MainViewModel
     ) : ViewModel() {
         val themeMode: StateFlow<String> =
             userPreferencesRepository.themeMode
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(SHARING_TIMEOUT), "System")
 
         val useDynamicColors: StateFlow<Boolean> =
             userPreferencesRepository.useDynamicColors
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(SHARING_TIMEOUT), true)
 
         init {
             viewModelScope.launch {

@@ -65,8 +65,8 @@ jobs:
       - name: Calculate Version Name
         id: version
         run: |
-          # Get the latest tag
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Get the latest v* tag
+          LATEST_TAG=$(git describe --tags --match "v*" --abbrev=0 2>/dev/null || echo "v0.0.0")
 
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # PR Build: v{Tag}-beta-PR{Number}.{CommitCount}
@@ -135,6 +135,7 @@ jobs:
             artifacts/GymExe-Beta-x86_64.apk
             artifacts/build_summary.log
           prerelease: true
+          draft: false
 
   release_stable:
     if: startsWith(github.ref, 'refs/tags/v')

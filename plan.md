@@ -112,9 +112,9 @@
 - [x] **Fix:** KSP2 Build Failure & Missing Icons.
 
 ### Phase 2: The Workout Engine
-- [ ] **UI:** Fix Edge-to-Edge overlaps (Status/Nav bars).
-- [ ] **Feature:** Implement Update Check Feedback (Toast/Dialog).
-- [ ] **UI:** Implement Adaptive Layouts (Floating/Split Screen logic).
+- [x] **UI:** Fix Edge-to-Edge overlaps (Status/Nav bars).
+- [x] **Feature:** Implement Update Check Feedback (Toast/Dialog).
+- [x] **UI:** Implement Adaptive Layouts (Floating/Split Screen logic).
 - [x] **Database:** Define Room Entities (Exercise, Workout, Set, Log).
 - [x] **Exercise Repo:** Implement JSON Loader & Versioned Merge Logic.
 - [ ] **Active Workout UI:** Implement Input rows with Math Parser.
