@@ -28,6 +28,7 @@ import java.net.URL
 import java.time.Instant
 
 private const val BUFFER_SIZE = 8192
+private const val RELEASE_LAG_TOLERANCE_MS = 20 * 60 * 1000L // 20 Minutes
 
 class UpdateManagerImpl(
     private val context: Context,
@@ -69,7 +70,7 @@ class UpdateManagerImpl(
                         val publishedAt = Instant.parse(publishedAtStr).toEpochMilli()
                         val buildTime = BuildConfig.BUILD_TIME
 
-                        if (publishedAt > buildTime) {
+                        if (publishedAt > buildTime + RELEASE_LAG_TOLERANCE_MS) {
                             return@withContext findCorrectAsset(releaseJson, true)
                         }
                     }
