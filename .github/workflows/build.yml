@@ -85,8 +85,12 @@ jobs:
 
       - name: Build Beta (Splits) & Capture Log
         run: |
-          # Build Optimized (Release) and Debuggable (Debug)
-          ./gradlew assembleDevRelease assembleDevDebug > build.log 2>&1 || (tail -n 200 build.log; exit 1)
+          # Build Optimized (Release)
+          ./gradlew assembleDevRelease > build.log 2>&1 || (tail -n 200 build.log; exit 1)
+
+          # Build Debuggable (Debug)
+          ./gradlew assembleDevDebug >> build.log 2>&1 || (tail -n 200 build.log; exit 1)
+
           tail -n 200 build.log > build_summary.log
         env:
           VERSION_NAME: ${{ env.VERSION_NAME }}
@@ -97,14 +101,15 @@ jobs:
           cp build_summary.log artifacts/
 
           # --- Optimized (Minified) ---
+          # Note: If minification is off, these will just be Release builds.
           find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-Universal.apk \;
           find app/build/outputs/apk/dev/release -name "app-dev-arm64-v8a-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-ARM64.apk \;
           find app/build/outputs/apk/dev/release -name "app-dev-armeabi-v7a-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-ARMv7.apk \;
           find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-x86_64.apk \;
 
           # --- Debuggable (Non-Minified) ---
-          # Note: Debug build usually doesn't split unless configured. Assuming Universal for Debug.
-          find app/build/outputs/apk/dev/debug -name "app-dev-debug.apk" -exec cp {} artifacts/GymExe-Beta-Debuggable.apk \;
+          # Debug builds often default to Universal if splits aren't applied to Debug buildType
+          find app/build/outputs/apk/dev/debug -name "*.apk" -exec cp {} artifacts/GymExe-Beta-Debuggable.apk \;
 
       - name: Delete Old Release
         uses: dev-drprasad/delete-tag-and-release@v1.1
