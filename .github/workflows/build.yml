@@ -47,6 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Needed for creating Releases and updating tags
+      workflows: write # Needed because the tag update might point to a commit changing workflows
     steps:
       - uses: actions/checkout@v4
         with:
@@ -85,7 +86,12 @@ jobs:
 
       - name: Build Beta (Splits) & Capture Log
         run: |
+          # Build Optimized (Release)
           ./gradlew assembleDevRelease > build.log 2>&1 || (tail -n 200 build.log; exit 1)
+
+          # Build Debuggable (Debug)
+          ./gradlew assembleDevDebug >> build.log 2>&1 || (tail -n 200 build.log; exit 1)
+
           tail -n 200 build.log > build_summary.log
         env:
           VERSION_NAME: ${{ env.VERSION_NAME }}
@@ -95,14 +101,26 @@ jobs:
           mkdir -p artifacts
           cp build_summary.log artifacts/
 
-          # Rename Universal
-          find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Universal.apk \;
-          # Rename ARM64
-          find app/build/outputs/apk/dev/release -name "app-dev-arm64-v8a-release.apk" -exec cp {} artifacts/GymExe-Beta-ARM64.apk \;
-          # Rename ARMV7
-          find app/build/outputs/apk/dev/release -name "app-dev-armeabi-v7a-release.apk" -exec cp {} artifacts/GymExe-Beta-ARMv7.apk \;
-          # Rename X86_64
-          find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-x86_64.apk \;
+          # --- Optimized (Minified) ---
+          # Note: If minification is off, these will just be Release builds.
+          find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-Universal.apk \;
+          find app/build/outputs/apk/dev/release -name "app-dev-arm64-v8a-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-ARM64.apk \;
+          find app/build/outputs/apk/dev/release -name "app-dev-armeabi-v7a-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-ARMv7.apk \;
+          find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-x86_64.apk \;
+
+          # --- Debuggable (Non-Minified) ---
+          # Debug builds often default to Universal if splits aren't applied to Debug buildType
+          find app/build/outputs/apk/dev/debug -name "*.apk" -exec cp {} artifacts/GymExe-Beta-Debuggable.apk \;
+
+      - name: Delete Old Release
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          delete_release: true
+          tag_name: beta
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for API Propagation
+        run: sleep 5
 
       - name: Update Beta Tag
         run: |
@@ -110,14 +128,6 @@ jobs:
           git config --global user.email 'bot@gymexe.com'
           git tag -f beta
           git push -f origin beta
-
-      - name: Delete Old Release
-        uses: dev-drprasad/delete-tag-and-release@v1.0
-        with:
-          delete_release: true
-          tag_name: beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release Rolling Beta
         uses: softprops/action-gh-release@v1
@@ -129,10 +139,11 @@ jobs:
             Version: ${{ env.VERSION_NAME }}
             Commit: ${{ github.sha }}
           files: |
-            artifacts/GymExe-Beta-Universal.apk
-            artifacts/GymExe-Beta-ARM64.apk
-            artifacts/GymExe-Beta-ARMv7.apk
-            artifacts/GymExe-Beta-x86_64.apk
+            artifacts/GymExe-Beta-Optimized-Universal.apk
+            artifacts/GymExe-Beta-Optimized-ARM64.apk
+            artifacts/GymExe-Beta-Optimized-ARMv7.apk
+            artifacts/GymExe-Beta-Optimized-x86_64.apk
+            artifacts/GymExe-Beta-Debuggable.apk
             artifacts/build_summary.log
           prerelease: true
           draft: false

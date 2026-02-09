@@ -59,6 +59,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         debug {
+            isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
         }
     }

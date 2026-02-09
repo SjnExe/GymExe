@@ -35,4 +35,10 @@ data class SetEntity(
     val timestamp: Long,
     val isDropSet: Boolean = false,
     val completed: Boolean = true,
+    // Duration in seconds (for timed exercises)
+    val duration: Long? = null,
+    // Distance in meters (for cardio)
+    val distance: Float? = null,
+    // Raw input expression (e.g., "20 10 5")
+    val inputString: String? = null,
 )

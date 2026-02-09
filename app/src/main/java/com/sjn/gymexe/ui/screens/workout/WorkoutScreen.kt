@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,12 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.sjn.gymexe.data.local.entity.SetEntity
+import com.sjn.gymexe.domain.logic.MathInputParser
 import com.sjn.gymexe.ui.components.RestTimerOverlay
+import com.sjn.gymexe.ui.screens.workout.components.SmartInputRow
 
 @Composable
 fun WorkoutScreen(
@@ -44,12 +42,24 @@ fun WorkoutScreen(
     val currentSets by viewModel.currentSets.collectAsState()
     val timerState by viewModel.restTimerState.collectAsState()
 
+    val availablePlates by viewModel.availablePlates.collectAsState()
+    val availableDumbbells by viewModel.availableDumbbells.collectAsState()
+
+    val exerciseStats by viewModel.exerciseStats.collectAsState()
+
     var showFinishDialog by remember { mutableStateOf(false) }
 
     var weightInput by remember { mutableStateOf("") }
     var repsInput by remember { mutableStateOf("") }
+
     // Defaulting to bench press for demo purposes
-    val selectedExerciseId by remember { mutableStateOf("chest_bench_press_barbell") }
+    val selectedExerciseId by remember { mutableStateOf("bench_press_barbell") }
+    // In a real implementation, this would come from the selected exercise entity
+    val selectedEquipmentCategory by remember { mutableStateOf("BARBELL") }
+    val machineIncrement: Float? = null
+    val machineMax: Float? = null
+
+    val parser = remember { MathInputParser() }
 
     if (showFinishDialog) {
         FinishWorkoutDialog(
@@ -72,20 +82,49 @@ fun WorkoutScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LogSetCard(
-                    weightInput = weightInput,
-                    onWeightChange = { weightInput = it },
-                    repsInput = repsInput,
-                    onRepsChange = { repsInput = it },
-                    onLogClick = {
-                        val w = weightInput.toFloatOrNull() ?: 0f
-                        val r = repsInput.toIntOrNull() ?: 0
-                        if (r > 0) {
-                            viewModel.logSet(selectedExerciseId, w, r, null)
-                            repsInput = "" // Clear reps for convenience
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Log Set: Bench Press", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        SmartInputRow(
+                            weightInput = weightInput,
+                            onWeightInputChange = { weightInput = it },
+                            repsInput = repsInput,
+                            onRepsInputChange = { repsInput = it },
+                            onLogSet = {
+                                val w = parser.parse(weightInput).toFloat()
+                                val r = repsInput.toIntOrNull() ?: 0
+                                if (r > 0) {
+                                    viewModel.logSet(selectedExerciseId, w, r, null, weightInput)
+                                    repsInput = ""
+                                    // Keep weight for next set convenience
+                                }
+                            },
+                            parser = parser,
+                            availablePlates = availablePlates,
+                            availableDumbbells = availableDumbbells,
+                            equipmentCategory = selectedEquipmentCategory,
+                            machineIncrement = machineIncrement,
+                            machineMax = machineMax,
+                            exerciseStats = exerciseStats
+                        )
+
+                        Button(
+                            onClick = {
+                                val w = parser.parse(weightInput).toFloat()
+                                val r = repsInput.toIntOrNull() ?: 0
+                                if (r > 0) {
+                                    viewModel.logSet(selectedExerciseId, w, r, null, weightInput)
+                                    repsInput = ""
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        ) {
+                            Text("Log Set")
                         }
-                    },
-                )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -136,45 +175,6 @@ private fun WorkoutHeader(
         }
         Button(onClick = onFinishClick) {
             Text("Finish")
-        }
-    }
-}
-
-@Composable
-private fun LogSetCard(
-    weightInput: String,
-    onWeightChange: (String) -> Unit,
-    repsInput: String,
-    onRepsChange: (String) -> Unit,
-    onLogClick: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Log Set: Bench Press", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                OutlinedTextField(
-                    value = weightInput,
-                    onValueChange = onWeightChange,
-                    label = { Text("Weight (kg)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                OutlinedTextField(
-                    value = repsInput,
-                    onValueChange = onRepsChange,
-                    label = { Text("Reps") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            Button(
-                onClick = onLogClick,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            ) {
-                Text("Log Set")
-            }
         }
     }
 }

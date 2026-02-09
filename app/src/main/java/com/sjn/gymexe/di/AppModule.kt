@@ -5,15 +5,18 @@ import androidx.room.Room
 import com.sjn.gymexe.data.local.GymDatabase
 import com.sjn.gymexe.data.local.dao.ExerciseDao
 import com.sjn.gymexe.data.local.dao.ProgramDao
+import com.sjn.gymexe.data.local.dao.SetDao
 import com.sjn.gymexe.data.manager.BackupManagerImpl
 import com.sjn.gymexe.data.manager.TimerManagerImpl
 import com.sjn.gymexe.data.manager.UpdateManagerImpl
 import com.sjn.gymexe.data.repository.ExerciseRepositoryImpl
+import com.sjn.gymexe.data.repository.HistoryRepositoryImpl
 import com.sjn.gymexe.data.repository.ProgramRepositoryImpl
 import com.sjn.gymexe.domain.manager.BackupManager
 import com.sjn.gymexe.domain.manager.TimerManager
 import com.sjn.gymexe.domain.manager.UpdateManager
 import com.sjn.gymexe.domain.repository.ExerciseRepository
+import com.sjn.gymexe.domain.repository.HistoryRepository
 import com.sjn.gymexe.domain.repository.ProgramRepository
 import dagger.Module
 import dagger.Provides
@@ -45,7 +48,9 @@ object AppModule {
                 context,
                 GymDatabase::class.java,
                 "gym_exe.db",
-            ).build()
+            )
+            .addMigrations(GymDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     @Singleton
@@ -61,11 +66,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSetDao(db: GymDatabase): com.sjn.gymexe.data.local.dao.SetDao = db.setDao()
+    fun provideSetDao(db: GymDatabase): SetDao = db.setDao()
 
     @Provides
     @Singleton
-    fun provideExerciseRepository(): ExerciseRepository = ExerciseRepositoryImpl()
+    fun provideExerciseRepository(
+        @ApplicationContext context: Context,
+        exerciseDao: ExerciseDao,
+    ): ExerciseRepository = ExerciseRepositoryImpl(context, exerciseDao)
 
     @Provides
     @Singleton
@@ -89,4 +97,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideTimerManager(): TimerManager = TimerManagerImpl()
+
+    @Provides
+    @Singleton
+    fun provideHistoryRepository(setDao: SetDao): HistoryRepository = HistoryRepositoryImpl(setDao)
 }

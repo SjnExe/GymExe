@@ -34,4 +34,22 @@ interface SetDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     @JvmSuppressWildcards
     suspend fun insertSets(sets: List<SetEntity>): List<Long>
+
+    // Smart Prefill Queries
+
+    @Query("""
+        SELECT * FROM sets
+        WHERE exerciseId = :exerciseId
+        ORDER BY timestamp DESC
+        LIMIT 1
+    """)
+    @JvmSuppressWildcards
+    suspend fun getLastSetForExercise(exerciseId: String): SetEntity?
+
+    @Query("""
+        SELECT MAX(weight) FROM sets
+        WHERE exerciseId = :exerciseId
+    """)
+    @JvmSuppressWildcards
+    suspend fun getPersonalRecordForExercise(exerciseId: String): Float?
 }
