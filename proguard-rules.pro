@@ -4,19 +4,21 @@
 # You can edit the include path and order by changing the proguardFiles
 # directive in build.gradle.
 
-# Keep Room Entities (accessed via Reflection/Generated Code)
--keep class com.sjn.gymexe.data.local.entity.** { *; }
+# --- CRITICAL FIX FOR CRASH ---
+# Keep all app code to prevent R8 from stripping generated classes (like GymDatabase_Impl)
+# accessed via reflection.
+-keep class com.sjn.gymexe.** { *; }
 
-# Keep Data Models (used in Serialization/Backup)
--keep class com.sjn.gymexe.data.model.** { *; }
+# Keep Room generated classes specifically (just in case)
+-keep class * extends androidx.room.RoomDatabase
 
-# Kotlinx Serialization
+# Keep Kotlinx Serialization
 -keepattributes *Annotation*, InnerClasses
 -dontwarn kotlinx.serialization.**
 -keep class kotlinx.serialization.** { *; }
 -keep interface kotlinx.serialization.** { *; }
 -keep class * implements kotlinx.serialization.KSerializer { *; }
 
-# Hilt/Dagger (Usually handled by plugin, but safety first)
+# Hilt/Dagger
 -keep class com.sjn.gymexe.GymExeApp { *; }
 -keep class com.sjn.gymexe.di.** { *; }
