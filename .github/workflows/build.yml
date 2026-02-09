@@ -104,20 +104,23 @@ jobs:
           # Rename X86_64
           find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-x86_64.apk \;
 
+      - name: Delete Old Release
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          delete_release: true
+          tag_name: beta
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for API Propagation
+        run: sleep 5
+
       - name: Update Beta Tag
         run: |
           git config --global user.name 'GymExe Bot'
           git config --global user.email 'bot@gymexe.com'
           git tag -f beta
           git push -f origin beta
-
-      - name: Delete Old Release
-        uses: dev-drprasad/delete-tag-and-release@v1.0
-        with:
-          delete_release: true
-          tag_name: beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release Rolling Beta
         uses: softprops/action-gh-release@v1
