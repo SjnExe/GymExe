@@ -47,6 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Needed for creating Releases and updating tags
+      workflows: write # Needed because the tag update might point to a commit changing workflows
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,8 +117,7 @@ jobs:
         with:
           delete_release: true
           tag_name: beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Wait for API Propagation
         run: sleep 5
