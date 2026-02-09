@@ -49,7 +49,7 @@ object AppModule {
                 GymDatabase::class.java,
                 "gym_exe.db",
             )
-            .fallbackToDestructiveMigration()
+            .addMigrations(GymDatabase.MIGRATION_1_2)
             .build()
 
     @Provides
