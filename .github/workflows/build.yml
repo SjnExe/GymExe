@@ -139,7 +139,10 @@ jobs:
             Version: ${{ env.VERSION_NAME }}
             Commit: ${{ github.sha }}
           files: |
-            artifacts/GymExe-Beta-Optimized.apk
+            artifacts/GymExe-Beta-Optimized-Universal.apk
+            artifacts/GymExe-Beta-Optimized-ARM64.apk
+            artifacts/GymExe-Beta-Optimized-ARMv7.apk
+            artifacts/GymExe-Beta-Optimized-x86_64.apk
             artifacts/GymExe-Beta-Debuggable.apk
             artifacts/build_summary.log
           prerelease: true

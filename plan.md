@@ -2,11 +2,18 @@
 
 ## 🚨 Handover Status (Current State)
 *   **CI Status:** **Passing.**
-*   **Implemented:**
-    *   **Core Logic:** `MathInputParser` (Custom Parser), `ExerciseRepository` (JSON sync).
-    *   **Database:** `GymDatabase` v2 (Schema updated for Equipment/Duration). *Note: Migration reverted for pre-release simplicity.*
-    *   **UI:** `ActiveSessionScreen`, `SmartInputRow` (Dynamic Equipment Chips).
-    *   **Preferences:** Custom Equipment Lists (Plates/Dumbbells).
+*   **Release Strategy (Dual Beta):**
+    *   **Optimized:** Minified (`isMinifyEnabled = true`), Splits Enabled. Uploaded as `GymExe-Beta-Optimized-*.apk`.
+    *   **Debuggable:** Unminified, Universal. Uploaded as `GymExe-Beta-Debuggable.apk`.
+    *   *Note:* Both signed with Release Keystore.
+*   **Known Issues:**
+    *   **R8/ProGuard Crash:** The Optimized build was crashing with `NoSuchMethodException: GymDatabase_Impl.<init>`.
+    *   **Fix Attempted:** Added specific `-keep` rules for Room implementation constructors. If this fails again, the fallback is to use the `Debuggable` APK or disable R8 for Beta.
+*   **Implemented Features:**
+    *   **Smart Input:** Math parser (e.g., "20 2x10"), Equipment-specific chips (Plates/Dumbbells).
+    *   **History:** Chart visualization of session duration.
+    *   **Settings:** Equipment editor (Plates/Dumbbells).
+    *   **Database:** Version 2 (Schema updated). Migration 1->2 restored.
 
 ---
 
@@ -108,7 +115,7 @@
 - [x] **Dev:** Add Timber, LeakCanary, Dependency Analysis.
 - [x] **Fix:** KSP2 Build Failure & Missing Icons.
 
-### Phase 2: The Workout Engine (In Progress)
+### Phase 2: The Workout Engine (Completed)
 - [x] **UI:** Fix Edge-to-Edge overlaps (Status/Nav bars).
 - [x] **Feature:** Implement Update Check Feedback (Toast/Dialog).
 - [x] **UI:** Implement Adaptive Layouts (Floating/Split Screen logic).
@@ -117,7 +124,15 @@
 - [x] **Active Workout UI:** Implement Input rows with Math Parser.
 - [x] **Smart Input:** Dynamic Equipment Chips (Plates/Dumbbells).
 
-### Phase 3: Intelligence & Polish
-- [ ] **Smart Prefill:** Implement "Most Used" algorithms & Heatmap UI.
-- [ ] **History:** Implement Charts & Calendars (handling sparse data).
-- [ ] **Release:** Beta Tagging & Feedback loop.
+### Phase 3: Intelligence & Polish (In Progress)
+- [x] **Smart Prefill:** Implement "Most Used" algorithms (Basic "Last Used" implemented).
+- [x] **History:** Implement Charts (Basic Session Duration implemented).
+- [ ] **Release:** Beta Tagging & Feedback loop (Refined CI/CD for Dual Artifacts).
+
+---
+
+## 5. Next Agent Instructions
+If the user reports that the **Optimized** APK still crashes:
+1.  **Check Log:** Confirm if it's `NoSuchMethodException: GymDatabase_Impl.<init>`.
+2.  **Action:** The ProGuard rule `-keep class * extends androidx.room.RoomDatabase { <init>(); }` was added. If it fails, R8 might require an even more specific rule for KSP-generated classes, or you might need to use `-keep class com.sjn.gymexe.data.local.GymDatabase_Impl { *; }` explicitly (if the wildcard didn't catch it).
+3.  **Fallback:** The `Debuggable` APK should work. You can instruct the user to use that while you debug R8.

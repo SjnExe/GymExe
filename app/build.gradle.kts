@@ -85,8 +85,6 @@ android {
         buildConfig = true
     }
 
-    // Splits disabled for Beta simplicity (Universal APK only)
-    /*
     splits {
         abi {
             isEnable = true
@@ -95,7 +93,6 @@ android {
             isUniversalApk = true
         }
     }
-    */
 
     lint {
         // Suppress ObsoleteLintCustomCheck because an external library's lint check is crashing
