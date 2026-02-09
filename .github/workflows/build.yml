@@ -102,15 +102,12 @@ jobs:
           cp build_summary.log artifacts/
 
           # --- Optimized (Minified) ---
-          # Note: If minification is off, these will just be Release builds.
+          # Universal Release APK
           find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-Universal.apk \;
-          find app/build/outputs/apk/dev/release -name "app-dev-arm64-v8a-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-ARM64.apk \;
-          find app/build/outputs/apk/dev/release -name "app-dev-armeabi-v7a-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-ARMv7.apk \;
-          find app/build/outputs/apk/dev/release -name "app-dev-x86_64-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-x86_64.apk \;
 
           # --- Debuggable (Non-Minified) ---
-          # Debug builds often default to Universal if splits aren't applied to Debug buildType
-          find app/build/outputs/apk/dev/debug -name "*.apk" -exec cp {} artifacts/GymExe-Beta-Debuggable.apk \;
+          # Universal Debug APK
+          find app/build/outputs/apk/dev/debug -name "app-dev-universal-debug.apk" -exec cp {} artifacts/GymExe-Beta-Debuggable.apk \;
 
       - name: Delete Old Release
         uses: dev-drprasad/delete-tag-and-release@v1.1
@@ -140,9 +137,6 @@ jobs:
             Commit: ${{ github.sha }}
           files: |
             artifacts/GymExe-Beta-Optimized-Universal.apk
-            artifacts/GymExe-Beta-Optimized-ARM64.apk
-            artifacts/GymExe-Beta-Optimized-ARMv7.apk
-            artifacts/GymExe-Beta-Optimized-x86_64.apk
             artifacts/GymExe-Beta-Debuggable.apk
             artifacts/build_summary.log
           prerelease: true
@@ -183,5 +177,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: app/build/outputs/apk/prod/release/app-prod-release.apk
+          files: |
+            app/build/outputs/apk/prod/release/app-prod-universal-release.apk
+            app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk
+            app/build/outputs/apk/prod/release/app-prod-armeabi-v7a-release.apk
+            app/build/outputs/apk/prod/release/app-prod-x86_64-release.apk
           generate_release_notes: true
