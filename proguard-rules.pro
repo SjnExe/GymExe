@@ -9,8 +9,16 @@
 # accessed via reflection.
 -keep class com.sjn.gymexe.** { *; }
 
-# Keep Room generated classes specifically (just in case)
--keep class * extends androidx.room.RoomDatabase
+# Keep Room generated classes specifically, INCLUDING CONSTRUCTORS
+# This fixes "NoSuchMethodException: GymDatabase_Impl.<init>"
+-keep class * extends androidx.room.RoomDatabase {
+    <init>();
+}
+
+# Defensive rule for the specific implementation class if package varies
+-keep class **.GymDatabase_Impl {
+    <init>();
+}
 
 # Keep Kotlinx Serialization
 -keepattributes *Annotation*, InnerClasses

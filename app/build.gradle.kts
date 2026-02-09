@@ -54,7 +54,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false // Disabled to prevent R8 crashes in Beta
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
