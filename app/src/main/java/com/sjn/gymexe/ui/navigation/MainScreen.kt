@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -48,7 +49,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.sjn.gymexe.ui.screens.history.HistoryScreen
 import com.sjn.gymexe.ui.screens.profile.ProfileScreen
+import com.sjn.gymexe.ui.screens.settings.EquipmentSettingsScreen
+import com.sjn.gymexe.ui.screens.workout.WorkoutScreen
 import com.sjn.gymexe.ui.settings.SettingsScreen
 
 private const val MIN_WIDTH_TABLET_DP = 480
@@ -67,6 +71,8 @@ sealed class Screen(
     data object Profile : Screen("profile", "You", Icons.Default.Person)
 
     data object Settings : Screen("settings", "Settings", Icons.Default.Settings)
+
+    data object EquipmentSettings : Screen("equipment_settings", "Equipment", Icons.Default.Settings)
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -83,8 +89,8 @@ fun MainScreen() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val showNav = currentDestination?.route != Screen.Settings.route
-    val showTopBar = currentDestination?.route != Screen.Settings.route
+    val showNav = currentDestination?.route !in listOf(Screen.Settings.route, Screen.EquipmentSettings.route)
+    val showTopBar = currentDestination?.route !in listOf(Screen.Settings.route, Screen.EquipmentSettings.route)
 
     val context = LocalContext.current
     val activity = context.findActivity()
@@ -144,7 +150,7 @@ private fun MainScreenWithRail(
 
         Scaffold(
             contentWindowInsets = WindowInsets.safeDrawing,
-            topBar = { if (showTopBar) GymExeTopBar() }
+            topBar = { if (showTopBar) GymExeTopBar(navController) }
         ) { innerPadding ->
             GymExeNavHost(
                 navController = navController,
@@ -166,7 +172,7 @@ private fun MainScreenWithBottomBar(
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
-        topBar = { if (showTopBar) GymExeTopBar() },
+        topBar = { if (showTopBar) GymExeTopBar(navController) },
         bottomBar = {
             if (showNav) {
                 NavigationBar {
@@ -192,17 +198,22 @@ private fun MainScreenWithBottomBar(
 }
 
 @Composable
-fun GymExeTopBar() {
+fun GymExeTopBar(navController: NavHostController) {
     Row(
         modifier =
         Modifier
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("GymExe", style = MaterialTheme.typography.titleLarge)
+
+        // Settings Button
+        IconButton(onClick = { navController.navigate(Screen.EquipmentSettings.route) }) {
+            Icon(Icons.Default.Settings, contentDescription = "Settings")
+        }
     }
 }
 
@@ -217,18 +228,20 @@ fun GymExeNavHost(
         modifier = modifier
     ) {
         composable(Screen.Dashboard.route) {
-            PlaceholderScreen("Dashboard")
+            // Dashboard can be history summary for now
+            HistoryScreen()
         }
         composable(Screen.Workout.route) {
-            PlaceholderScreen("Workout")
+            WorkoutScreen(navController)
         }
         composable(Screen.Exercises.route) {
-            PlaceholderScreen("Exercises")
+            PlaceholderScreen("Exercises Library")
         }
         composable(Screen.Profile.route) {
             ProfileScreen(navController)
         }
         composable(Screen.Settings.route) { SettingsScreen() }
+        composable(Screen.EquipmentSettings.route) { EquipmentSettingsScreen() }
     }
 }
 
