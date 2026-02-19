@@ -1,0 +1,84 @@
+Starting a Gradle Daemon, 1 busy and 3 stopped Daemons could not be reused, use --status for details
+
+The Kotlin Gradle plugin was loaded multiple times in different subprojects, which is not supported and may break the build.
+This might happen in subprojects that apply the Kotlin plugins with the Gradle 'plugins { ... }' DSL if they specify explicit versions, even if the versions are equal.
+Please add the Kotlin plugin to the common parent project or the root project, then remove the versions in the subprojects.
+If the parent project does not need the plugin, add 'apply false' to the plugin line.
+See: https://docs.gradle.org/current/userguide/plugins.html#sec:subprojects_plugins_dsl
+The Kotlin plugin was loaded in the following projects: ':app', ':core:model', ':core:ui', ':feature:onboarding'
+> Task :core:data:preBuild UP-TO-DATE
+> Task :core:data:preDebugBuild UP-TO-DATE
+> Task :core:data:generateDebugResources UP-TO-DATE
+> Task :core:data:packageDebugResources UP-TO-DATE
+> Task :core:data:processDebugNavigationResources UP-TO-DATE
+> Task :core:data:parseDebugLocalResources UP-TO-DATE
+> Task :core:data:generateDebugRFile UP-TO-DATE
+> Task :core:model:preBuild UP-TO-DATE
+> Task :core:model:preDebugBuild UP-TO-DATE
+> Task :core:model:generateDebugResources UP-TO-DATE
+> Task :core:model:packageDebugResources UP-TO-DATE
+> Task :core:model:processDebugNavigationResources UP-TO-DATE
+> Task :core:model:parseDebugLocalResources UP-TO-DATE
+> Task :core:model:generateDebugRFile UP-TO-DATE
+> Task :core:model:compileDebugKotlin UP-TO-DATE
+> Task :core:model:javaPreCompileDebug UP-TO-DATE
+> Task :core:model:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:model:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:data:kspDebugKotlin UP-TO-DATE
+> Task :core:data:compileDebugKotlin UP-TO-DATE
+> Task :core:data:javaPreCompileDebug UP-TO-DATE
+> Task :core:data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:model:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:data:transformDebugClassesWithAsm UP-TO-DATE
+> Task :core:data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:data:processDebugJavaRes UP-TO-DATE
+> Task :core:model:processDebugJavaRes UP-TO-DATE
+> Task :core:ui:preBuild UP-TO-DATE
+> Task :core:ui:preDebugBuild UP-TO-DATE
+> Task :core:ui:generateDebugResources UP-TO-DATE
+> Task :core:ui:packageDebugResources UP-TO-DATE
+> Task :core:ui:processDebugNavigationResources UP-TO-DATE
+> Task :core:ui:parseDebugLocalResources UP-TO-DATE
+> Task :core:ui:generateDebugRFile UP-TO-DATE
+> Task :core:ui:compileDebugKotlin UP-TO-DATE
+> Task :core:ui:javaPreCompileDebug UP-TO-DATE
+> Task :core:ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:ui:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:ui:processDebugJavaRes UP-TO-DATE
+> Task :feature:workout:preBuild UP-TO-DATE
+> Task :feature:workout:preDebugBuild UP-TO-DATE
+> Task :core:data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:ui:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:workout:generateDebugResources UP-TO-DATE
+> Task :feature:workout:packageDebugResources UP-TO-DATE
+> Task :feature:workout:processDebugNavigationResources UP-TO-DATE
+> Task :feature:workout:parseDebugLocalResources UP-TO-DATE
+> Task :feature:workout:generateDebugRFile UP-TO-DATE
+> Task :feature:workout:javaPreCompileDebug UP-TO-DATE
+> Task :feature:workout:preDebugUnitTestBuild UP-TO-DATE
+> Task :feature:workout:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :feature:workout:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :feature:workout:kspDebugKotlin
+
+> Task :feature:workout:compileDebugKotlin
+w: file:///app/feature/workout/src/main/java/com/sjn/gym/feature/workout/ExerciseListScreen.kt:13:40 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
+w: file:///app/feature/workout/src/main/java/com/sjn/gym/feature/workout/WorkoutScreen.kt:15:35 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
+
+> Task :feature:workout:compileDebugJavaWithJavac
+> Task :feature:workout:processDebugJavaRes
+> Task :feature:workout:transformDebugClassesWithAsm
+> Task :feature:workout:bundleLibRuntimeToJarDebug
+> Task :feature:workout:bundleLibCompileToJarDebug
+> Task :feature:workout:kspDebugUnitTestKotlin
+> Task :feature:workout:compileDebugUnitTestKotlin
+> Task :feature:workout:processDebugUnitTestJavaRes
+> Task :feature:workout:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :feature:workout:hiltSyncDebugUnitTest
+> Task :feature:workout:hiltAggregateDepsDebugUnitTest
+> Task :feature:workout:hiltJavaCompileDebugUnitTest NO-SOURCE
+> Task :feature:workout:transformDebugUnitTestClassesWithAsm
+> Task :feature:workout:testDebugUnitTest
+
+BUILD SUCCESSFUL in 1m 15s
+55 actionable tasks: 14 executed, 41 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
