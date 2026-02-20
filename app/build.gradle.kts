@@ -52,20 +52,14 @@ android {
 
     signingConfigs {
         create("release") {
-            val keyStoreFile = rootProject.file("GymExe/signature/release.jks")
-            if (keyStoreFile.exists()) {
-                storeFile = keyStoreFile
-                storePassword = rootProject.file("GymExe/signature/KEYSTORE_PASSWORD.txt").readText().trim()
-                keyAlias = rootProject.file("GymExe/signature/KEY_ALIAS.txt").readText().trim()
-                keyPassword = rootProject.file("GymExe/signature/KEY_PASSWORD.txt").readText().trim()
-            }
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
         }
     }
 
-    // Apply signing config only if keystore exists
-    if (rootProject.file("GymExe/signature/release.jks").exists()) {
-        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
-    }
+    buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
