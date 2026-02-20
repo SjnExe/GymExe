@@ -38,6 +38,18 @@ android {
         }
     }
 
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        create("stable") {
+            dimension = "env"
+        }
+    }
+
     signingConfigs {
         create("release") {
             val keyStoreFile = rootProject.file("GymExe/signature/release.jks")

@@ -64,16 +64,16 @@ jobs:
         run: |
           mkdir -p GymExe/signature
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > GymExe/signature/release.jks
-          echo "${{ secrets.KEYSTORE_PASSWORD }}" > GymExe/signature/store_password.txt
-          echo "${{ secrets.KEY_PASSWORD }}" > GymExe/signature/key_password.txt
-          echo "${{ secrets.KEY_ALIAS }}" > GymExe/signature/key_alias.txt
+          echo "${{ secrets.KEYSTORE_PASSWORD }}" > GymExe/signature/KEYSTORE_PASSWORD.txt
+          echo "${{ secrets.KEY_PASSWORD }}" > GymExe/signature/KEY_PASSWORD.txt
+          echo "${{ secrets.KEY_ALIAS }}" > GymExe/signature/KEY_ALIAS.txt
 
       - name: Build with Gradle
         run: |
           ./gradlew assembleRelease assembleDebug lint test \
             -PversionName=${{ env.VERSION_NAME }} \
             -PversionCode=${{ env.VERSION_CODE }} \
-            > build_output.log 2>&1 || true
+            > build_output.log 2>&1 || { cat build_output.log; exit 1; }
 
           cp build_output.log build_${{ env.BUILD_TYPE }}.log
 
@@ -94,8 +94,8 @@ jobs:
         with:
           name: gym-exe-dev
           path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/dev/release/*.apk
+            app/build/outputs/apk/dev/debug/*.apk
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
@@ -103,14 +103,14 @@ jobs:
         with:
           name: gym-exe-stable
           path: |
-            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/stable/release/*.apk
 
       - name: Create Release (Stable)
         if: env.BUILD_TYPE == 'stable'
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/stable/release/*.apk
           name: Release ${{ env.VERSION_NAME }}
           body: "Stable release ${{ env.VERSION_NAME }}"
           draft: false
@@ -131,7 +131,7 @@ jobs:
           name: Development Build
           body: "Latest dev build: ${{ env.VERSION_NAME }}"
           files: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/dev/release/*.apk
+            app/build/outputs/apk/dev/debug/*.apk
           prerelease: true
           make_latest: false
