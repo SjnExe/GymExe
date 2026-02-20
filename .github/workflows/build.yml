@@ -67,10 +67,17 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew assembleRelease assembleDebug lint test \
-            -PversionName=${{ env.VERSION_NAME }} \
-            -PversionCode=${{ env.VERSION_CODE }} \
-            > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
+            ./gradlew assembleStableRelease lintStableRelease testStableDebugUnitTest \
+              -PversionName=${{ env.VERSION_NAME }} \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+          else
+            ./gradlew assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest \
+              -PversionName=${{ env.VERSION_NAME }} \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+          fi
 
           cp build_output.log build_${{ env.BUILD_TYPE }}.log
 
@@ -132,6 +139,6 @@ jobs:
             "$APK_RELEASE" \
             "$APK_DEBUG" \
             --title "Development Build $VERSION_NAME" \
-            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' '$VERSION_NAME')" \
+            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
             --target ${{ github.sha }}

@@ -14,8 +14,12 @@ android {
         applicationId = "com.sjn.gym"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.0.1"
+
+        val codeProp = project.findProperty("versionCode") as? String
+        val nameProp = project.findProperty("versionName") as? String
+
+        versionCode = codeProp?.toIntOrNull() ?: 1
+        versionName = nameProp ?: "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,7 +47,9 @@ android {
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
+            if (!project.hasProperty("versionName")) {
+                versionNameSuffix = "-dev"
+            }
         }
         create("stable") {
             dimension = "env"
