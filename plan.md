@@ -36,12 +36,15 @@ The app follows a modular architecture:
 *   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity (Secrets removed).
 *   **Versioning**:
     *   **Stable**: Tag `v*` -> Version `1.2.3`.
-    *   **Dev**: `v0.0.1-dev-PR{num}.{commits}` or `v0.0.1-dev-run{num}`.
-    *   Version Code: `Total Commits - 1`.
+    *   **Dev**: `v{LatestTag}-dev-PR{Num}.{Commits}` or `v{LatestTag}-dev-run{Num}`.
+    *   **Fallback**: Defaults to `v0.0.0` if no tags exist.
+    *   **Version Code**: `Total Commits - 1`.
 *   **Releases**:
     *   **Dev**: Deletes floating `dev` tag/release and recreates it with new APKs (individual assets, no zip).
     *   **Stable**: Creates standard release.
+    *   **Release Notes**: Uses specific format for parsing: `Development build triggered by {method}.\nVersion: {version_string}`.
 *   **Flavors**: Builds `dev` (debuggable, suffixed) and `stable` (minified) variants.
+*   **Artifacts**: Uploads `gym-exe-dev-{version}` (uncompressed zip artifact).
 
 ## 5. Build Logic (Implemented Infrastructure)
 **Directory:** `build-logic/`
@@ -58,7 +61,7 @@ The app follows a modular architecture:
 ### Phase 1: Repository & Environment Setup (Completed)
 - [x] **Initialize Repository**: `README.md`, `LICENSE`, `.gitignore` created.
 - [x] **AGENTS.md**: Comprehensive agent instructions added.
-- [x] **Gradle Setup**: `gradle.properties` (JVM args), `libs.versions.toml` configured.
+- [x] **Gradle Setup**: `gradle.properties` (JVM args, optimizations), `libs.versions.toml` configured.
 - [x] **Signing**: `debug.keystore` generated and tracked. `build.gradle.kts` uses it.
 - [x] **CI/CD Pipeline**: `build.yml` robust, correct versioning, artifact upload fixed.
 
@@ -72,15 +75,19 @@ The app follows a modular architecture:
 - [x] **Welcome Screen**: Basic UI implemented.
 - [x] **DataStore**: `UserPreferencesRepository` stores onboarding status.
 - [ ] **Profile Setup**: Input fields for gender/height/weight (UI needed).
-- [ ] **Experience Level**: Selection UI needed.
-- [ ] **Equipment Setup**: Selection UI needed.
+- [ ] **Experience Level**: Selection UI needed (Free style, Fixed Day/Week, Splits).
+- [ ] **Equipment Setup**: Selection UI needed (None, Full Gym, Specific Machines/Weights).
 
 ### Phase 4: Settings Feature (Partially Implemented)
 - [x] **Theme Settings**: Functional UI for switching themes.
-- [ ] **Unit Configuration**: Logic pending.
-- [ ] **Backup & Restore**: UI placeholders added. Logic needed.
-- [ ] **Developer Options**: UI placeholders added.
-- [ ] **Updater**: Logic to check `dev` release notes using the specific version format is pending.
+- [ ] **Updater**: Logic to check `dev` release notes using the format `Version: ...` is pending.
+- [ ] **Backup & Restore**:
+    *   **Format**: `.gym` file (compressed ZIP containing DB + Prefs).
+    *   **Location**: `Documents/GymExe`.
+    *   **Restore**: Two modes (Auto-detect / Manual Select).
+- [ ] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
+- [ ] **Developer Options**: Copy Logs / Save Logs.
+- [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
 ### Phase 5: Data Layer (Room) (Implemented)
 - [x] **Entities**: `ExerciseEntity` created.
@@ -91,15 +98,35 @@ The app follows a modular architecture:
 ### Phase 6: Workout & Intelligent Input (Partially Implemented)
 - [x] **Intelligent Text Box**: `PlateCalculator` logic implemented and unit-tested.
 - [x] **UI Integration**: `WorkoutScreen` connects input to calculator.
+- [ ] **Syntax Highlighting**: Text box needs colored syntax for Quantity, Operator, and Weight.
 - [x] **Exercise List**: `ExerciseListScreen` displays data from DB.
-- [ ] **Workout Session**: Timers, Sets, Notifications not yet implemented.
+- [ ] **Workout Session**:
+    *   **Sets**: Types (Warmup, Failure, Drop set, etc.).
+    *   **Timers**: Quick timer, Rest timer.
+    *   **Notifications**: Ongoing workout notification.
 
 ### Phase 7: Profile & Stats (Placeholder)
 - [x] **Basic Screen**: Placeholder UI.
 - [ ] **Graphs**: Charts and stats logic needed.
 
-## 7. Next Steps for Next Session
-1.  **Migrate to Convention Plugins**: Refactor module build files to use `gymexe.*` plugins.
-2.  **Updater Logic**: Implement the in-app updater in `feature:settings`.
-3.  **Backup Implementation**: Implement the backup/restore logic (zipping DB + prefs to `.gym` file).
-4.  **Workout Session**: Build the active workout logger (timers, set tracking).
+## 7. Detailed Instructions for Next Session
+
+1.  **Migrate to Convention Plugins**:
+    *   Refactor `app/build.gradle.kts`: Use `id("gymexe.android.application")`, `id("gymexe.android.compose")`, `id("gymexe.android.hilt")`.
+    *   Refactor `core/ui`: `gymexe.android.library`, `gymexe.android.compose`.
+    *   Refactor `core/data`: `gymexe.android.library`, `gymexe.android.hilt`.
+    *   Refactor `feature/*`: `gymexe.android.library`, `gymexe.android.compose`, `gymexe.android.hilt`.
+
+2.  **Updater Logic**:
+    *   Fetch `https://api.github.com/repos/SjnExe/GymExe/releases/tags/dev`.
+    *   Parse `body` to find line starting with `Version: `.
+    *   Compare with `BuildConfig.VERSION_NAME`.
+    *   Show Update UI if newer.
+
+3.  **Backup Implementation**:
+    *   Create `BackupManager`.
+    *   Zip `getDatabasePath("gym_database.db")` and shared prefs XML.
+    *   Handle `Documents/GymExe` permissions (SAF or standard storage depending on Android version).
+
+4.  **Workout UI Polish**:
+    *   Implement `AnnotatedString` building for Syntax Highlighting in `WorkoutScreen` text field.
