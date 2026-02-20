@@ -1,0 +1,184 @@
+name: Build & Release
+
+on:
+  pull_request:
+    branches: [ "dev" ] # Rolling Beta Build on PR commits
+  push:
+    tags: [ "v*" ]      # Stable Release on tags
+  workflow_dispatch:    # Manual Rolling Beta Trigger
+
+jobs:
+  quality_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run KtLint Check
+        id: lint_check
+        continue-on-error: true
+        run: ./gradlew ktlintCheck
+
+      - name: Upload Lint Report (On Failure)
+        if: steps.lint_check.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results*
+
+      - name: Run Unit Tests
+        run: ./gradlew testDevDebugUnitTest
+
+  build_beta:
+    # Runs on Manual OR PR (Rolling Beta Logic)
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    needs: quality_check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed for creating Releases and updating tags
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for calculating commit count
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Calculate Version Name
+        id: version
+        run: |
+          # Get the latest v* tag
+          LATEST_TAG=$(git describe --tags --match "v*" --abbrev=0 2>/dev/null || echo "v0.0.0")
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # PR Build: v{Tag}-beta-PR{Number}.{CommitCount}
+            PR_NUM="${{ github.event.number }}"
+            # Calculate commits in PR (PR Head vs Base Branch)
+            git fetch origin "${{ github.base_ref }}"
+            COMMIT_COUNT=$(git rev-list --count "${{ github.event.pull_request.head.sha }}" "^origin/${{ github.base_ref }}")
+            VERSION_NAME="${LATEST_TAG}-beta-PR${PR_NUM}.${COMMIT_COUNT}"
+          else
+            # Manual Build: v{Tag}-beta-{RunId}
+            VERSION_NAME="${LATEST_TAG}-beta-${{ github.run_number }}"
+          fi
+
+          echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
+          echo "Calculated Version: ${VERSION_NAME}"
+
+      - name: Build Beta (Splits) & Capture Log
+        run: |
+          # Build Optimized (Release)
+          ./gradlew assembleDevRelease > build.log 2>&1 || (tail -n 200 build.log; exit 1)
+
+          # Build Debuggable (Debug)
+          ./gradlew assembleDevDebug >> build.log 2>&1 || (tail -n 200 build.log; exit 1)
+
+          tail -n 200 build.log > build_summary.log
+        env:
+          VERSION_NAME: ${{ env.VERSION_NAME }}
+
+      - name: Rename and Prepare Artifacts
+        run: |
+          mkdir -p artifacts
+          cp build_summary.log artifacts/
+
+          # --- Optimized (Minified) ---
+          # Universal Release APK
+          find app/build/outputs/apk/dev/release -name "app-dev-universal-release.apk" -exec cp {} artifacts/GymExe-Beta-Optimized-Universal.apk \;
+
+          # --- Debuggable (Non-Minified) ---
+          # Universal Debug APK
+          find app/build/outputs/apk/dev/debug -name "app-dev-universal-debug.apk" -exec cp {} artifacts/GymExe-Beta-Debuggable.apk \;
+
+      - name: Delete Old Release
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          delete_release: true
+          tag_name: beta
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for API Propagation
+        run: sleep 5
+
+      - name: Update Beta Tag
+        run: |
+          git config --global user.name 'GymExe Bot'
+          git config --global user.email 'bot@gymexe.com'
+          git tag -f beta
+          git push -f origin beta
+
+      - name: Release Rolling Beta
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: beta
+          name: GymExe Beta (Rolling)
+          body: |
+            Rolling beta release.
+            Version: ${{ env.VERSION_NAME }}
+            Commit: ${{ github.sha }}
+          files: |
+            artifacts/GymExe-Beta-Optimized-Universal.apk
+            artifacts/GymExe-Beta-Debuggable.apk
+            artifacts/build_summary.log
+          prerelease: true
+          draft: false
+
+  release_stable:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: quality_check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Set Version Name from Tag
+        run: |
+          # Strip 'refs/tags/v' to get '1.0.0'
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "VERSION_NAME=${TAG_NAME}" >> $GITHUB_ENV
+
+      - name: Build Stable
+        run: ./gradlew assembleProdRelease
+        env:
+          VERSION_NAME: ${{ env.VERSION_NAME }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            app/build/outputs/apk/prod/release/app-prod-universal-release.apk
+            app/build/outputs/apk/prod/release/app-prod-arm64-v8a-release.apk
+            app/build/outputs/apk/prod/release/app-prod-armeabi-v7a-release.apk
+            app/build/outputs/apk/prod/release/app-prod-x86_64-release.apk
+          generate_release_notes: true

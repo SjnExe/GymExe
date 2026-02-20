@@ -1,118 +1,137 @@
-name: Build & Release
+name: Build and Release
 
 on:
+  workflow_dispatch:
   pull_request:
-    branches: [ "dev" ] # Lint & Beta Build on PR commits
+    branches: [ "dev" ]
   push:
-    tags: [ "v*" ]      # Stable Release on tags
-  workflow_dispatch:    # Manual Beta Trigger
+    tags: [ "v*" ]
 
 jobs:
-  lint_and_test:
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run KtLint Check
-        id: lint_check
-        continue-on-error: true
-        run: ./gradlew ktlintCheck
-
-      # Auto-fix lint errors only on PRs (commits back to the PR branch)
-      - name: Auto-Fix Lint Errors
-        if: steps.lint_check.outcome == 'failure' && github.event_name == 'pull_request'
-        run: |
-          ./gradlew ktlintFormat
-          git config --global user.name 'GymExe Bot'
-          git config --global user.email 'bot@gymexe.com'
-          # Fetch the PR branch reference to commit back to it
-          git fetch origin ${{ github.head_ref }}
-          git checkout ${{ github.head_ref }}
-          git add .
-          git commit -m "style: auto-fix linting errors"
-          git push origin ${{ github.head_ref }}
-          echo "Lint errors were found and fixed. Failing job to notify."
-          exit 1
-
-  build_and_release:
-    needs: lint_and_test
-    runs-on: ubuntu-24.04-arm
+  build:
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      # --- BETA / PR / MANUAL FLOW ---
-      # Runs on Pull Requests OR Manual Dispatch
-      - name: Build Beta (ARM64 & Universal)
-        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-        run: ./gradlew assembleDevRelease
-
-      - name: Prepare Beta Artifacts
-        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-        run: |
-          mv app/build/outputs/apk/dev/release/app-dev-release.apk GymExe-Beta-Universal.apk
-          cp GymExe-Beta-Universal.apk GymExe-Beta-ARM64.apk
-
-      - name: Update Beta Tag (Manual Only)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config --global user.name 'GymExe Bot'
-          git config --global user.email 'bot@gymexe.com'
-          git tag -f beta
-          git push -f origin beta
-
-      - name: Release Beta (Rolling - Manual Only)
-        if: github.event_name == 'workflow_dispatch'
-        uses: softprops/action-gh-release@v1
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          tag_name: beta
-          name: GymExe Beta (Rolling)
-          body: "Rolling beta release. Built at $(date)"
-          files: |
-            GymExe-Beta-Universal.apk
-            GymExe-Beta-ARM64.apk
-          prerelease: true
+          gradle-version: '9.3.1'
+          cache-read-only: false
 
-      # For PRs, we just upload artifacts to the Action Run (no GitHub Release)
-      - name: Upload PR Artifacts
-        if: github.event_name == 'pull_request'
+      - name: Calculate Version
+        id: version
+        run: |
+          # Fetch tags for versioning
+          git fetch --tags --force
+
+          # Get latest stable tag or default to v0.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          VERSION_BASE=${LATEST_TAG#v}
+          RAW_COUNT=$(git rev-list --count HEAD)
+          # Subtract 1 from commit count as per versioning strategy
+          VERSION_CODE=$((RAW_COUNT - 1))
+
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION_NAME=${GITHUB_REF#refs/tags/v}
+            BUILD_TYPE=stable
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER=${{ github.event.pull_request.number }}
+            # Count commits in this PR
+            RAW_PR_COMMITS=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
+            PR_COMMITS=$((RAW_PR_COMMITS))
+            VERSION_NAME="${VERSION_BASE}-dev-PR${PR_NUMBER}.${PR_COMMITS}"
+            BUILD_TYPE=dev
+          else
+            RUN_NUMBER=${{ github.run_number }}
+            VERSION_NAME="${VERSION_BASE}-dev-run${RUN_NUMBER}"
+            BUILD_TYPE=dev
+          fi
+
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
+          echo "Calculated Version: $VERSION_NAME ($VERSION_CODE)"
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew assembleRelease assembleDebug lint test \
+            -PversionName=${{ env.VERSION_NAME }} \
+            -PversionCode=${{ env.VERSION_CODE }} \
+            > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+
+          cp build_output.log build_${{ env.BUILD_TYPE }}.log
+
+      - name: Log Aggregation
+        run: |
+          grep -E "error|warning|failed|exception" build_output.log > build_summary.txt || true
+          zip build_logs.zip build_output.log build_summary.txt
+
+      - name: Upload Logs
         uses: actions/upload-artifact@v4
         with:
-          name: beta-apks
-          path: |
-            GymExe-Beta-Universal.apk
-            GymExe-Beta-ARM64.apk
+          name: build-logs
+          path: build_logs.zip
 
-      # --- STABLE / TAG FLOW ---
-      - name: Build Stable
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: ./gradlew assembleProdRelease
-
-      - name: Release Stable
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
+      - name: Upload APKs (Dev)
+        if: env.BUILD_TYPE == 'dev'
+        uses: actions/upload-artifact@v4
         with:
-          files: app/build/outputs/apk/prod/release/app-prod-release.apk
-          generate_release_notes: true
+          name: gym-exe-dev-${{ env.VERSION_NAME }}
+          path: |
+            app/build/outputs/apk/dev/release/*.apk
+            app/build/outputs/apk/dev/debug/*.apk
+          compression-level: 0
+
+      - name: Upload APKs (Stable)
+        if: env.BUILD_TYPE == 'stable'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gym-exe-stable
+          path: |
+            app/build/outputs/apk/stable/release/*.apk
+
+      - name: Create Release (Stable)
+        if: env.BUILD_TYPE == 'stable'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            app/build/outputs/apk/stable/release/*.apk
+          name: Release ${{ env.VERSION_NAME }}
+          body: "Stable release ${{ env.VERSION_NAME }}"
+          draft: false
+          prerelease: false
+
+      - name: Create/Update Dev Release
+        if: env.BUILD_TYPE == 'dev'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_NAME: ${{ env.VERSION_NAME }}
+        run: |
+          # Delete existing 'dev' tag and release to keep it floating
+          gh release delete dev --cleanup-tag -y || true
+
+          # Find APK paths dynamically
+          APK_RELEASE=$(find app/build/outputs/apk/dev/release -name "*.apk" | head -n 1)
+          APK_DEBUG=$(find app/build/outputs/apk/dev/debug -name "*.apk" | head -n 1)
+
+          # Create new Dev Release
+          gh release create dev \
+            "$APK_RELEASE" \
+            "$APK_DEBUG" \
+            --title "Development Build $VERSION_NAME" \
+            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' '$VERSION_NAME')" \
+            --prerelease \
+            --target ${{ github.sha }}
