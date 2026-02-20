@@ -37,8 +37,8 @@ jobs:
           # Fetch tags for versioning
           git fetch --tags --force
 
-          # Get latest stable tag or default to v0.0.0
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Get latest stable tag or default to v0.0.1
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
           VERSION_BASE=${LATEST_TAG#v}
           RAW_COUNT=$(git rev-list --count HEAD)
 
@@ -132,6 +132,6 @@ jobs:
             "$APK_RELEASE" \
             "$APK_DEBUG" \
             --title "Development Build $VERSION_NAME" \
-            --notes "Development build triggered by ${{ github.event_name }}. Version: $VERSION_NAME" \
+            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' '$VERSION_NAME')" \
             --prerelease \
             --target ${{ github.sha }}
