@@ -37,26 +37,36 @@ The app follows a modular architecture:
 *   **Versioning**:
     *   **Stable**: Tag `v*` -> Version `1.2.3`.
     *   **Dev**: `v0.0.1-dev-PR{num}.{commits}` or `v0.0.1-dev-run{num}`.
-    *   Logic handles missing tags by defaulting to `v0.0.1`.
+    *   Version Code: `Total Commits - 1`.
 *   **Releases**:
     *   **Dev**: Deletes floating `dev` tag/release and recreates it with new APKs (individual assets, no zip).
     *   **Stable**: Creates standard release.
 *   **Flavors**: Builds `dev` (debuggable, suffixed) and `stable` (minified) variants.
 
-## 5. Handover Checklist & Status
+## 5. Build Logic (Implemented Infrastructure)
+**Directory:** `build-logic/`
+**Purpose:** Share build configuration via Convention Plugins.
+**Plugins Available:**
+*   `gymexe.android.application`: Common Android App config (SDK versions, Kotlin options).
+*   `gymexe.android.library`: Common Android Library config.
+*   `gymexe.android.compose`: Jetpack Compose setup.
+*   `gymexe.android.hilt`: Hilt/KSP setup.
+**Next Step:** Migrate module `build.gradle.kts` files to use `plugins { id("gymexe.android.application") ... }`.
+
+## 6. Handover Checklist & Status
 
 ### Phase 1: Repository & Environment Setup (Completed)
 - [x] **Initialize Repository**: `README.md`, `LICENSE`, `.gitignore` created.
-- [x] **AGENTS.md**: Environment setup script verified.
+- [x] **AGENTS.md**: Comprehensive agent instructions added.
 - [x] **Gradle Setup**: `gradle.properties` (JVM args), `libs.versions.toml` configured.
 - [x] **Signing**: `debug.keystore` generated and tracked. `build.gradle.kts` uses it.
-- [x] **CI/CD Pipeline**: `build.yml` robust, handles Metaspace OOM, correct versioning.
+- [x] **CI/CD Pipeline**: `build.yml` robust, correct versioning, artifact upload fixed.
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
 - [x] **Icons**: Vector Assets (Adaptive) created.
 - [x] **Theming Engine**: Material 3, Dark/Light/System mode, Dynamic Color support.
 - [x] **Navigation**: Type-safe Compose Navigation set up.
-- [x] **Build Logic**: `build.gradle.kts` root file added, plugins applied safely.
+- [x] **Build Logic**: Infrastructure created.
 
 ### Phase 3: Onboarding (Setup Wizard) (Partially Implemented)
 - [x] **Welcome Screen**: Basic UI implemented.
@@ -88,13 +98,8 @@ The app follows a modular architecture:
 - [x] **Basic Screen**: Placeholder UI.
 - [ ] **Graphs**: Charts and stats logic needed.
 
-## 6. Next Steps for Next Session
-1.  **Updater Logic**: Implement the in-app updater in `feature:settings`. It should parse the `Version: ...` line from the GitHub Release notes (Dev channel) to compare versions.
-2.  **Backup Implementation**: Implement the backup/restore logic (zipping DB + prefs to `.gym` file).
-3.  **Workout Session**: Build the active workout logger (timers, set tracking).
-4.  **Unit Tests**: Add more tests for ViewModels and Repositories.
-
-## 7. Known Issues / Watchlist
-*   **Metaspace OOM**: Fixed via `gradle.properties` (`-XX:MaxMetaspaceSize=1g`), but keep an eye on CI memory usage.
-*   **ProGuard**: `consumer-rules.pro` files created to satisfy build, but empty. Add rules if obfuscation breaks things.
-*   **Imports**: `hiltViewModel` is deprecated in `navigation.compose`, consider migrating to `lifecycle.viewmodel.compose` when dependencies allow.
+## 7. Next Steps for Next Session
+1.  **Migrate to Convention Plugins**: Refactor module build files to use `gymexe.*` plugins.
+2.  **Updater Logic**: Implement the in-app updater in `feature:settings`.
+3.  **Backup Implementation**: Implement the backup/restore logic (zipping DB + prefs to `.gym` file).
+4.  **Workout Session**: Build the active workout logger (timers, set tracking).

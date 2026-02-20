@@ -37,14 +37,15 @@ jobs:
           # Fetch tags for versioning
           git fetch --tags --force
 
-          # Get latest stable tag or default to v0.0.1
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
+          # Get latest stable tag or default to v0.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           VERSION_BASE=${LATEST_TAG#v}
           RAW_COUNT=$(git rev-list --count HEAD)
+          # Subtract 1 from commit count as per versioning strategy
+          VERSION_CODE=$((RAW_COUNT - 1))
 
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION_NAME=${GITHUB_REF#refs/tags/v}
-            VERSION_CODE=$RAW_COUNT
             BUILD_TYPE=stable
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             PR_NUMBER=${{ github.event.pull_request.number }}
@@ -52,12 +53,10 @@ jobs:
             RAW_PR_COMMITS=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
             PR_COMMITS=$((RAW_PR_COMMITS))
             VERSION_NAME="${VERSION_BASE}-dev-PR${PR_NUMBER}.${PR_COMMITS}"
-            VERSION_CODE=$RAW_COUNT
             BUILD_TYPE=dev
           else
             RUN_NUMBER=${{ github.run_number }}
             VERSION_NAME="${VERSION_BASE}-dev-run${RUN_NUMBER}"
-            VERSION_CODE=$RAW_COUNT
             BUILD_TYPE=dev
           fi
 
@@ -90,10 +89,11 @@ jobs:
         if: env.BUILD_TYPE == 'dev'
         uses: actions/upload-artifact@v4
         with:
-          name: gym-exe-dev
+          name: gym-exe-dev-${{ env.VERSION_NAME }}
           path: |
             app/build/outputs/apk/dev/release/*.apk
             app/build/outputs/apk/dev/debug/*.apk
+          compression-level: 0
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
