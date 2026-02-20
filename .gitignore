@@ -22,5 +22,6 @@ out/
 listing.txt
 *.jks
 *.keystore
+!app/debug.keystore
 google-services.json
 secrets.properties
