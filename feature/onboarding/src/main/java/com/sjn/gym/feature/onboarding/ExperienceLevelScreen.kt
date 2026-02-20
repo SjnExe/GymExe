@@ -1,6 +1,7 @@
 package com.sjn.gym.feature.onboarding
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,32 +29,44 @@ fun ExperienceLevelScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     var selectedLevel by remember { mutableStateOf<String?>(null) }
+
+    // In a real app these strings should be resources
     val options = listOf(
-        "Freestyle" to "I do what I feel like doing.",
-        "Fixed Routine" to "I follow a strict plan (e.g. Mon: Chest, Tue: Back).",
-        "Split Training" to "I train specific muscle groups on different days."
+        "Freestyle" to "I decide what to do when I get to the gym.",
+        "Split Routine" to "I train specific muscle groups on different days (e.g., Push/Pull/Legs).",
+        "Full Body" to "I train my whole body in every session."
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(24.dp),
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "What is your training style?",
+            text = "Training Style",
             style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Text(
+            text = "How do you usually structure your workouts?",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        options.forEach { (title, description) ->
-            ExperienceCard(
-                title = title,
-                description = description,
-                isSelected = selectedLevel == title,
-                onClick = { selectedLevel = title }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            options.forEach { (title, description) ->
+                ExperienceCard(
+                    title = title,
+                    description = description,
+                    isSelected = selectedLevel == title,
+                    onClick = { selectedLevel = title }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -66,9 +79,11 @@ fun ExperienceLevelScreen(
                 }
             },
             enabled = selectedLevel != null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         ) {
-            Text("Next")
+            Text("Next", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -81,17 +96,18 @@ fun ExperienceCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(4.dp))

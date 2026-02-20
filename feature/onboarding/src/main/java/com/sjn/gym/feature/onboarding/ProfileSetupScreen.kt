@@ -19,7 +19,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,70 +43,104 @@ fun ProfileSetupScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .padding(24.dp), // Increased padding
+        horizontalAlignment = Alignment.Start, // Align content to start usually looks better for forms
         verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = "Tell us about yourself",
             style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
         // Gender Selection
-        Text("Gender", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Start))
+        Text(
+            text = "Gender",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            GenderCard("Male", gender == "Male") { gender = "Male" }
-            GenderCard("Female", gender == "Female") { gender = "Female" }
+            GenderCard(
+                gender = "Male",
+                isSelected = gender == "Male",
+                onClick = { gender = "Male" },
+                modifier = Modifier.weight(1f)
+            )
+            GenderCard(
+                gender = "Female",
+                isSelected = gender == "Female",
+                onClick = { gender = "Female" },
+                modifier = Modifier.weight(1f)
+            )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
         // Weight Input
-        Text("Weight", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Start))
+        Text(
+            text = "Weight",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
                 value = weightValue,
                 onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) weightValue = it },
                 label = { Text("Weight") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                singleLine = true
             )
-            SegmentedButton(
-                options = listOf("KG", "LBS"),
-                selectedOption = weightUnit,
-                onOptionSelected = { weightUnit = it }
-            )
+            // SegmentedButton might need explicit size or container
+            Box(modifier = Modifier.height(56.dp), contentAlignment = Alignment.Center) {
+                 SegmentedButton(
+                    options = listOf("KG", "LBS"),
+                    selectedOption = weightUnit,
+                    onOptionSelected = { weightUnit = it }
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
         // Height Input
-        Text("Height", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Start))
+        Text(
+            text = "Height",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
                 value = heightValue,
                 onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) heightValue = it },
                 label = { Text("Height") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                singleLine = true
             )
-            SegmentedButton(
-                options = listOf("CM", "FT"),
-                selectedOption = heightUnit,
-                onOptionSelected = { heightUnit = it }
-            )
+            Box(modifier = Modifier.height(56.dp), contentAlignment = Alignment.Center) {
+                SegmentedButton(
+                    options = listOf("CM", "FT"),
+                    selectedOption = heightUnit,
+                    onOptionSelected = { heightUnit = it }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -124,9 +157,11 @@ fun ProfileSetupScreen(
                 onNext()
             },
             enabled = gender != null && weightValue.isNotEmpty() && heightValue.isNotEmpty(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp) // Taller button
         ) {
-            Text("Next")
+            Text("Next", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -135,15 +170,17 @@ fun ProfileSetupScreen(
 fun GenderCard(
     gender: String,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .height(100.dp),
+        onClick = onClick,
+        modifier = modifier.height(120.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        shape = MaterialTheme.shapes.medium
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -151,8 +188,7 @@ fun GenderCard(
         ) {
             Text(
                 text = gender,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(16.dp)
+                style = MaterialTheme.typography.headlineSmall
             )
         }
     }

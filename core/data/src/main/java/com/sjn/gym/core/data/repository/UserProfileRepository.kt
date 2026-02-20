@@ -65,4 +65,12 @@ class UserProfileRepository @Inject constructor(
     suspend fun setEquipmentList(equipment: Set<String>) {
         dataStore.edit { it[ProfileKeys.EQUIPMENT_LIST] = equipment }
     }
+
+    suspend fun setWeightUnit(unit: String) {
+        dataStore.edit { it[ProfileKeys.WEIGHT_UNIT] = unit }
+    }
+
+    suspend fun setHeightUnit(unit: String) {
+        dataStore.edit { it[ProfileKeys.HEIGHT_UNIT] = unit }
+    }
 }
