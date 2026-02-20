@@ -34,29 +34,36 @@ jobs:
       - name: Calculate Version
         id: version
         run: |
-          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+          # Fetch tags for versioning
+          git fetch --tags --force
+
+          # Get latest stable tag or default to v0.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          VERSION_BASE=${LATEST_TAG#v}
+          RAW_COUNT=$(git rev-list --count HEAD)
+
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION_NAME=${GITHUB_REF#refs/tags/v}
-            VERSION_CODE=$(git rev-list --count HEAD)
-            echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-            echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
+            VERSION_CODE=$RAW_COUNT
+            BUILD_TYPE=stable
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER=${{ github.event.pull_request.number }}
+            # Count commits in this PR
+            RAW_PR_COMMITS=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
+            PR_COMMITS=$((RAW_PR_COMMITS))
+            VERSION_NAME="${VERSION_BASE}-dev-PR${PR_NUMBER}.${PR_COMMITS}"
+            VERSION_CODE=$RAW_COUNT
+            BUILD_TYPE=dev
           else
-            # Dev logic
-            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
-            COMMITS_SINCE=$(git rev-list --count HEAD ^$LATEST_TAG 2>/dev/null || git rev-list --count HEAD)
-
-            if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-               PR_NUM=${{ github.event.pull_request.number }}
-               VERSION_NAME="${LATEST_TAG}-dev-${PR_NUM}.${COMMITS_SINCE}"
-            else
-               VERSION_NAME="${LATEST_TAG}-dev-run${{ github.run_number }}"
-            fi
-
-            VERSION_CODE=$(git rev-list --count HEAD)
-            echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-            echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
+            RUN_NUMBER=${{ github.run_number }}
+            VERSION_NAME="${VERSION_BASE}-dev-run${RUN_NUMBER}"
+            VERSION_CODE=$RAW_COUNT
+            BUILD_TYPE=dev
           fi
+
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "Calculated Version: $VERSION_NAME ($VERSION_CODE)"
 
       - name: Build with Gradle
@@ -107,22 +114,24 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Delete Dev Release
-        if: env.BUILD_TYPE == 'dev' && github.event_name != 'pull_request'
+      - name: Create/Update Dev Release
+        if: env.BUILD_TYPE == 'dev'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_NAME: ${{ env.VERSION_NAME }}
         run: |
+          # Delete existing 'dev' tag and release to keep it floating
           gh release delete dev --cleanup-tag -y || true
 
-      - name: Create Release (Dev)
-        if: env.BUILD_TYPE == 'dev' && github.event_name != 'pull_request'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: dev
-          name: Development Build
-          body: "Latest dev build: ${{ env.VERSION_NAME }}"
-          files: |
-            app/build/outputs/apk/dev/release/*.apk
-            app/build/outputs/apk/dev/debug/*.apk
-          prerelease: true
-          make_latest: false
+          # Find APK paths dynamically
+          APK_RELEASE=$(find app/build/outputs/apk/dev/release -name "*.apk" | head -n 1)
+          APK_DEBUG=$(find app/build/outputs/apk/dev/debug -name "*.apk" | head -n 1)
+
+          # Create new Dev Release
+          gh release create dev \
+            "$APK_RELEASE" \
+            "$APK_DEBUG" \
+            --title "Development Build $VERSION_NAME" \
+            --notes "Development build triggered by ${{ github.event_name }}. Version: $VERSION_NAME" \
+            --prerelease \
+            --target ${{ github.sha }}
