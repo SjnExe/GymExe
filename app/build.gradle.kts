@@ -1,21 +1,22 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    id("gymexe.android.application")
+    id("gymexe.android.compose")
+    id("gymexe.android.hilt")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
 }
 
 android {
     namespace = "com.sjn.gym"
-    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.sjn.gym"
-        minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "0.0.1"
+        // minSdk, targetSdk handled by convention plugin
+
+        val codeProp = project.findProperty("versionCode") as? String
+        val nameProp = project.findProperty("versionName") as? String
+
+        versionCode = codeProp?.toIntOrNull() ?: 1
+        versionName = nameProp ?: "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -29,9 +30,8 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
-            // signingConfig = signingConfigs.getByName("release") // Apply conditionally below
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -43,7 +43,9 @@ android {
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
+            if (!project.hasProperty("versionName")) {
+                versionNameSuffix = "-dev"
+            }
         }
         create("stable") {
             dimension = "env"
@@ -61,13 +63,6 @@ android {
 
     buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    buildFeatures {
-        compose = true
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -80,16 +75,17 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
+    // Compose BOM, tooling, preview handled by convention plugin
+
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    // Hilt handled by convention plugin
+
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
@@ -97,8 +93,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.leakcanary.android)
 
     // Modular dependencies
     implementation(project(":core:ui"))

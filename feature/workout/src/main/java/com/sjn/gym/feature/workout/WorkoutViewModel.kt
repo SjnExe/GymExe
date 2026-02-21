@@ -10,18 +10,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class WorkoutViewModel @Inject constructor(
-    private val plateCalculator: PlateCalculator
-) : ViewModel() {
+class WorkoutViewModel
+    @Inject
+    constructor(
+        private val plateCalculator: PlateCalculator,
+    ) : ViewModel() {
+        var input by mutableStateOf("")
+            private set
 
-    var input by mutableStateOf("")
-        private set
+        var plateResult by mutableStateOf<List<PlateCount>>(emptyList())
+            private set
 
-    var plateResult by mutableStateOf<List<PlateCount>>(emptyList())
-        private set
-
-    fun onInputChange(newInput: String) {
-        input = newInput
-        plateResult = plateCalculator.parse(newInput)
+        fun onInputChange(newInput: String) {
+            input = newInput
+            plateResult = plateCalculator.parse(newInput)
+        }
     }
-}

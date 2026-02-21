@@ -11,11 +11,11 @@ data class Exercise(
     val secondaryMuscles: List<String> = emptyList(),
     val equipment: String, // "Barbell", "Dumbbell", "Machine", "None"
     val type: ExerciseType = ExerciseType.WEIGHT_REPS,
-    val isCustom: Boolean = false
+    val isCustom: Boolean = false,
 )
 
 enum class ExerciseType {
     WEIGHT_REPS, // Standard
-    TIME,        // Plank
-    CARDIO       // Distance/Time/Speed
+    TIME, // Plank
+    CARDIO, // Distance/Time/Speed
 }

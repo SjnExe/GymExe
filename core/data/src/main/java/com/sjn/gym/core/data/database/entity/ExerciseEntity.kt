@@ -13,5 +13,5 @@ data class ExerciseEntity(
     val secondaryMuscles: String = "", // Comma separated
     val equipment: String,
     val type: ExerciseType,
-    val isCustom: Boolean
+    val isCustom: Boolean,
 )

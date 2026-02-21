@@ -1,16 +1,13 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("gymexe.android.library")
+    id("gymexe.android.hilt")
+    // ksp plugin is added by hilt convention
 }
 
 android {
     namespace = "com.sjn.gym.core.data"
-    compileSdk = 36
 
     defaultConfig {
-        minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -20,13 +17,9 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 
@@ -34,6 +27,7 @@ dependencies {
     implementation(project(":core:model"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.serialization.json)
 
     // Room
     implementation(libs.androidx.room.runtime)
@@ -47,9 +41,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.okhttp)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    // Hilt handled by convention plugin (hilt-android, hilt-compiler)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

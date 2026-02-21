@@ -74,3 +74,6 @@ java -version
 ### Modularization
 *   **Sync Project:** `./gradlew --refresh-dependencies`
 *   **Clean Build:** `./gradlew clean build`
+
+### Maintenance
+*   **Update Dependencies:** `./gradlew versionCatalogUpdate`

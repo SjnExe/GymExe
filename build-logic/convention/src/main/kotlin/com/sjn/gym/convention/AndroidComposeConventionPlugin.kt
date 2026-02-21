@@ -1,7 +1,8 @@
 package com.sjn.gym.convention
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
@@ -16,8 +17,12 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
                 ?: extensions.findByType(ApplicationExtension::class.java)
                 ?: return
 
-            extension.apply {
-                buildFeatures {
+            if (extension is ApplicationExtension) {
+                extension.buildFeatures {
+                    compose = true
+                }
+            } else if (extension is LibraryExtension) {
+                extension.buildFeatures {
                     compose = true
                 }
             }

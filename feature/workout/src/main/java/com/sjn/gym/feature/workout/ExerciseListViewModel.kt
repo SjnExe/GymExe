@@ -11,13 +11,19 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class ExerciseListViewModel @Inject constructor(
-    exerciseDao: ExerciseDao
-) : ViewModel() {
-    val exercises: StateFlow<List<ExerciseEntity>> = exerciseDao.getAll()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
-        )
-}
+class ExerciseListViewModel
+    @Inject
+    constructor(
+        exerciseDao: ExerciseDao,
+    ) : ViewModel() {
+        val exercises: StateFlow<List<ExerciseEntity>> =
+            exerciseDao
+                .getAll()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                    initialValue = emptyList(),
+                )
+    }
+
+private const val STOP_TIMEOUT_MILLIS = 5_000L
