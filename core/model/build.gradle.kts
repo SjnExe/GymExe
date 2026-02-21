@@ -1,15 +1,12 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("gymexe.android.library")
     alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     namespace = "com.sjn.gym.core.model"
-    compileSdk = 36
 
     defaultConfig {
-        minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -22,10 +19,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 

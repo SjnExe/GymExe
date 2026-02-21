@@ -1,5 +1,8 @@
 package com.sjn.gym.feature.settings
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,18 +13,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.window.Dialog
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sjn.gym.core.ui.components.SegmentedButton
+import com.sjn.gym.feature.settings.components.RestoreOptionsDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,11 +44,86 @@ fun SettingsScreen(
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val weightUnit by viewModel.weightUnit.collectAsStateWithLifecycle()
     val heightUnit by viewModel.heightUnit.collectAsStateWithLifecycle()
+    val backupStatus by viewModel.backupStatus.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // State for restore flow
+    var showRestoreDialog by remember { mutableStateOf(false) }
+    var restoreUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher for creating a backup file
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        uri?.let {
+            try {
+                context.contentResolver.openOutputStream(it)?.let { outputStream ->
+                    viewModel.performBackup(outputStream)
+                }
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+    // Launcher for opening a backup file
+    val openDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            restoreUri = it
+            showRestoreDialog = true
+        }
+    }
+
+    LaunchedEffect(backupStatus) {
+        when (val status = backupStatus) {
+            is BackupStatus.Success -> {
+                snackbarHostState.showSnackbar(status.message)
+                viewModel.clearStatus()
+            }
+            is BackupStatus.Error -> {
+                snackbarHostState.showSnackbar(status.message)
+                viewModel.clearStatus()
+            }
+            else -> {}
+        }
+    }
+
+    if (showRestoreDialog && restoreUri != null) {
+        RestoreOptionsDialog(
+            onDismissRequest = {
+                showRestoreDialog = false
+                restoreUri = null
+            },
+            onConfirm = { options ->
+                try {
+                    context.contentResolver.openInputStream(restoreUri!!)?.let { inputStream ->
+                        viewModel.restoreBackup(inputStream, options)
+                    }
+                } catch (e: Exception) {
+                    // Handle error
+                }
+                showRestoreDialog = false
+                restoreUri = null
+            }
+        )
+    }
+
+    // Loading overlay
+    if (backupStatus is BackupStatus.Loading) {
+        Dialog(onDismissRequest = {}) {
+            CircularProgressIndicator()
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Settings") })
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -77,13 +165,13 @@ fun SettingsScreen(
             // Data Section
             SettingsSection("Data") {
                 Button(
-                    onClick = { /* TODO: Backup */ },
+                    onClick = { createDocumentLauncher.launch("backup.gym") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Backup Data")
                 }
                 Button(
-                    onClick = { /* TODO: Restore */ },
+                    onClick = { openDocumentLauncher.launch(arrayOf("*/*")) }, // Ideally application/octet-stream or custom mime
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Restore Data")

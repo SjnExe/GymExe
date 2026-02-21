@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -28,6 +28,7 @@ import com.sjn.gym.feature.onboarding.OnboardingScreen
 import com.sjn.gym.feature.workout.HomeScreen
 import com.sjn.gym.feature.workout.WorkoutScreen
 import com.sjn.gym.feature.workout.ExerciseListScreen
+import com.sjn.gym.feature.workout.LibraryScreen
 import com.sjn.gym.feature.settings.SettingsScreen
 import com.sjn.gym.feature.profile.ProfileScreen
 
@@ -47,6 +48,9 @@ object Workout
 object ExerciseList
 
 @Serializable
+object Library
+
+@Serializable
 object Onboarding
 
 enum class TopLevelDestination(
@@ -55,7 +59,7 @@ enum class TopLevelDestination(
     val labelRes: Int
 ) {
     HOME(Home, Icons.Filled.Home, R.string.home),
-    WORKOUTS(Workout, Icons.Filled.FitnessCenter, R.string.workouts),
+    LIBRARY(Library, Icons.Filled.LocalLibrary, R.string.library),
     YOU(Profile, Icons.Filled.Person, R.string.you)
 }
 
@@ -123,6 +127,9 @@ fun GymExeNavHost(
             }
             composable<Workout> {
                 WorkoutScreen()
+            }
+            composable<Library> {
+                LibraryScreen()
             }
             composable<ExerciseList> {
                 ExerciseListScreen()
