@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             // For now, we'll just log or prepare it.
             // In a real implementation, you might want to use a SideEffect or a specific Intent Handler
 
-            val intentUri = intent?.data
+            // val intentUri = intent?.data
 
             when (val state = uiState) {
                 is MainActivityUiState.Loading -> {
@@ -41,21 +41,23 @@ class MainActivity : ComponentActivity() {
                         // Empty surface or splash
                     }
                 }
+
                 is MainActivityUiState.Success -> {
                     // Determine theme
-                    val darkTheme = when (state.userData.themeMode) {
-                        "DARK" -> true
-                        "LIGHT" -> false
-                        else -> isSystemInDarkTheme()
-                    }
+                    val darkTheme =
+                        when (state.userData.themeMode) {
+                            "DARK" -> true
+                            "LIGHT" -> false
+                            else -> isSystemInDarkTheme()
+                        }
 
                     GymExeTheme(
                         darkTheme = darkTheme,
-                        dynamicColor = state.userData.useDynamicColor
+                        dynamicColor = state.userData.useDynamicColor,
                     ) {
                         Surface(modifier = Modifier.fillMaxSize()) {
                             GymExeNavHost(
-                                isOnboardingCompleted = state.userData.isOnboardingCompleted
+                                isOnboardingCompleted = state.userData.isOnboardingCompleted,
                             )
                         }
                     }

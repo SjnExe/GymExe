@@ -14,21 +14,22 @@ import androidx.compose.ui.unit.dp
 fun SegmentedButton(
     options: List<String>,
     selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
 ) {
     Row(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(8.dp),
     ) {
         options.forEachIndexed { index, option ->
             val isSelected = option == selectedOption
             Text(
                 text = option,
-                modifier = Modifier
-                    .clickable { onOptionSelected(option) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier =
+                    Modifier
+                        .clickable { onOptionSelected(option) }
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 style = if (isSelected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
     }

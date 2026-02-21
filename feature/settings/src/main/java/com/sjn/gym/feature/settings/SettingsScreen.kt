@@ -38,9 +38,7 @@ import com.sjn.gym.feature.settings.components.RestoreOptionsDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel()
-) {
+fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val weightUnit by viewModel.weightUnit.collectAsStateWithLifecycle()
     val heightUnit by viewModel.heightUnit.collectAsStateWithLifecycle()
@@ -54,29 +52,31 @@ fun SettingsScreen(
     var restoreUri by remember { mutableStateOf<Uri?>(null) }
 
     // Launcher for creating a backup file
-    val createDocumentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
-    ) { uri ->
-        uri?.let {
-            try {
-                context.contentResolver.openOutputStream(it)?.let { outputStream ->
-                    viewModel.performBackup(outputStream)
+    val createDocumentLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+        ) { uri ->
+            uri?.let {
+                try {
+                    context.contentResolver.openOutputStream(it)?.let { outputStream ->
+                        viewModel.performBackup(outputStream)
+                    }
+                } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+                    // Handle error
                 }
-            } catch (e: Exception) {
-                // Handle error
             }
         }
-    }
 
     // Launcher for opening a backup file
-    val openDocumentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        uri?.let {
-            restoreUri = it
-            showRestoreDialog = true
+    val openDocumentLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            uri?.let {
+                restoreUri = it
+                showRestoreDialog = true
+            }
         }
-    }
 
     LaunchedEffect(backupStatus) {
         when (val status = backupStatus) {
@@ -84,10 +84,12 @@ fun SettingsScreen(
                 snackbarHostState.showSnackbar(status.message)
                 viewModel.clearStatus()
             }
+
             is BackupStatus.Error -> {
                 snackbarHostState.showSnackbar(status.message)
                 viewModel.clearStatus()
             }
+
             else -> {}
         }
     }
@@ -103,12 +105,12 @@ fun SettingsScreen(
                     context.contentResolver.openInputStream(restoreUri!!)?.let { inputStream ->
                         viewModel.restoreBackup(inputStream, options)
                     }
-                } catch (e: Exception) {
+                } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
                     // Handle error
                 }
                 showRestoreDialog = false
                 restoreUri = null
-            }
+            },
         )
     }
 
@@ -123,15 +125,16 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(title = { Text("Settings") })
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             // Theme Section
             SettingsSection("Appearance") {
@@ -139,7 +142,7 @@ fun SettingsScreen(
                 SegmentedButton(
                     options = listOf("LIGHT", "DARK", "SYSTEM"),
                     selectedOption = themeMode,
-                    onOptionSelected = { viewModel.setTheme(it) }
+                    onOptionSelected = { viewModel.setTheme(it) },
                 )
             }
 
@@ -149,7 +152,7 @@ fun SettingsScreen(
                 SegmentedButton(
                     options = listOf("KG", "LBS"),
                     selectedOption = weightUnit,
-                    onOptionSelected = { viewModel.setWeightUnit(it) }
+                    onOptionSelected = { viewModel.setWeightUnit(it) },
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -158,7 +161,7 @@ fun SettingsScreen(
                 SegmentedButton(
                     options = listOf("CM", "FT"),
                     selectedOption = heightUnit,
-                    onOptionSelected = { viewModel.setHeightUnit(it) }
+                    onOptionSelected = { viewModel.setHeightUnit(it) },
                 )
             }
 
@@ -166,13 +169,13 @@ fun SettingsScreen(
             SettingsSection("Data") {
                 Button(
                     onClick = { createDocumentLauncher.launch("backup.gym") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("Backup Data")
                 }
                 Button(
                     onClick = { openDocumentLauncher.launch(arrayOf("*/*")) }, // Ideally application/octet-stream or custom mime
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("Restore Data")
                 }
@@ -183,7 +186,7 @@ fun SettingsScreen(
                 Text("GymExe v1.0.0", style = MaterialTheme.typography.bodySmall)
                 Button(
                     onClick = { /* Check Updates */ },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("Check for Updates")
                 }
@@ -193,12 +196,15 @@ fun SettingsScreen(
 }
 
 @Composable
-fun SettingsSection(title: String, content: @Composable () -> Unit) {
+fun SettingsSection(
+    title: String,
+    content: @Composable () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
         content()
     }

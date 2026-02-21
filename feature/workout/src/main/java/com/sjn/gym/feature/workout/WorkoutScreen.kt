@@ -11,15 +11,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
-fun WorkoutScreen(
-    viewModel: WorkoutViewModel = hiltViewModel()
-) {
+fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Log Set")
         TextField(
             value = viewModel.input,
             onValueChange = { viewModel.onInputChange(it) },
-            label = { Text("Enter Plates (e.g. 2x20)") }
+            label = { Text("Enter Plates (e.g. 2x20)") },
         )
 
         Row {

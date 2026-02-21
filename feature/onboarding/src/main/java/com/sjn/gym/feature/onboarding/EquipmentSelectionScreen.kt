@@ -30,49 +30,60 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun EquipmentSelectionScreen(
     onComplete: () -> Unit,
-    viewModel: OnboardingViewModel = hiltViewModel()
+    viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
-    val equipmentList = listOf(
-        "Dumbbells", "Barbell", "Kettlebell", "Pull-up Bar",
-        "Cable Machine", "Leg Press", "Smith Machine", "Squat Rack",
-        "Bench", "Medicine Ball", "Resistance Bands"
-    )
+    val equipmentList =
+        listOf(
+            "Dumbbells",
+            "Barbell",
+            "Kettlebell",
+            "Pull-up Bar",
+            "Cable Machine",
+            "Leg Press",
+            "Smith Machine",
+            "Squat Rack",
+            "Bench",
+            "Medicine Ball",
+            "Resistance Bands",
+        )
 
     var selectedEquipment by remember { mutableStateOf(setOf<String>()) }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
     ) {
         Text(
             text = "Equipment",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         Text(
             text = "Select what you have access to.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 24.dp),
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             OutlinedButton(
                 onClick = { selectedEquipment = emptySet() },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text("None / Bodyweight")
             }
             OutlinedButton(
                 onClick = { selectedEquipment = equipmentList.toSet() },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text("Full Gym Access")
             }
@@ -80,19 +91,20 @@ fun EquipmentSelectionScreen(
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(equipmentList) { equipment ->
                 EquipmentItem(
                     name = equipment,
                     isSelected = selectedEquipment.contains(equipment),
                     onToggle = {
-                        selectedEquipment = if (selectedEquipment.contains(equipment)) {
-                            selectedEquipment - equipment
-                        } else {
-                            selectedEquipment + equipment
-                        }
-                    }
+                        selectedEquipment =
+                            if (selectedEquipment.contains(equipment)) {
+                                selectedEquipment - equipment
+                            } else {
+                                selectedEquipment + equipment
+                            }
+                    },
                 )
             }
         }
@@ -103,10 +115,11 @@ fun EquipmentSelectionScreen(
                 viewModel.completeOnboarding()
                 onComplete()
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-                .height(56.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+                    .height(56.dp),
         ) {
             Text("Finish Setup", style = MaterialTheme.typography.titleMedium)
         }
@@ -117,29 +130,31 @@ fun EquipmentSelectionScreen(
 fun EquipmentItem(
     name: String,
     isSelected: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
 ) {
     Surface(
         onClick = onToggle,
         shape = MaterialTheme.shapes.small,
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface,
         tonalElevation = if (isSelected) 2.dp else 0.dp,
-        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp), // Checkbox has internal padding
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            // Checkbox has internal padding
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Checkbox(
                 checked = isSelected,
-                onCheckedChange = { onToggle() }
+                onCheckedChange = { onToggle() },
             )
             Text(
                 text = name,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
             )
         }
     }
