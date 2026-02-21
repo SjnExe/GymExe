@@ -98,7 +98,9 @@ class BackupRepositoryImpl
                         try {
                             com.sjn.gym.core.model.Gender
                                 .valueOf(it)
-                        } catch (@Suppress("SwallowedException") e: IllegalArgumentException) {
+                        } catch (
+                            @Suppress("SwallowedException") e: IllegalArgumentException,
+                        ) {
                             com.sjn.gym.core.model.Gender.MALE
                         }
                     } ?: com.sjn.gym.core.model.Gender.MALE,

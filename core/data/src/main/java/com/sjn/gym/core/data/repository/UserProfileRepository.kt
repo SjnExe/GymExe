@@ -59,7 +59,9 @@ class UserProfileRepository
                     genderStr?.let {
                         try {
                             Gender.valueOf(it)
-                        } catch (@Suppress("SwallowedException") e: IllegalArgumentException) {
+                        } catch (
+                            @Suppress("SwallowedException") e: IllegalArgumentException,
+                        ) {
                             Gender.MALE
                         }
                     } ?: Gender.MALE
