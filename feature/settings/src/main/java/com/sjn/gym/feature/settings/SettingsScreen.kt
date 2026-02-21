@@ -61,7 +61,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     context.contentResolver.openOutputStream(it)?.let { outputStream ->
                         viewModel.performBackup(outputStream)
                     }
-                } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+                } catch (
+                    @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
+                ) {
                     // Handle error
                 }
             }
@@ -105,7 +107,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     context.contentResolver.openInputStream(restoreUri!!)?.let { inputStream ->
                         viewModel.restoreBackup(inputStream, options)
                     }
-                } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+                } catch (
+                    @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
+                ) {
                     // Handle error
                 }
                 showRestoreDialog = false

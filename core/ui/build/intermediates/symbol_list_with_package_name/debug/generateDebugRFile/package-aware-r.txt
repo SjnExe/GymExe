@@ -1,1 +1,0 @@
-com.sjn.gym.core.ui
