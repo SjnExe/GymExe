@@ -3,8 +3,8 @@ package com.sjn.gym.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -22,15 +22,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import kotlinx.serialization.Serializable
 import com.sjn.gym.R
 import com.sjn.gym.feature.onboarding.OnboardingScreen
-import com.sjn.gym.feature.workout.HomeScreen
-import com.sjn.gym.feature.workout.WorkoutScreen
-import com.sjn.gym.feature.workout.ExerciseListScreen
-import com.sjn.gym.feature.workout.LibraryScreen
-import com.sjn.gym.feature.settings.SettingsScreen
 import com.sjn.gym.feature.profile.ProfileScreen
+import com.sjn.gym.feature.settings.SettingsScreen
+import com.sjn.gym.feature.workout.ExerciseListScreen
+import com.sjn.gym.feature.workout.HomeScreen
+import com.sjn.gym.feature.workout.LibraryScreen
+import com.sjn.gym.feature.workout.WorkoutScreen
+import kotlinx.serialization.Serializable
 
 @Serializable
 object Home
@@ -56,35 +56,35 @@ object Onboarding
 enum class TopLevelDestination(
     val route: Any,
     val icon: ImageVector,
-    val labelRes: Int
+    val labelRes: Int,
 ) {
     HOME(Home, Icons.Filled.Home, R.string.home),
     LIBRARY(Library, Icons.Filled.LocalLibrary, R.string.library),
-    YOU(Profile, Icons.Filled.Person, R.string.you)
+    YOU(Profile, Icons.Filled.Person, R.string.you),
 }
 
 @Composable
-fun GymExeNavHost(
-    isOnboardingCompleted: Boolean
-) {
+fun GymExeNavHost(isOnboardingCompleted: Boolean) {
     val navController = rememberNavController()
     val startDestination: Any = if (isOnboardingCompleted) Home else Onboarding
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val showBottomBar = TopLevelDestination.values().any { topLevelRoute ->
-        currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
-    }
+    val showBottomBar =
+        TopLevelDestination.values().any { topLevelRoute ->
+            currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
+        }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
                     TopLevelDestination.values().forEach { topLevelRoute ->
-                        val isSelected = currentDestination?.hierarchy?.any {
-                            it.hasRoute(topLevelRoute.route::class)
-                        } == true
+                        val isSelected =
+                            currentDestination?.hierarchy?.any {
+                                it.hasRoute(topLevelRoute.route::class)
+                            } == true
 
                         NavigationBarItem(
                             icon = { Icon(topLevelRoute.icon, contentDescription = stringResource(topLevelRoute.labelRes)) },
@@ -98,17 +98,17 @@ fun GymExeNavHost(
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            }
+                            },
                         )
                     }
                 }
             }
-        }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
             composable<Onboarding> {
                 OnboardingScreen(
@@ -116,13 +116,13 @@ fun GymExeNavHost(
                         navController.navigate(Home) {
                             popUpTo(Onboarding) { inclusive = true }
                         }
-                    }
+                    },
                 )
             }
             composable<Home> {
                 HomeScreen(
                     onNavigateToExerciseList = { navController.navigate(ExerciseList) },
-                    onNavigateToWorkout = { navController.navigate(Workout) }
+                    onNavigateToWorkout = { navController.navigate(Workout) },
                 )
             }
             composable<Workout> {
@@ -139,7 +139,7 @@ fun GymExeNavHost(
             }
             composable<Profile> {
                 ProfileScreen(
-                    onNavigateToSettings = { navController.navigate(Settings) }
+                    onNavigateToSettings = { navController.navigate(Settings) },
                 )
             }
         }

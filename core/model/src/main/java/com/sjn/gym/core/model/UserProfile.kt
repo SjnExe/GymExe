@@ -6,9 +6,11 @@ data class UserProfile(
     val age: Int,
     val weight: Double,
     val height: Double,
-    val gender: Gender
+    val gender: Gender,
 )
 
 enum class Gender {
-    MALE, FEMALE, OTHER
+    MALE,
+    FEMALE,
+    OTHER,
 }

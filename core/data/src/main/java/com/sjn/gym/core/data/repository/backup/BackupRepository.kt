@@ -22,12 +22,15 @@ interface BackupRepository {
     /**
      * Restores data from the provided [GymBackupData] object based on the [RestoreOptions].
      */
-    suspend fun restoreData(data: GymBackupData, options: RestoreOptions): Result<Unit>
+    suspend fun restoreData(
+        data: GymBackupData,
+        options: RestoreOptions,
+    ): Result<Unit>
 }
 
 data class RestoreOptions(
     val restoreExercises: Boolean = true,
     val restoreWorkouts: Boolean = true,
     val restoreProfile: Boolean = true,
-    val restoreSettings: Boolean = true
+    val restoreSettings: Boolean = true,
 )

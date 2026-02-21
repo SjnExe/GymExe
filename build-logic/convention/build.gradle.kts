@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
+    implementation(libs.detekt.gradlePlugin)
 }
 
 gradlePlugin {
@@ -27,6 +28,14 @@ gradlePlugin {
         register("androidCompose") {
             id = "gymexe.android.compose"
             implementationClass = "com.sjn.gym.convention.AndroidComposeConventionPlugin"
+        }
+        register("spotless") {
+            id = "gymexe.spotless"
+            implementationClass = "com.sjn.gym.convention.SpotlessConventionPlugin"
+        }
+        register("detekt") {
+            id = "gymexe.detekt"
+            implementationClass = "com.sjn.gym.convention.DetektConventionPlugin"
         }
     }
 }

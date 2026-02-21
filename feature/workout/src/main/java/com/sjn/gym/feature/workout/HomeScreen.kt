@@ -20,21 +20,22 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeScreen(
     onNavigateToExerciseList: () -> Unit,
-    onNavigateToWorkout: () -> Unit
+    onNavigateToWorkout: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("GymExe") }
+                title = { Text("GymExe") },
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -42,7 +43,7 @@ fun HomeScreen(
                     Text("Push Day (Placeholder)", style = MaterialTheme.typography.headlineSmall)
                     Button(
                         onClick = onNavigateToWorkout,
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp),
                     ) {
                         Text("Start Workout")
                     }
@@ -53,7 +54,7 @@ fun HomeScreen(
 
             Button(
                 onClick = onNavigateToExerciseList,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Browse Exercises")
             }

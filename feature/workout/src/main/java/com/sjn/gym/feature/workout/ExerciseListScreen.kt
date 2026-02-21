@@ -9,9 +9,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun ExerciseListScreen(
-    viewModel: ExerciseListViewModel = hiltViewModel()
-) {
+fun ExerciseListScreen(viewModel: ExerciseListViewModel = hiltViewModel()) {
     val exercises by viewModel.exercises.collectAsStateWithLifecycle()
 
     LazyColumn {

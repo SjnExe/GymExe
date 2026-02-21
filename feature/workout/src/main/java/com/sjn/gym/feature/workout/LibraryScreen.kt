@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,19 +26,20 @@ fun LibraryScreen() {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Library") })
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
         ) {
             PrimaryTabRow(selectedTabIndex = selectedTab) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
-                        text = { Text(title) }
+                        text = { Text(title) },
                     )
                 }
             }
@@ -49,6 +50,7 @@ fun LibraryScreen() {
                     // Assuming ExerciseListScreen handles its own data
                     ExerciseListScreen()
                 }
+
                 1 -> {
                     // Routines Placeholder
                     Column(modifier = Modifier.padding(16.dp)) {

@@ -15,12 +15,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
-
     @Provides
     @Singleton
     fun provideUserProfileRepository(
-        @ApplicationContext context: Context
-    ): UserProfileRepository {
-        return UserProfileRepository(context)
-    }
+        @ApplicationContext context: Context,
+    ): UserProfileRepository = UserProfileRepository(context)
 }

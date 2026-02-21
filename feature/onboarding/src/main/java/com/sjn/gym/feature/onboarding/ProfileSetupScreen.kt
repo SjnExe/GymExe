@@ -32,7 +32,7 @@ import com.sjn.gym.core.ui.components.SegmentedButton
 @Composable
 fun ProfileSetupScreen(
     onNext: () -> Unit,
-    viewModel: OnboardingViewModel = hiltViewModel()
+    viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     var gender by remember { mutableStateOf<String?>(null) }
     var weightValue by remember { mutableStateOf("") }
@@ -41,17 +41,19 @@ fun ProfileSetupScreen(
     var heightUnit by remember { mutableStateOf("CM") }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp), // Increased padding
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+        // Increased padding
         horizontalAlignment = Alignment.Start, // Align content to start usually looks better for forms
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Top,
     ) {
         Text(
             text = "Tell us about yourself",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         // Gender Selection
@@ -59,25 +61,26 @@ fun ProfileSetupScreen(
             text = "Gender",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             GenderCard(
                 gender = "Male",
                 isSelected = gender == "Male",
                 onClick = { gender = "Male" },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             GenderCard(
                 gender = "Female",
                 isSelected = gender == "Female",
                 onClick = { gender = "Female" },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
         }
 
@@ -86,14 +89,15 @@ fun ProfileSetupScreen(
             text = "Weight",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             OutlinedTextField(
                 value = weightValue,
@@ -101,14 +105,14 @@ fun ProfileSetupScreen(
                 label = { Text("Weight") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),
-                singleLine = true
+                singleLine = true,
             )
             // SegmentedButton might need explicit size or container
             Box(modifier = Modifier.height(56.dp), contentAlignment = Alignment.Center) {
-                 SegmentedButton(
+                SegmentedButton(
                     options = listOf("KG", "LBS"),
                     selectedOption = weightUnit,
-                    onOptionSelected = { weightUnit = it }
+                    onOptionSelected = { weightUnit = it },
                 )
             }
         }
@@ -118,13 +122,14 @@ fun ProfileSetupScreen(
             text = "Height",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             OutlinedTextField(
                 value = heightValue,
@@ -132,13 +137,13 @@ fun ProfileSetupScreen(
                 label = { Text("Height") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),
-                singleLine = true
+                singleLine = true,
             )
             Box(modifier = Modifier.height(56.dp), contentAlignment = Alignment.Center) {
                 SegmentedButton(
                     options = listOf("CM", "FT"),
                     selectedOption = heightUnit,
-                    onOptionSelected = { heightUnit = it }
+                    onOptionSelected = { heightUnit = it },
                 )
             }
         }
@@ -152,14 +157,15 @@ fun ProfileSetupScreen(
                     weight = weightValue.toDoubleOrNull(),
                     weightUnit = weightUnit,
                     height = heightValue.toDoubleOrNull(),
-                    heightUnit = heightUnit
+                    heightUnit = heightUnit,
                 )
                 onNext()
             },
             enabled = gender != null && weightValue.isNotEmpty() && heightValue.isNotEmpty(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp) // Taller button
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp), // Taller button
         ) {
             Text("Next", style = MaterialTheme.typography.titleMedium)
         }
@@ -171,24 +177,25 @@ fun GenderCard(
     gender: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         onClick = onClick,
         modifier = modifier.height(120.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        shape = MaterialTheme.shapes.medium
+        colors =
+            CardDefaults.cardColors(
+                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        shape = MaterialTheme.shapes.medium,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = gender,
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
             )
         }
     }

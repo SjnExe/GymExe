@@ -8,7 +8,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun OnboardingScreen(
     onOnboardingComplete: () -> Unit,
-    viewModel: OnboardingViewModel = hiltViewModel()
+    viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val currentStep by viewModel.currentStep.collectAsState()
 
