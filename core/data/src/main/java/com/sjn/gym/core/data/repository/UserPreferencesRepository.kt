@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.sjn.gym.core.model.UserPreferences
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -46,6 +47,15 @@ class UserPreferencesRepository @Inject constructor(
     val unitSystem: Flow<String> = dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.UNIT_SYSTEM] ?: "METRIC"
+        }
+
+    val userData: Flow<UserPreferences> = dataStore.data
+        .map { preferences ->
+            UserPreferences(
+                isOnboardingCompleted = preferences[PreferencesKeys.IS_ONBOARDING_COMPLETED] ?: false,
+                themeMode = preferences[PreferencesKeys.THEME_MODE] ?: "SYSTEM",
+                useDynamicColor = preferences[PreferencesKeys.USE_DYNAMIC_COLOR] ?: true,
+            )
         }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {

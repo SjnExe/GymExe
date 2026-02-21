@@ -41,7 +41,6 @@ jobs:
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           VERSION_BASE=${LATEST_TAG#v}
           RAW_COUNT=$(git rev-list --count HEAD)
-          # Subtract 1 from commit count as per versioning strategy
           VERSION_CODE=$((RAW_COUNT - 1))
 
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -51,7 +50,8 @@ jobs:
             PR_NUMBER=${{ github.event.pull_request.number }}
             # Count commits in this PR
             RAW_PR_COMMITS=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
-            PR_COMMITS=$((RAW_PR_COMMITS))
+            PR_COMMITS=$((RAW_PR_COMMITS - 1))
+            if [ $PR_COMMITS -lt 0 ]; then PR_COMMITS=0; fi
             VERSION_NAME="${VERSION_BASE}-dev-PR${PR_NUMBER}.${PR_COMMITS}"
             BUILD_TYPE=dev
           else
@@ -67,10 +67,17 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew assembleRelease assembleDebug lint test \
-            -PversionName=${{ env.VERSION_NAME }} \
-            -PversionCode=${{ env.VERSION_CODE }} \
-            > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
+            ./gradlew assembleStableRelease lintStableRelease testStableDebugUnitTest \
+              -PversionName=${{ env.VERSION_NAME }} \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+          else
+            ./gradlew assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest \
+              -PversionName=${{ env.VERSION_NAME }} \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+          fi
 
           cp build_output.log build_${{ env.BUILD_TYPE }}.log
 
@@ -132,6 +139,6 @@ jobs:
             "$APK_RELEASE" \
             "$APK_DEBUG" \
             --title "Development Build $VERSION_NAME" \
-            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' '$VERSION_NAME')" \
+            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
             --target ${{ github.sha }}
