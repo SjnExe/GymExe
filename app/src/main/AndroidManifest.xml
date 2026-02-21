@@ -35,7 +35,7 @@
             </intent-filter>
 
             <!-- Backup File Intent Filter -->
-            <intent-filter>
+            <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="content" />
@@ -45,7 +45,7 @@
             </intent-filter>
 
              <!-- Backup File Intent Filter with custom mimetype if possible (less reliable across file managers) -->
-             <intent-filter>
+             <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/octet-stream" />
