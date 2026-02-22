@@ -79,15 +79,15 @@ fun ProfileSetupScreen(
             GenderCard(
                 gender = "Male",
                 icon = Icons.Filled.Man,
-                isSelected = gender == "Male",
-                onClick = { gender = "Male" },
+                isSelected = gender == "MALE",
+                onClick = { gender = "MALE" },
                 modifier = Modifier.weight(1f),
             )
             GenderCard(
                 gender = "Female",
                 icon = Icons.Filled.Woman,
-                isSelected = gender == "Female",
-                onClick = { gender = "Female" },
+                isSelected = gender == "FEMALE",
+                onClick = { gender = "FEMALE" },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -109,7 +109,13 @@ fun ProfileSetupScreen(
         ) {
             OutlinedTextField(
                 value = weightValue,
-                onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) weightValue = it },
+                onValueChange = { newValue ->
+                    if (newValue.all { char -> char.isDigit() || char == '.' } &&
+                        newValue.count { it == '.' } <= 1
+                    ) {
+                        weightValue = newValue
+                    }
+                },
                 label = { Text("Weight") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),
@@ -141,7 +147,13 @@ fun ProfileSetupScreen(
         ) {
             OutlinedTextField(
                 value = heightValue,
-                onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) heightValue = it },
+                onValueChange = { newValue ->
+                    if (newValue.all { char -> char.isDigit() || char == '.' } &&
+                        newValue.count { it == '.' } <= 1
+                    ) {
+                        heightValue = newValue
+                    }
+                },
                 label = { Text("Height") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),

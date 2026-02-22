@@ -21,7 +21,6 @@ android {
         versionCode = codeProp?.toIntOrNull() ?: 1
         versionName = nameProp ?: "0.0.1"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }

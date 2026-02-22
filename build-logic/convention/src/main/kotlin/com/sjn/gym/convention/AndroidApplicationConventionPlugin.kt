@@ -19,6 +19,10 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 defaultConfig.minSdk = 26
                 compileSdk = 36
 
+                defaultConfig {
+                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                }
+
                 // Common configuration function
                 configureKotlinAndroid(this)
             }

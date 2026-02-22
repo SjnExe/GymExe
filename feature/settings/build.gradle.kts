@@ -13,18 +13,6 @@ android {
     defaultConfig {
         val nameProp = project.findProperty("versionName") as? String
         buildConfigField("String", "VERSION_NAME", "\"${nameProp ?: "0.0.1"}\"")
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
     }
 }
 
