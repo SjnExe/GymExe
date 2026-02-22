@@ -50,8 +50,12 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 
 ## Environment Setup
 
-The following script is already ran on Jules environment. This ensures all system dependencies are updated.
+Run the setup script to configure your environment quickly:
+```bash
+./scripts/setup.sh
+```
 
+Alternatively, manually install dependencies:
 ```bash
 sudo apt update
 sudo apt full-upgrade -y
@@ -67,6 +71,14 @@ java -version
 ```
 
 ## Useful Commands
+
+### Quick Verification (Jules Default Check)
+Run this before submitting any change:
+```bash
+./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest
+```
+
+### Building
 
 ### Building
 *   **Build Debug APK (Dev):** `./gradlew assembleDevDebug`

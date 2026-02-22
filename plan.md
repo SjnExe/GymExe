@@ -123,3 +123,25 @@ The app follows a modular architecture:
 
 4.  **Database Migration**:
     *   Handle data persistence during updates.
+
+## 8. Improvements & Optimizations (Backlog)
+
+### Build Logic & Infrastructure
+- [ ] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
+- [ ] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
+- [ ] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
+- [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.
+
+### Developer Experience (DX)
+- [x] **Setup Script**: Created `scripts/setup.sh` for fast environment initialization.
+- [ ] **Pre-Push Hook**: Create `scripts/pre-push.sh` to run critical checks locally before pushing.
+- [ ] **Dependency Bundling**: Group related dependencies in `libs.versions.toml` (e.g., `compose-ui`, `unit-test`) for cleaner build files.
+
+### Code Quality & Architecture
+- [ ] **Konsist Tests**: Integrate `Konsist` to enforce architectural rules (e.g., "Repositories must reside in `data` package").
+- [ ] **Detekt Refinement**: Review strict rules (e.g., `MagicNumber` for UI definitions) and adjust excludes.
+- [ ] **Module Graph**: Automate generation of Mermaid diagrams for `README.md` using the `moduleGraph` plugin.
+
+### CI/CD Enhancements
+- [ ] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
+- [ ] **Release Drafter**: Consider automating release notes generation further.
