@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Man
+import androidx.compose.material.icons.filled.Woman
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -72,12 +78,14 @@ fun ProfileSetupScreen(
         ) {
             GenderCard(
                 gender = "Male",
+                icon = Icons.Filled.Man,
                 isSelected = gender == "Male",
                 onClick = { gender = "Male" },
                 modifier = Modifier.weight(1f),
             )
             GenderCard(
                 gender = "Female",
+                icon = Icons.Filled.Woman,
                 isSelected = gender == "Female",
                 onClick = { gender = "Female" },
                 modifier = Modifier.weight(1f),
@@ -175,6 +183,7 @@ fun ProfileSetupScreen(
 @Composable
 fun GenderCard(
     gender: String,
+    icon: ImageVector,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -189,10 +198,17 @@ fun GenderCard(
             ),
         shape = MaterialTheme.shapes.medium,
     ) {
-        Box(
+        Column(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = gender,
+                modifier = Modifier.size(48.dp),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = gender,
                 style = MaterialTheme.typography.headlineSmall,

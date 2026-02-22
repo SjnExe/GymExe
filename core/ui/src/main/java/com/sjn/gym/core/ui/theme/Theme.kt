@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -33,6 +34,7 @@ private val LightColorScheme =
 fun GymExeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
+    customColor: Int? = null,
     content: @Composable () -> Unit,
 ) {
     val colorScheme =
@@ -40,6 +42,15 @@ fun GymExeTheme(
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            }
+
+            customColor != null -> {
+                val color = Color(customColor)
+                if (darkTheme) {
+                    DarkColorScheme.copy(primary = color, secondary = color, tertiary = color)
+                } else {
+                    LightColorScheme.copy(primary = color, secondary = color, tertiary = color)
+                }
             }
 
             darkTheme -> {

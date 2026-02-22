@@ -143,9 +143,12 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                     isDevMode = BuildConfig.FLAVOR == "dev",
                     onLaunchNetworkInspector = {
                         try {
-                            com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context).let { intent ->
-                                context.startActivity(intent)
-                            }
+                            val chuckerClass = Class.forName("com.chuckerteam.chucker.api.Chucker")
+                            val getLaunchIntentMethod =
+                                chuckerClass.getMethod("getLaunchIntent", android.content.Context::class.java)
+                            val intent =
+                                getLaunchIntentMethod.invoke(null, context) as android.content.Intent
+                            context.startActivity(intent)
                         } catch (e: Exception) {
                             // Handle or log error if Chucker is not available or crashes
                         }

@@ -62,11 +62,18 @@ sudo apt autoremove -y
 sudo apt clean
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew --version
-java -version
+./gradlew --refresh-dependencies
 ```
 
 ## Useful Commands
+
+### Quick Verification (Jules Default Check)
+Run this before submitting any change:
+```bash
+./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest
+```
+
+### Building
 
 ### Building
 *   **Build Debug APK (Dev):** `./gradlew assembleDevDebug`
