@@ -68,7 +68,7 @@ import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.ThemeConfig
 import com.sjn.gym.core.model.ThemeStyle
 import com.sjn.gym.core.model.WeightUnit
-import com.sjn.gym.feature.settings.components.RestoreOptionsDialog
+import com.sjn.gym.core.ui.components.RestoreOptionsDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

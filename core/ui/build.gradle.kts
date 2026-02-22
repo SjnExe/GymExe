@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     // Compose BOM and tooling added by plugin
 
+    implementation(project(":core:model"))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3)

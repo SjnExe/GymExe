@@ -1,4 +1,4 @@
-package com.sjn.gym.feature.settings.components
+package com.sjn.gym.core.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -17,7 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.sjn.gym.core.data.repository.backup.RestoreOptions
+import com.sjn.gym.core.model.backup.RestoreOptions
 
 @Composable
 fun RestoreOptionsDialog(

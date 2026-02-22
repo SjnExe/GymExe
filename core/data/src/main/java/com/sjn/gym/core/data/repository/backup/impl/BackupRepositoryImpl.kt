@@ -3,7 +3,7 @@ package com.sjn.gym.core.data.repository.backup.impl
 import com.sjn.gym.core.data.repository.UserPreferencesRepository
 import com.sjn.gym.core.data.repository.UserProfileRepository
 import com.sjn.gym.core.data.repository.backup.BackupRepository
-import com.sjn.gym.core.data.repository.backup.RestoreOptions
+import com.sjn.gym.core.model.backup.RestoreOptions
 import com.sjn.gym.core.model.UserPreferences
 import com.sjn.gym.core.model.UserProfile
 import com.sjn.gym.core.model.backup.BackupProfile

@@ -10,12 +10,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sjn.gym.core.data.repository.UserProfileRepository
 import com.sjn.gym.core.data.repository.backup.BackupRepository
-import com.sjn.gym.core.data.repository.backup.RestoreOptions
 import com.sjn.gym.core.model.DistanceUnit
 import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.ThemeConfig
 import com.sjn.gym.core.model.ThemeStyle
 import com.sjn.gym.core.model.WeightUnit
+import com.sjn.gym.core.model.backup.RestoreOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -188,11 +188,15 @@ class SettingsViewModel
                     val clipboard = application.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     val clip = ClipData.newPlainText("App Logs", content)
                     clipboard.setPrimaryClip(clip)
+                    _backupStatus.value = BackupStatus.Success("Logs copied to clipboard")
+                } else {
+                    _backupStatus.value = BackupStatus.Error("No logs found")
                 }
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
                 Timber.e(e, "Failed to copy logs")
+                _backupStatus.value = BackupStatus.Error("Failed to copy logs")
             }
         }
 
