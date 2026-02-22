@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sjn.gym.core.model.ThemeConfig
+import com.sjn.gym.core.model.ThemeStyle
 import com.sjn.gym.core.ui.theme.GymExeTheme
 import com.sjn.gym.navigation.GymExeNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,15 +47,16 @@ class MainActivity : ComponentActivity() {
                 is MainActivityUiState.Success -> {
                     // Determine theme
                     val darkTheme =
-                        when (state.userData.themeMode) {
-                            "DARK" -> true
-                            "LIGHT" -> false
-                            else -> isSystemInDarkTheme()
+                        when (state.userData.themeConfig) {
+                            ThemeConfig.DARK -> true
+                            ThemeConfig.LIGHT -> false
+                            ThemeConfig.SYSTEM -> isSystemInDarkTheme()
                         }
 
                     GymExeTheme(
                         darkTheme = darkTheme,
-                        dynamicColor = state.userData.useDynamicColor,
+                        dynamicColor = state.userData.themeStyle == ThemeStyle.DYNAMIC,
+                        customColor = state.userData.customThemeColor,
                     ) {
                         Surface(modifier = Modifier.fillMaxSize()) {
                             GymExeNavHost(

@@ -3,6 +3,9 @@ package com.sjn.gym
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sjn.gym.core.data.repository.UserPreferencesRepository
+import com.sjn.gym.core.data.repository.UserProfileRepository
+import com.sjn.gym.core.model.ThemeConfig
+import com.sjn.gym.core.model.ThemeStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,16 +17,23 @@ import javax.inject.Inject
 class MainViewModel
     @Inject
     constructor(
-        private val repo: UserPreferencesRepository,
+        userPreferencesRepository: UserPreferencesRepository,
+        userProfileRepository: UserProfileRepository,
     ) : ViewModel() {
         val uiState: StateFlow<MainActivityUiState> =
             combine(
-                repo.themeMode,
-                repo.useDynamicColor,
-                repo.isOnboardingCompleted,
-            ) { themeMode, useDynamicColor, isOnboardingCompleted ->
+                userPreferencesRepository.isOnboardingCompleted,
+                userProfileRepository.themeConfig,
+                userProfileRepository.themeStyle,
+                userProfileRepository.customThemeColor,
+            ) { isOnboardingCompleted, themeConfig, themeStyle, customThemeColor ->
                 MainActivityUiState.Success(
-                    UserData(themeMode, useDynamicColor, isOnboardingCompleted),
+                    UserData(
+                        isOnboardingCompleted = isOnboardingCompleted,
+                        themeConfig = themeConfig,
+                        themeStyle = themeStyle,
+                        customThemeColor = customThemeColor,
+                    ),
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -43,7 +53,8 @@ sealed interface MainActivityUiState {
 }
 
 data class UserData(
-    val themeMode: String,
-    val useDynamicColor: Boolean,
     val isOnboardingCompleted: Boolean,
+    val themeConfig: ThemeConfig,
+    val themeStyle: ThemeStyle,
+    val customThemeColor: Int?,
 )

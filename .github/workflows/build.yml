@@ -66,34 +66,62 @@ jobs:
           echo "Calculated Version: $VERSION_NAME ($VERSION_CODE)"
 
       - name: Build with Gradle
+        id: gradle_build
         run: |
+          set +e
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            ./gradlew assembleStableRelease lintStableRelease testStableDebugUnitTest \
-              -PversionName=${{ env.VERSION_NAME }} \
-              -PversionCode=${{ env.VERSION_CODE }} \
-              > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+            TASKS="spotlessCheck assembleStableRelease lintStableRelease testStableDebugUnitTest"
           else
-            ./gradlew assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest \
-              -PversionName=${{ env.VERSION_NAME }} \
-              -PversionCode=${{ env.VERSION_CODE }} \
-              > build_output.log 2>&1 || { cat build_output.log; exit 1; }
+            TASKS="spotlessCheck assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest"
           fi
 
-          cp build_output.log build_${{ env.BUILD_TYPE }}.log
+          echo "Running tasks: $TASKS"
+          ./gradlew $TASKS \
+            -PversionName=${{ env.VERSION_NAME }} \
+            -PversionCode=${{ env.VERSION_CODE }} \
+            --info --stacktrace \
+            > build_output.log 2>&1
 
-      - name: Log Aggregation
+          EXIT_CODE=$?
+          echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
+
+          # Allow next steps to process logs
+          exit 0
+
+      - name: Log Processing & Report Collection
+        if: always()
         run: |
-          grep -E "error|warning|failed|exception" build_output.log > build_summary.txt || true
-          zip build_logs.zip build_output.log build_summary.txt
+          # 1. Summary
+          echo "=== BUILD LOG HEAD ===" > build_summary.txt
+          head -n 100 build_output.log >> build_summary.txt
+          echo -e "\n=== BUILD LOG TAIL ===" >> build_summary.txt
+          tail -n 100 build_output.log >> build_summary.txt
+          echo -e "\n=== ERRORS/WARNINGS ===" >> build_summary.txt
+          grep -iE "error|warning|failed|exception" build_output.log | head -n 500 >> build_summary.txt || true
 
-      - name: Upload Logs
+          # 2. Collect Reports
+          mkdir -p reports/lint
+          mkdir -p reports/tests
+
+          # Find and copy Lint reports (preserve path to avoid overwrite)
+          find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
+          find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
+
+          # Find and copy Test reports directories
+          find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
+
+          # 3. Zip everything
+          zip -r build_logs.zip build_output.log build_summary.txt reports/
+
+      - name: Upload Logs & Reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs
+          name: build-logs-reports
           path: build_logs.zip
 
       - name: Upload APKs (Dev)
-        if: env.BUILD_TYPE == 'dev'
+        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
         uses: actions/upload-artifact@v4
         with:
           name: gym-exe-dev-${{ env.VERSION_NAME }}
@@ -103,7 +131,7 @@ jobs:
           compression-level: 0
 
       - name: Upload APKs (Stable)
-        if: env.BUILD_TYPE == 'stable'
+        if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
         uses: actions/upload-artifact@v4
         with:
           name: gym-exe-stable
@@ -111,18 +139,21 @@ jobs:
             app/build/outputs/apk/stable/release/*.apk
 
       - name: Create Release (Stable)
-        if: env.BUILD_TYPE == 'stable'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            app/build/outputs/apk/stable/release/*.apk
-          name: Release ${{ env.VERSION_NAME }}
-          body: "Stable release ${{ env.VERSION_NAME }}"
-          draft: false
-          prerelease: false
+        if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+           # Find APK paths
+           APK_RELEASE=$(find app/build/outputs/apk/stable/release -name "*.apk" | head -n 1)
+
+           gh release create ${{ env.VERSION_NAME }} \
+             "$APK_RELEASE" \
+             --title "Release ${{ env.VERSION_NAME }}" \
+             --notes "Stable release ${{ env.VERSION_NAME }}" \
+             --target ${{ github.sha }}
 
       - name: Create/Update Dev Release
-        if: env.BUILD_TYPE == 'dev'
+        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_NAME: ${{ env.VERSION_NAME }}
@@ -142,3 +173,11 @@ jobs:
             --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
             --target ${{ github.sha }}
+
+      - name: Check Build Status
+        if: always()
+        run: |
+          if [ "${{ env.EXIT_CODE }}" != "0" ]; then
+            echo "Build failed with exit code ${{ env.EXIT_CODE }}"
+            exit ${{ env.EXIT_CODE }}
+          fi

@@ -8,14 +8,16 @@
 **Philosophy:** Modular architecture, latest stable tools, absolute control over data (backups, logs), and "intelligent" input methods.
 
 ## 2. Environment & Tooling (Implemented)
-*   **Language:** Kotlin
-*   **JDK:** Java 25 (OpenJDK)
+*   **Language:** Kotlin 2.3.10
+*   **JDK:** Java 25 (OpenJDK). Build logic uses Java 25 Toolchain.
 *   **Build System:** Gradle 9.3.1 (Wrapper included)
 *   **Android SDK:** Compile 36, Min 26.
 *   **UI Framework:** Jetpack Compose (Material 3).
 *   **Dependency Injection:** Hilt.
 *   **Database:** Room (SQLite).
 *   **CI/CD:** GitHub Actions (Build, Test, Release).
+*   **Code Quality:** Spotless (Ktlint), Detekt (Strict Mode with `warningsAsErrors`), Android Lint.
+*   **Dev Tools:** Chucker (Network Inspection), Timber (Logging), LeakCanary.
 
 ## 3. Architecture (Implemented)
 The app follows a modular architecture:
@@ -33,16 +35,12 @@ The app follows a modular architecture:
 **Features:**
 *   **JDK 25 Setup**: Uses Temurin distribution.
 *   **Caching**: Gradle build/cache restored effectively.
-*   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity (Secrets removed).
+*   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity.
 *   **Versioning**:
     *   **Stable**: Tag `v*` -> Version `1.2.3`.
     *   **Dev**: `v{LatestTag}-dev-PR{Num}.{Commits}` or `v{LatestTag}-dev-run{Num}`.
     *   **Fallback**: Defaults to `v0.0.0` if no tags exist.
     *   **Version Code**: `Total Commits - 1`.
-*   **Releases**:
-    *   **Dev**: Deletes floating `dev` tag/release and recreates it with new APKs (individual assets, no zip).
-    *   **Stable**: Creates standard release.
-    *   **Release Notes**: Uses specific format for parsing: `Development build triggered by {method}.\nVersion: {version_string}`.
 *   **Flavors**: Builds `dev` (debuggable, suffixed) and `stable` (minified) variants.
 *   **Artifacts**: Uploads `gym-exe-dev-{version}` (uncompressed zip artifact).
 
@@ -54,7 +52,8 @@ The app follows a modular architecture:
 *   `gymexe.android.library`: Common Android Library config.
 *   `gymexe.android.compose`: Jetpack Compose setup.
 *   `gymexe.android.hilt`: Hilt/KSP setup.
-**Next Step:** Migrate module `build.gradle.kts` files to use `plugins { id("gymexe.android.application") ... }`.
+*   `gymexe.detekt`: Detekt configuration (Strict).
+*   `gymexe.spotless`: Spotless configuration.
 
 ## 6. Handover Checklist & Status
 
@@ -64,11 +63,13 @@ The app follows a modular architecture:
 - [x] **Gradle Setup**: `gradle.properties` (JVM args, optimizations), `libs.versions.toml` configured.
 - [x] **Signing**: `debug.keystore` generated and tracked. `build.gradle.kts` uses it.
 - [x] **CI/CD Pipeline**: `build.yml` robust, correct versioning, artifact upload fixed.
+- [x] **Java 25 Upgrade**: Toolchains configured, Gradle plugins updated.
+- [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled.
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
 - [x] **Icons**: Vector Assets (Adaptive) created.
 - [x] **Theming Engine**: Material 3, Dark/Light/System mode, Dynamic Color support.
-- [x] **Navigation**: Type-safe Compose Navigation set up.
+- [x] **Navigation**: Type-safe Compose Navigation set up (`GymExeNavHost`).
 - [x] **Build Logic**: Infrastructure created.
 
 ### Phase 3: Onboarding (Setup Wizard) (Partially Implemented)
@@ -79,14 +80,12 @@ The app follows a modular architecture:
 - [ ] **Equipment Setup**: Selection UI needed (None, Full Gym, Specific Machines/Weights).
 
 ### Phase 4: Settings Feature (Partially Implemented)
-- [x] **Theme Settings**: Functional UI for switching themes.
-- [ ] **Updater**: Logic to check `dev` release notes using the format `Version: ...` is pending.
-- [ ] **Backup & Restore**:
-    *   **Format**: `.gym` file (compressed ZIP containing DB + Prefs).
-    *   **Location**: `Documents/GymExe`.
-    *   **Restore**: Two modes (Auto-detect / Manual Select).
-- [ ] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
-- [ ] **Developer Options**: Copy Logs / Save Logs.
+- [x] **Theme Settings**: Functional UI for switching themes (System/Light/Dark).
+- [x] **Settings UI**: "Hexium" style implementation (Segmented Buttons, Developer Options).
+- [x] **Updater**: Mock logic implemented. Shows version from BuildConfig.
+- [x] **Backup & Restore**: Functional integration with `BackupRepository` (File picker/saver).
+- [x] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
+- [x] **Developer Options**: Copy Logs / Save Logs, Network Inspector launch.
 - [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
 ### Phase 5: Data Layer (Room) (Implemented)
@@ -112,21 +111,37 @@ The app follows a modular architecture:
 ## 7. Detailed Instructions for Next Session
 
 1.  **Migrate to Convention Plugins**:
-    *   Refactor `app/build.gradle.kts`: Use `id("gymexe.android.application")`, `id("gymexe.android.compose")`, `id("gymexe.android.hilt")`.
-    *   Refactor `core/ui`: `gymexe.android.library`, `gymexe.android.compose`.
-    *   Refactor `core/data`: `gymexe.android.library`, `gymexe.android.hilt`.
-    *   Refactor `feature/*`: `gymexe.android.library`, `gymexe.android.compose`, `gymexe.android.hilt`.
+    *   Refactor module `build.gradle.kts` files to use the convention plugins.
 
-2.  **Updater Logic**:
-    *   Fetch `https://api.github.com/repos/SjnExe/GymExe/releases/tags/dev`.
-    *   Parse `body` to find line starting with `Version: `.
-    *   Compare with `BuildConfig.VERSION_NAME`.
-    *   Show Update UI if newer.
+2.  **Onboarding Flow Completion**:
+    *   Implement screens for Profile Setup, Experience Level, and Equipment Selection.
+    *   Connect to `UserPreferencesRepository`.
 
-3.  **Backup Implementation**:
-    *   Create `BackupManager`.
-    *   Zip `getDatabasePath("gym_database.db")` and shared prefs XML.
-    *   Handle `Documents/GymExe` permissions (SAF or standard storage depending on Android version).
-
-4.  **Workout UI Polish**:
+3.  **Workout UI Polish**:
     *   Implement `AnnotatedString` building for Syntax Highlighting in `WorkoutScreen` text field.
+    *   Improve Exercise List UI.
+
+4.  **Database Migration**:
+    *   Handle data persistence during updates.
+
+## 8. Improvements & Optimizations (Backlog)
+
+### Build Logic & Infrastructure
+- [ ] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
+- [ ] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
+- [ ] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
+- [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.
+
+### Developer Experience (DX)
+- [x] **Setup Script**: Integrated into `AGENTS.md` for centralized environment initialization.
+- [ ] **Pre-Push Hook**: Create `scripts/pre-push.sh` to run critical checks locally before pushing.
+- [ ] **Dependency Bundling**: Group related dependencies in `libs.versions.toml` (e.g., `compose-ui`, `unit-test`) for cleaner build files.
+
+### Code Quality & Architecture
+- [ ] **Konsist Tests**: Integrate `Konsist` to enforce architectural rules (e.g., "Repositories must reside in `data` package").
+- [ ] **Detekt Refinement**: Review strict rules (e.g., `MagicNumber` for UI definitions) and adjust excludes.
+- [ ] **Module Graph**: Automate generation of Mermaid diagrams for `README.md` using the `moduleGraph` plugin.
+
+### CI/CD Enhancements
+- [ ] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
+- [ ] **Release Drafter**: Consider automating release notes generation further.
