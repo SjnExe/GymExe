@@ -53,12 +53,6 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 The following script is already ran on Jules environment. This ensures all system dependencies are updated.
 
 ```bash
-#!/bin/bash
-set -e
-
-echo "🚀 Setting up GymExe environment..."
-
-# 1. Install System Dependencies
 sudo apt update
 sudo apt full-upgrade -y
 sudo apt install -y openjdk-25-jdk
@@ -66,20 +60,9 @@ sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
 echo y | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0"
 sudo apt autoremove -y
 sudo apt clean
-
-# 2. Configure Environment Variables
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-
-# 3. Verify Installation
-./gradlew --version
-java -version
-
-# 4. Update Project Dependencies
-echo "📦 Updating dependencies..."
 ./gradlew --refresh-dependencies
-
-echo "🎉 Setup complete!"
 ```
 
 ## Useful Commands
