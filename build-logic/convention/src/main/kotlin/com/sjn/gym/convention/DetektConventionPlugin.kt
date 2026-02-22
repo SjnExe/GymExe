@@ -22,7 +22,7 @@ class DetektConventionPlugin : Plugin<Project> {
             }
 
             tasks.withType<Detekt>().configureEach {
-                jvmTarget = "21"
+                jvmTarget = "25"
                 reports {
                     html.required.set(true)
                     xml.required.set(true)

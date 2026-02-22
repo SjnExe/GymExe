@@ -1,11 +1,15 @@
-@file:Suppress("LongMethod", "CyclomaticComplexMethod")
+@file:Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList", "TooManyFunctions")
 
 package com.sjn.gym.feature.settings
 
 import android.net.Uri
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,19 +29,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -67,6 +75,8 @@ import com.sjn.gym.feature.settings.components.RestoreOptionsDialog
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     isDevMode: Boolean = false,
+    onNavigateUp: () -> Unit = {},
+    onLaunchNetworkInspector: () -> Unit = {},
 ) {
     val state = rememberSettingsState(viewModel)
     val context = LocalContext.current
@@ -77,8 +87,6 @@ fun SettingsScreen(
     var restoreUri by remember { mutableStateOf<Uri?>(null) }
 
     // State for dialogs
-    var showThemeConfigDialog by remember { mutableStateOf(false) }
-    var showThemeStyleDialog by remember { mutableStateOf(false) }
     var showWeightUnitDialog by remember { mutableStateOf(false) }
     var showHeightUnitDialog by remember { mutableStateOf(false) }
     var showDistanceUnitDialog by remember { mutableStateOf(false) }
@@ -137,7 +145,19 @@ fun SettingsScreen(
     LoadingOverlay(state.backupStatus, state.updateStatus)
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Settings") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
@@ -147,62 +167,116 @@ fun SettingsScreen(
                     .padding(padding)
                     .verticalScroll(rememberScrollState()),
         ) {
-            AppearanceSection(
-                state =
-                    AppearanceState(
-                        themeConfig = state.themeConfig,
-                        themeStyle = state.themeStyle,
-                        customThemeColor = state.customThemeColor,
-                    ),
-                onThemeConfigClick = { showThemeConfigDialog = true },
-                onThemeStyleClick = { showThemeStyleDialog = true },
-                onColorSelected = { viewModel.setCustomThemeColor(it) },
-            )
-            HorizontalDivider()
+            // Theme Section
+            SettingsSectionHeader("Theme")
 
-            UnitsSection(
-                state =
-                    UnitsState(
-                        weightUnit = state.weightUnit,
-                        heightUnit = state.heightUnit,
-                        distanceUnit = state.distanceUnit,
-                    ),
-                onWeightUnitClick = { showWeightUnitDialog = true },
-                onHeightUnitClick = { showHeightUnitDialog = true },
-                onDistanceUnitClick = { showDistanceUnitDialog = true },
+            ThemeSelectionRow(
+                themeConfig = state.themeConfig,
+                onThemeSelected = { viewModel.setThemeConfig(it) },
             )
-            HorizontalDivider()
 
-            DataSection(
-                createDocumentLauncher = createDocumentLauncher,
-                openDocumentLauncher = openDocumentLauncher,
+            SettingsSwitchRow(
+                title = "Dynamic Colors (Material You)",
+                checked = state.themeStyle == ThemeStyle.DYNAMIC,
+                onCheckedChange = { checked ->
+                    viewModel.setThemeStyle(if (checked) ThemeStyle.DYNAMIC else ThemeStyle.CUSTOM)
+                },
             )
-            HorizontalDivider()
 
-            if (isDevMode) {
-                DevelopmentSection(
-                    onCopyLogs = { viewModel.copyLogs() },
-                    onSaveLogs = { viewModel.saveLogs(context) },
+            AnimatedVisibility(
+                visible = state.themeStyle != ThemeStyle.DYNAMIC,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                ColorPicker(
+                    selectedColor = state.customThemeColor ?: android.graphics.Color.BLUE,
+                    onColorSelected = { viewModel.setCustomThemeColor(it) },
                 )
-                HorizontalDivider()
             }
 
-            AboutSection(
-                appVersion = viewModel.appVersion,
-                onCheckForUpdates = { viewModel.checkForUpdates() },
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+            // Units Section
+            SettingsSectionHeader("Units")
+            SettingsDetailRow(
+                title = "Weight Unit",
+                value = state.weightUnit.name,
+                onClick = { showWeightUnitDialog = true },
             )
+            SettingsDetailRow(
+                title = "Height Unit",
+                value = state.heightUnit.name,
+                onClick = { showHeightUnitDialog = true },
+            )
+            SettingsDetailRow(
+                title = "Distance Unit",
+                value = state.distanceUnit.name,
+                onClick = { showDistanceUnitDialog = true },
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+            // Data Section
+            SettingsSectionHeader("Data Management")
+            SettingsActionRow(
+                title = "Backup Data",
+                subtitle = "Save your data to a file",
+                onClick = { createDocumentLauncher.launch("backup.gym") },
+            )
+            SettingsActionRow(
+                title = "Restore Data",
+                subtitle = "Import data from a file",
+                onClick = { openDocumentLauncher.launch(arrayOf("*/*")) },
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+            // Developer Options
+            if (isDevMode) {
+                SettingsSectionHeader("Developer Options")
+                SettingsActionRow(
+                    title = "Open Network Inspector",
+                    onClick = onLaunchNetworkInspector,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    FilledTonalButton(
+                        onClick = { viewModel.copyLogs() },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Copy Logs")
+                    }
+                    FilledTonalButton(
+                        onClick = { viewModel.saveLogs(context) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Save Logs")
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            } else {
+                // If not dev mode, show version info here
+                AboutSection(
+                    appVersion = viewModel.appVersion,
+                    onCheckForUpdates = { viewModel.checkForUpdates() },
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
     SettingsDialogs(
         state = state,
-        showThemeConfigDialog = showThemeConfigDialog,
-        showThemeStyleDialog = showThemeStyleDialog,
         showWeightUnitDialog = showWeightUnitDialog,
         showHeightUnitDialog = showHeightUnitDialog,
         showDistanceUnitDialog = showDistanceUnitDialog,
-        onDismissThemeConfig = { showThemeConfigDialog = false },
-        onDismissThemeStyle = { showThemeStyleDialog = false },
         onDismissWeightUnit = { showWeightUnitDialog = false },
         onDismissHeightUnit = { showHeightUnitDialog = false },
         onDismissDistanceUnit = { showDistanceUnitDialog = false },
@@ -211,39 +285,16 @@ fun SettingsScreen(
 }
 
 @Composable
-@Suppress("LongParameterList")
 fun SettingsDialogs(
     state: SettingsState,
-    showThemeConfigDialog: Boolean,
-    showThemeStyleDialog: Boolean,
     showWeightUnitDialog: Boolean,
     showHeightUnitDialog: Boolean,
     showDistanceUnitDialog: Boolean,
-    onDismissThemeConfig: () -> Unit,
-    onDismissThemeStyle: () -> Unit,
     onDismissWeightUnit: () -> Unit,
     onDismissHeightUnit: () -> Unit,
     onDismissDistanceUnit: () -> Unit,
     viewModel: SettingsViewModel,
 ) {
-    if (showThemeConfigDialog) {
-        SelectionDialog(
-            title = "Theme",
-            options = ThemeConfig.entries,
-            selectedOption = state.themeConfig,
-            onOptionSelected = { viewModel.setThemeConfig(it) },
-            onDismissRequest = onDismissThemeConfig,
-        )
-    }
-    if (showThemeStyleDialog) {
-        SelectionDialog(
-            title = "Style",
-            options = ThemeStyle.entries,
-            selectedOption = state.themeStyle,
-            onOptionSelected = { viewModel.setThemeStyle(it) },
-            onDismissRequest = onDismissThemeStyle,
-        )
-    }
     if (showWeightUnitDialog) {
         SelectionDialog(
             title = "Weight Unit",
@@ -270,6 +321,124 @@ fun SettingsDialogs(
             onOptionSelected = { viewModel.setDistanceUnit(it) },
             onDismissRequest = onDismissDistanceUnit,
         )
+    }
+}
+
+@Composable
+fun SettingsSectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ThemeSelectionRow(
+    themeConfig: ThemeConfig,
+    onThemeSelected: (ThemeConfig) -> Unit,
+) {
+    val options = listOf(ThemeConfig.SYSTEM, ThemeConfig.LIGHT, ThemeConfig.DARK)
+    val labels = listOf("System", "Light", "Dark")
+    val selectedIndex = options.indexOf(themeConfig)
+
+    SingleChoiceSegmentedButtonRow(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        options.forEachIndexed { index, option ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                onClick = { onThemeSelected(option) },
+                selected = index == selectedIndex,
+                label = { Text(labels[index]) },
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsSwitchRow(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable { onCheckedChange(!checked) }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+@Composable
+fun SettingsDetailRow(
+    title: String,
+    value: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+fun SettingsActionRow(
+    title: String,
+    subtitle: String? = null,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        if (subtitle != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -342,126 +511,20 @@ fun LoadingOverlay(
     }
 }
 
-data class AppearanceState(
-    val themeConfig: ThemeConfig,
-    val themeStyle: ThemeStyle,
-    val customThemeColor: Int?,
-)
-
-@Composable
-fun AppearanceSection(
-    state: AppearanceState,
-    onThemeConfigClick: () -> Unit,
-    onThemeStyleClick: () -> Unit,
-    onColorSelected: (Int) -> Unit,
-) {
-    SettingsSectionTitle("Appearance")
-    ListItem(
-        headlineContent = { Text("Theme") },
-        supportingContent = { Text(state.themeConfig.name) },
-        modifier = Modifier.clickable { onThemeConfigClick() },
-    )
-    ListItem(
-        headlineContent = { Text("Style") },
-        supportingContent = { Text(state.themeStyle.name) },
-        modifier = Modifier.clickable { onThemeStyleClick() },
-    )
-
-    if (state.themeStyle == ThemeStyle.CUSTOM) {
-        ListItem(
-            headlineContent = { Text("Custom Color") },
-            supportingContent = {
-                ColorPicker(
-                    selectedColor = state.customThemeColor ?: android.graphics.Color.BLUE,
-                    onColorSelected = onColorSelected,
-                )
-            },
-        )
-    }
-}
-
-data class UnitsState(
-    val weightUnit: WeightUnit,
-    val heightUnit: HeightUnit,
-    val distanceUnit: DistanceUnit,
-)
-
-@Composable
-fun UnitsSection(
-    state: UnitsState,
-    onWeightUnitClick: () -> Unit,
-    onHeightUnitClick: () -> Unit,
-    onDistanceUnitClick: () -> Unit,
-) {
-    SettingsSectionTitle("Units")
-    ListItem(
-        headlineContent = { Text("Weight Unit") },
-        supportingContent = { Text(state.weightUnit.name) },
-        modifier = Modifier.clickable { onWeightUnitClick() },
-    )
-    ListItem(
-        headlineContent = { Text("Height Unit") },
-        supportingContent = { Text(state.heightUnit.name) },
-        modifier = Modifier.clickable { onHeightUnitClick() },
-    )
-    ListItem(
-        headlineContent = { Text("Distance Unit") },
-        supportingContent = { Text(state.distanceUnit.name) },
-        modifier = Modifier.clickable { onDistanceUnitClick() },
-    )
-}
-
-@Composable
-fun DataSection(
-    createDocumentLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    openDocumentLauncher: ManagedActivityResultLauncher<Array<String>, Uri?>,
-) {
-    SettingsSectionTitle("Data")
-    ListItem(
-        headlineContent = { Text("Backup Data") },
-        supportingContent = { Text("Save your data to a file") },
-        leadingContent = { Icon(Icons.Default.Backup, contentDescription = null) },
-        modifier = Modifier.clickable { createDocumentLauncher.launch("backup.gym") },
-    )
-    ListItem(
-        headlineContent = { Text("Restore Data") },
-        supportingContent = { Text("Import data from a file") },
-        leadingContent = { Icon(Icons.Default.Restore, contentDescription = null) },
-        modifier = Modifier.clickable { openDocumentLauncher.launch(arrayOf("*/*")) },
-    )
-}
-
-@Composable
-fun DevelopmentSection(
-    onCopyLogs: () -> Unit,
-    onSaveLogs: () -> Unit,
-) {
-    SettingsSectionTitle("Development")
-    ListItem(
-        headlineContent = { Text("Copy Logs") },
-        supportingContent = { Text("Copy logs to clipboard") },
-        modifier = Modifier.clickable { onCopyLogs() },
-    )
-    ListItem(
-        headlineContent = { Text("Save Logs") },
-        supportingContent = { Text("Save logs to file") },
-        modifier = Modifier.clickable { onSaveLogs() },
-    )
-}
-
 @Composable
 fun AboutSection(
     appVersion: String,
     onCheckForUpdates: () -> Unit,
 ) {
     SettingsSectionTitle("About")
-    ListItem(
-        headlineContent = { Text("Version") },
-        supportingContent = { Text(appVersion) },
+    SettingsDetailRow(
+        title = "Version",
+        value = appVersion,
+        onClick = {},
     )
-    ListItem(
-        headlineContent = { Text("Check for Updates") },
-        modifier = Modifier.clickable { onCheckForUpdates() },
+    SettingsActionRow(
+        title = "Check for Updates",
+        onClick = onCheckForUpdates,
     )
 }
 
@@ -496,7 +559,7 @@ fun rememberSettingsState(viewModel: SettingsViewModel): SettingsState {
 fun SettingsSectionTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp),
     )
@@ -586,7 +649,10 @@ fun ColorPicker(
     val colors = ThemeColors.PALETTE
 
     FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

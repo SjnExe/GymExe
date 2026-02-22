@@ -16,7 +16,7 @@
 *   **Dependency Injection:** Hilt.
 *   **Database:** Room (SQLite).
 *   **CI/CD:** GitHub Actions (Build, Test, Release).
-*   **Code Quality:** Spotless (Ktlint), Detekt (Strict Mode, currently skipped on Java 25 env), Android Lint.
+*   **Code Quality:** Spotless (Ktlint), Detekt (Strict Mode with `warningsAsErrors`), Android Lint.
 *   **Dev Tools:** Chucker (Network Inspection), Timber (Logging), LeakCanary.
 
 ## 3. Architecture (Implemented)
@@ -35,16 +35,12 @@ The app follows a modular architecture:
 **Features:**
 *   **JDK 25 Setup**: Uses Temurin distribution.
 *   **Caching**: Gradle build/cache restored effectively.
-*   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity (Secrets removed).
+*   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity.
 *   **Versioning**:
     *   **Stable**: Tag `v*` -> Version `1.2.3`.
     *   **Dev**: `v{LatestTag}-dev-PR{Num}.{Commits}` or `v{LatestTag}-dev-run{Num}`.
     *   **Fallback**: Defaults to `v0.0.0` if no tags exist.
     *   **Version Code**: `Total Commits - 1`.
-*   **Releases**:
-    *   **Dev**: Deletes floating `dev` tag/release and recreates it with new APKs (individual assets, no zip).
-    *   **Stable**: Creates standard release.
-    *   **Release Notes**: Uses specific format for parsing: `Development build triggered by {method}.\nVersion: {version_string}`.
 *   **Flavors**: Builds `dev` (debuggable, suffixed) and `stable` (minified) variants.
 *   **Artifacts**: Uploads `gym-exe-dev-{version}` (uncompressed zip artifact).
 
@@ -56,7 +52,8 @@ The app follows a modular architecture:
 *   `gymexe.android.library`: Common Android Library config.
 *   `gymexe.android.compose`: Jetpack Compose setup.
 *   `gymexe.android.hilt`: Hilt/KSP setup.
-**Next Step:** Migrate module `build.gradle.kts` files to use `plugins { id("gymexe.android.application") ... }`.
+*   `gymexe.detekt`: Detekt configuration (Strict).
+*   `gymexe.spotless`: Spotless configuration.
 
 ## 6. Handover Checklist & Status
 
@@ -67,12 +64,12 @@ The app follows a modular architecture:
 - [x] **Signing**: `debug.keystore` generated and tracked. `build.gradle.kts` uses it.
 - [x] **CI/CD Pipeline**: `build.yml` robust, correct versioning, artifact upload fixed.
 - [x] **Java 25 Upgrade**: Toolchains configured, Gradle plugins updated.
-- [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled (conditional on JDK).
+- [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled.
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
 - [x] **Icons**: Vector Assets (Adaptive) created.
 - [x] **Theming Engine**: Material 3, Dark/Light/System mode, Dynamic Color support.
-- [x] **Navigation**: Type-safe Compose Navigation set up.
+- [x] **Navigation**: Type-safe Compose Navigation set up (`GymExeNavHost`).
 - [x] **Build Logic**: Infrastructure created.
 
 ### Phase 3: Onboarding (Setup Wizard) (Partially Implemented)
@@ -83,15 +80,12 @@ The app follows a modular architecture:
 - [ ] **Equipment Setup**: Selection UI needed (None, Full Gym, Specific Machines/Weights).
 
 ### Phase 4: Settings Feature (Partially Implemented)
-- [x] **Theme Settings**: Functional UI for switching themes.
-- [x] **Settings UI**: Improved layout with cleaner list items and alignment.
+- [x] **Theme Settings**: Functional UI for switching themes (System/Light/Dark).
+- [x] **Settings UI**: "Hexium" style implementation (Segmented Buttons, Developer Options).
 - [x] **Updater**: Mock logic implemented. Shows version from BuildConfig.
-- [ ] **Backup & Restore**:
-    *   **Format**: `.gym` file (compressed ZIP containing DB + Prefs).
-    *   **Location**: `Documents/GymExe`.
-    *   **Restore**: Two modes (Auto-detect / Manual Select).
+- [x] **Backup & Restore**: Functional integration with `BackupRepository` (File picker/saver).
 - [x] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
-- [ ] **Developer Options**: Copy Logs / Save Logs.
+- [x] **Developer Options**: Copy Logs / Save Logs, Network Inspector launch.
 - [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
 ### Phase 5: Data Layer (Room) (Implemented)
@@ -117,21 +111,15 @@ The app follows a modular architecture:
 ## 7. Detailed Instructions for Next Session
 
 1.  **Migrate to Convention Plugins**:
-    *   Refactor `app/build.gradle.kts`: Use `id("gymexe.android.application")`, `id("gymexe.android.compose")`, `id("gymexe.android.hilt")`.
-    *   Refactor `core/ui`: `gymexe.android.library`, `gymexe.android.compose`.
-    *   Refactor `core/data`: `gymexe.android.library`, `gymexe.android.hilt`.
-    *   Refactor `feature/*`: `gymexe.android.library`, `gymexe.android.compose`, `gymexe.android.hilt`.
+    *   Refactor module `build.gradle.kts` files to use the convention plugins.
 
-2.  **Updater Logic**:
-    *   Fetch `https://api.github.com/repos/SjnExe/GymExe/releases/tags/dev`.
-    *   Parse `body` to find line starting with `Version: `.
-    *   Compare with `BuildConfig.VERSION_NAME`.
-    *   Show Update UI if newer.
+2.  **Onboarding Flow Completion**:
+    *   Implement screens for Profile Setup, Experience Level, and Equipment Selection.
+    *   Connect to `UserPreferencesRepository`.
 
-3.  **Backup Implementation**:
-    *   Create `BackupManager`.
-    *   Zip `getDatabasePath("gym_database.db")` and shared prefs XML.
-    *   Handle `Documents/GymExe` permissions (SAF or standard storage depending on Android version).
-
-4.  **Workout UI Polish**:
+3.  **Workout UI Polish**:
     *   Implement `AnnotatedString` building for Syntax Highlighting in `WorkoutScreen` text field.
+    *   Improve Exercise List UI.
+
+4.  **Database Migration**:
+    *   Handle data persistence during updates.
