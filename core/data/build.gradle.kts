@@ -41,6 +41,10 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.okhttp)
 
+    // Chucker
+    debugImplementation(libs.chucker.debug)
+    releaseImplementation(libs.chucker.release)
+
     // Hilt handled by convention plugin (hilt-android, hilt-compiler)
 
     // Coroutines

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -22,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.sjn.gym.BuildConfig
 import com.sjn.gym.R
 import com.sjn.gym.feature.onboarding.OnboardingScreen
 import com.sjn.gym.feature.profile.ProfileScreen
@@ -135,7 +137,20 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                 ExerciseListScreen()
             }
             composable<Settings> {
-                SettingsScreen()
+                val context = LocalContext.current
+                SettingsScreen(
+                    onNavigateUp = { navController.navigateUp() },
+                    isDevMode = BuildConfig.FLAVOR == "dev",
+                    onLaunchNetworkInspector = {
+                        try {
+                            com.chuckerteam.chucker.api.Chucker.getLaunchIntent(context).let { intent ->
+                                context.startActivity(intent)
+                            }
+                        } catch (e: Exception) {
+                            // Handle or log error if Chucker is not available or crashes
+                        }
+                    },
+                )
             }
             composable<Profile> {
                 ProfileScreen(

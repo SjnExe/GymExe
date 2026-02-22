@@ -2,12 +2,16 @@
 
 This file contains instructions for AI agents working on the **GymExe** repository.
 
+## Core Directives for Agents
+- **NO LOG REPORTS:** Do not generate file-based log reports (e.g., `error_log.txt`) or paste massive logs into the chat. Users view logs directly in their terminal by re-running commands.
+- **Deep Planning:** Always engage in "Deep Planning Mode" before starting a task. Verify requirements through questions until absolute certainty is reached.
+
 ## Project Context
 - **Name:** GymExe
 - **Package:** `com.sjn.gym`
 - **Purpose:** A modular, offline-first workout tracker for gym goers.
 - **Tech Stack:**
-  - Android (Kotlin)
+  - Android (Kotlin 2.3.10)
   - Jetpack Compose (UI)
   - Hilt (Dependency Injection)
   - Room (Local Database)
@@ -24,6 +28,9 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 - **Testing:**
   - Unit Tests for ViewModels and Domain logic.
   - UI Tests using Compose Test Rule.
+- **Linting:** Strict mode enabled.
+  - **Detekt:** `warningsAsErrors` is ON.
+  - **Spotless:** Enforces Ktlint formatting.
 
 ## Security
 - **Signing:** Uses `app/debug.keystore` (tracked in git) with default credentials for simplicity.
@@ -31,7 +38,7 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 
 ## Build & Release
 - **Flavors:**
-  - `dev`: For development and PR checks (Debuggable, suffix `-dev`).
+  - `dev`: For development and PR checks (Debuggable, suffix `-dev`). Includes Dev Tools (Chucker, LeakCanary, File Logging).
   - `stable`: For production release (Minified).
 - **Versioning:** Automated via GitHub Actions.
   - Strategy: `v{Tag}-dev-PR{Num}.{Commits}`
@@ -69,7 +76,7 @@ java -version
 ### Quality & Testing
 *   **Run Lint:** `./gradlew lintDevDebug`
 *   **Run Unit Tests:** `./gradlew testDevDebugUnitTest`
-*   **Format Code:** `./gradlew spotlessApply` (if configured)
+*   **Format Code:** `./gradlew spotlessApply`
 
 ### Modularization
 *   **Sync Project:** `./gradlew --refresh-dependencies`

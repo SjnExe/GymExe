@@ -1,12 +1,21 @@
-*.iml
-.gradle
-local.properties
-.idea
+# IntelliJ IDEA
+.idea/
 .DS_Store
-**/build/
-captures
-.externalNativeBuild
-.cxx
+*.iml
+*.iws
+*.ipr
+*.swp
+
+# Gradle
+.gradle/
+build/
+.kotlin/
+gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/libs.versions.toml
+
+# Android
+local.properties
 .settings/
 .project
 .classpath
@@ -15,9 +24,9 @@ captures
 *.apk
 *.dex
 *.class
-bin/
-gen/
-out/
+/bin
+/gen
+/out
 .mapping
 listing.txt
 *.jks
@@ -25,3 +34,16 @@ listing.txt
 !app/debug.keystore
 google-services.json
 secrets.properties
+*.log
+**/build/
+captures/
+.externalNativeBuild
+.cxx
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
