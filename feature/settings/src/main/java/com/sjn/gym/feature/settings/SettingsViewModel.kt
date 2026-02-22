@@ -8,6 +8,7 @@ import com.sjn.gym.core.data.repository.UserProfileRepository
 import com.sjn.gym.core.data.repository.backup.BackupRepository
 import com.sjn.gym.core.data.repository.backup.RestoreOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -49,6 +50,11 @@ class SettingsViewModel
 
         private val _backupStatus = MutableStateFlow<BackupStatus>(BackupStatus.Idle)
         val backupStatus: StateFlow<BackupStatus> = _backupStatus.asStateFlow()
+
+        private val _updateStatus = MutableStateFlow<UpdateStatus>(UpdateStatus.Idle)
+        val updateStatus: StateFlow<UpdateStatus> = _updateStatus.asStateFlow()
+
+        val appVersion: String = com.sjn.gym.feature.settings.BuildConfig.VERSION_NAME
 
         fun setTheme(mode: String) {
             viewModelScope.launch {
@@ -105,8 +111,20 @@ class SettingsViewModel
             }
         }
 
+        fun checkForUpdates() {
+            viewModelScope.launch {
+                _updateStatus.value = UpdateStatus.Checking
+                delay(2000) // Mock network delay
+                _updateStatus.value = UpdateStatus.NoUpdate
+            }
+        }
+
         fun clearStatus() {
             _backupStatus.value = BackupStatus.Idle
+        }
+
+        fun clearUpdateStatus() {
+            _updateStatus.value = UpdateStatus.Idle
         }
     }
 
@@ -124,4 +142,18 @@ sealed class BackupStatus {
     data class Error(
         val message: String,
     ) : BackupStatus()
+}
+
+sealed class UpdateStatus {
+    object Idle : UpdateStatus()
+
+    object Checking : UpdateStatus()
+
+    object NoUpdate : UpdateStatus()
+
+    object UpdateAvailable : UpdateStatus()
+
+    data class Error(
+        val message: String,
+    ) : UpdateStatus()
 }

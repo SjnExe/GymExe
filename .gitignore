@@ -1,12 +1,12 @@
 *.iml
 .gradle
-local.properties
-.idea
+.idea/
 .DS_Store
-**/build/
-captures
+/build
+/captures
 .externalNativeBuild
 .cxx
+local.properties
 .settings/
 .project
 .classpath
@@ -15,9 +15,9 @@ captures
 *.apk
 *.dex
 *.class
-bin/
-gen/
-out/
+/bin
+/gen
+/out
 .mapping
 listing.txt
 *.jks
@@ -25,3 +25,5 @@ listing.txt
 !app/debug.keystore
 google-services.json
 secrets.properties
+*.log
+**/build/

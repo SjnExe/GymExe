@@ -8,14 +8,16 @@
 **Philosophy:** Modular architecture, latest stable tools, absolute control over data (backups, logs), and "intelligent" input methods.
 
 ## 2. Environment & Tooling (Implemented)
-*   **Language:** Kotlin
-*   **JDK:** Java 25 (OpenJDK)
+*   **Language:** Kotlin 2.3.10
+*   **JDK:** Java 25 (OpenJDK). Build logic uses Java 25 Toolchain.
 *   **Build System:** Gradle 9.3.1 (Wrapper included)
 *   **Android SDK:** Compile 36, Min 26.
 *   **UI Framework:** Jetpack Compose (Material 3).
 *   **Dependency Injection:** Hilt.
 *   **Database:** Room (SQLite).
 *   **CI/CD:** GitHub Actions (Build, Test, Release).
+*   **Code Quality:** Spotless (Ktlint), Detekt (Strict Mode, currently skipped on Java 25 env), Android Lint.
+*   **Dev Tools:** Chucker (Network Inspection), Timber (Logging), LeakCanary.
 
 ## 3. Architecture (Implemented)
 The app follows a modular architecture:
@@ -64,6 +66,8 @@ The app follows a modular architecture:
 - [x] **Gradle Setup**: `gradle.properties` (JVM args, optimizations), `libs.versions.toml` configured.
 - [x] **Signing**: `debug.keystore` generated and tracked. `build.gradle.kts` uses it.
 - [x] **CI/CD Pipeline**: `build.yml` robust, correct versioning, artifact upload fixed.
+- [x] **Java 25 Upgrade**: Toolchains configured, Gradle plugins updated.
+- [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled (conditional on JDK).
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
 - [x] **Icons**: Vector Assets (Adaptive) created.
@@ -80,12 +84,13 @@ The app follows a modular architecture:
 
 ### Phase 4: Settings Feature (Partially Implemented)
 - [x] **Theme Settings**: Functional UI for switching themes.
-- [ ] **Updater**: Logic to check `dev` release notes using the format `Version: ...` is pending.
+- [x] **Settings UI**: Improved layout with cleaner list items and alignment.
+- [x] **Updater**: Mock logic implemented. Shows version from BuildConfig.
 - [ ] **Backup & Restore**:
     *   **Format**: `.gym` file (compressed ZIP containing DB + Prefs).
     *   **Location**: `Documents/GymExe`.
     *   **Restore**: Two modes (Auto-detect / Manual Select).
-- [ ] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
+- [x] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
 - [ ] **Developer Options**: Copy Logs / Save Logs.
 - [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
