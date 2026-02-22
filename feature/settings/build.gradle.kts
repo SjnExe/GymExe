@@ -44,5 +44,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation(libs.timber)
+
     debugImplementation(libs.androidx.ui.test.manifest)
 }

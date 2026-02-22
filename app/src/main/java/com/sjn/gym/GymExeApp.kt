@@ -1,6 +1,7 @@
 package com.sjn.gym
 
 import android.app.Application
+import com.sjn.gym.util.FileLoggingTree
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -10,6 +11,9 @@ class GymExeApp : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+            if (BuildConfig.FLAVOR == "dev") {
+                Timber.plant(FileLoggingTree(this))
+            }
         }
     }
 }

@@ -1,11 +1,19 @@
-*.iml
-.gradle
+# IntelliJ IDEA
 .idea/
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+*.iml
+*.iws
+*.ipr
+
+# Gradle
+.gradle/
+build/
+.kotlin/
+gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/libs.versions.toml
+
+# Android
 local.properties
 .settings/
 .project
@@ -27,3 +35,14 @@ google-services.json
 secrets.properties
 *.log
 **/build/
+captures/
+.externalNativeBuild
+.cxx
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
