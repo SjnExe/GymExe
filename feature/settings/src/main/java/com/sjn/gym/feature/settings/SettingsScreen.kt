@@ -198,21 +198,21 @@ fun SettingsScreen(
                 title = "Weight Unit",
                 options = WeightUnit.entries,
                 selectedOption = state.weightUnit,
-                onOptionSelected = { viewModel.setWeightUnit(it) }
+                onOptionSelected = { viewModel.setWeightUnit(it) },
             )
 
             SettingsUnitRow(
                 title = "Height Unit",
                 options = HeightUnit.entries,
                 selectedOption = state.heightUnit,
-                onOptionSelected = { viewModel.setHeightUnit(it) }
+                onOptionSelected = { viewModel.setHeightUnit(it) },
             )
 
             SettingsUnitRow(
                 title = "Distance Unit",
                 options = DistanceUnit.entries,
                 selectedOption = state.distanceUnit,
-                onOptionSelected = { viewModel.setDistanceUnit(it) }
+                onOptionSelected = { viewModel.setDistanceUnit(it) },
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -272,7 +272,6 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -284,24 +283,25 @@ fun <T : Enum<T>> SettingsUnitRow(
     onOptionSelected: (T) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         SingleChoiceSegmentedButtonRow(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             options.forEachIndexed { index, option ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     onClick = { onOptionSelected(option) },
                     selected = option == selectedOption,
-                    label = { Text(option.name) }
+                    label = { Text(option.name) },
                 )
             }
         }

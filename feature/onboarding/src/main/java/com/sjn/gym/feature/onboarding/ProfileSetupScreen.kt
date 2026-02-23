@@ -152,13 +152,14 @@ fun ProfileSetupScreen(
                 value = heightValue,
                 onValueChange = { newValue ->
                     if (heightUnit == "CM") {
-                         if (newValue.all { char -> char.isDigit() || char == '.' } &&
-                             newValue.count { it == '.' } <= 1) {
-                             val decimalIndex = newValue.indexOf('.')
-                             if (decimalIndex == -1 || newValue.length - decimalIndex <= 2) {
+                        if (newValue.all { char -> char.isDigit() || char == '.' } &&
+                            newValue.count { it == '.' } <= 1
+                        ) {
+                            val decimalIndex = newValue.indexOf('.')
+                            if (decimalIndex == -1 || newValue.length - decimalIndex <= 2) {
                                 heightValue = newValue
-                             }
-                         }
+                            }
+                        }
                     } else {
                         // For Feet, allow digits, ', ", and .
                         if (newValue.all { char -> char.isDigit() || char == '.' || char == '\'' || char == '"' }) {
@@ -195,24 +196,25 @@ fun ProfileSetupScreen(
                     finalHeight = heightValue.toDoubleOrNull()
                 } else if (heightUnit == "FT") {
                     // Try parsing 5'11" format
-                     try {
+                    try {
                         val feetIndex = heightValue.indexOf('\'')
                         val inchIndex = heightValue.indexOf('"')
 
                         if (feetIndex != -1) {
                             val feet = heightValue.substring(0, feetIndex).trim().toDouble()
-                            val inches = if (inchIndex != -1 && inchIndex > feetIndex) {
-                                heightValue.substring(feetIndex + 1, inchIndex).trim().toDouble()
-                            } else if (feetIndex < heightValue.length - 1) {
-                                heightValue.substring(feetIndex + 1).trim().toDoubleOrNull() ?: 0.0
-                            } else {
-                                0.0
-                            }
+                            val inches =
+                                if (inchIndex != -1 && inchIndex > feetIndex) {
+                                    heightValue.substring(feetIndex + 1, inchIndex).trim().toDouble()
+                                } else if (feetIndex < heightValue.length - 1) {
+                                    heightValue.substring(feetIndex + 1).trim().toDoubleOrNull() ?: 0.0
+                                } else {
+                                    0.0
+                                }
                             // Convert to decimal feet: 5'6" -> 5.5
                             finalHeight = feet + (inches / 12.0)
                         } else {
-                             // Try parsing as simple double if no ' symbol
-                             finalHeight = heightValue.toDoubleOrNull()
+                            // Try parsing as simple double if no ' symbol
+                            finalHeight = heightValue.toDoubleOrNull()
                         }
                     } catch (e: Exception) {
                         // ignore parsing error, button validation should handle
@@ -228,12 +230,15 @@ fun ProfileSetupScreen(
                 )
                 onNext()
             },
-            enabled = gender != null &&
-                      weightValue.isNotEmpty() && weightValue.toDoubleOrNull()?.let { it > 0 } == true &&
-                      heightValue.isNotEmpty() && (
-                          (heightUnit == "CM" && heightValue.toDoubleOrNull()?.let { it > 0 } == true) ||
-                          (heightUnit == "FT" && heightValue.any { it.isDigit() }) // Basic check, real parsing validation happens on click for now
-                      ),
+            enabled =
+                gender != null &&
+                    weightValue.isNotEmpty() &&
+                    weightValue.toDoubleOrNull()?.let { it > 0 } == true &&
+                    heightValue.isNotEmpty() &&
+                    (
+                        (heightUnit == "CM" && heightValue.toDoubleOrNull()?.let { it > 0 } == true) ||
+                            (heightUnit == "FT" && heightValue.any { it.isDigit() })
+                    ),
             modifier =
                 Modifier
                     .fillMaxWidth()

@@ -32,19 +32,20 @@ object DatabaseModule {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
                         // Seed data
-                        val exercises = listOf(
-                            "('Bench Press', 'Chest', 'Pectoralis Major', 'Triceps,Anterior Deltoid', 'Barbell', 'WEIGHT_REPS', 0)",
-                            "('Squat', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Barbell', 'WEIGHT_REPS', 0)",
-                            "('Deadlift', 'Back', 'Erector Spinae', 'Glutes,Hamstrings,Traps', 'Barbell', 'WEIGHT_REPS', 0)",
-                            "('Overhead Press', 'Shoulders', 'Anterior Deltoid', 'Triceps,Lateral Deltoid', 'Barbell', 'WEIGHT_REPS', 0)",
-                            "('Pull Up', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Bodyweight', 'REPS_ONLY', 0)",
-                            "('Dumbbell Row', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Dumbbell', 'WEIGHT_REPS', 0)",
-                            "('Lunges', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Dumbbell', 'WEIGHT_REPS', 0)"
-                        )
+                        val exercises =
+                            listOf(
+                                "('Bench Press', 'Chest', 'Pectoralis Major', 'Triceps,Anterior Deltoid', 'Barbell', 'WEIGHT_REPS', 0)",
+                                "('Squat', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Barbell', 'WEIGHT_REPS', 0)",
+                                "('Deadlift', 'Back', 'Erector Spinae', 'Glutes,Hamstrings,Traps', 'Barbell', 'WEIGHT_REPS', 0)",
+                                "('Overhead Press', 'Shoulders', 'Anterior Deltoid', 'Triceps,Lateral Deltoid', 'Barbell', 'WEIGHT_REPS', 0)",
+                                "('Pull Up', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Bodyweight', 'REPS_ONLY', 0)",
+                                "('Dumbbell Row', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Dumbbell', 'WEIGHT_REPS', 0)",
+                                "('Lunges', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Dumbbell', 'WEIGHT_REPS', 0)",
+                            )
 
                         exercises.forEach { values ->
                             db.execSQL(
-                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom) VALUES $values"
+                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom) VALUES $values",
                             )
                         }
                     }

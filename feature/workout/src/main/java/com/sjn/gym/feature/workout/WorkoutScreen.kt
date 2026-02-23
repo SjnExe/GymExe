@@ -63,11 +63,13 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
                                 append(char)
                             }
                         }
+
                         char.lowercaseChar() == 'x' || char == '*' -> {
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)) {
                                 append(char)
                             }
                         }
+
                         else -> {
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
                                 append(char)
@@ -103,8 +105,8 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = {
-                         TransformedText(annotatedString, OffsetMapping.Identity)
-                    }
+                        TransformedText(annotatedString, OffsetMapping.Identity)
+                    },
                 )
             }
         }
