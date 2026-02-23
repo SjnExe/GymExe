@@ -2,6 +2,7 @@
 
 package com.sjn.gym.feature.settings
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -63,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sjn.gym.core.data.repository.UpdateInfo
 import com.sjn.gym.core.model.DistanceUnit
 import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.ThemeConfig
@@ -133,6 +136,20 @@ fun SettingsScreen(
                 }
                 showRestoreDialog = false
                 restoreUri = null
+            },
+        )
+    }
+
+    if (state.updateStatus is UpdateStatus.UpdateAvailable) {
+        val updateInfo = (state.updateStatus as UpdateStatus.UpdateAvailable).updateInfo
+        UpdateDialog(
+            updateInfo = updateInfo,
+            onDismissRequest = { viewModel.clearUpdateStatus() },
+            onUpdate = {
+                // Launch browser download
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateInfo.downloadUrl))
+                context.startActivity(intent)
+                viewModel.clearUpdateStatus()
             },
         )
     }
@@ -270,6 +287,69 @@ fun SettingsScreen(
                 )
             }
             Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun UpdateDialog(
+    updateInfo: UpdateInfo,
+    onDismissRequest: () -> Unit,
+    onUpdate: () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp,
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Update Available",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "New Version: ${updateInfo.version}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                )
+                if (updateInfo.isStable) {
+                    Text(
+                        text = "(Stable Release)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Limited release notes
+                val notes = if (updateInfo.releaseNotes.length > 200) {
+                    updateInfo.releaseNotes.take(200) + "..."
+                } else {
+                    updateInfo.releaseNotes
+                }
+                Text(
+                    text = notes,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    androidx.compose.material3.TextButton(onClick = onDismissRequest) {
+                        Text("Cancel")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    FilledTonalButton(onClick = onUpdate) {
+                        Text("Download")
+                    }
+                }
+            }
         }
     }
 }
