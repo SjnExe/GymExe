@@ -325,11 +325,12 @@ fun UpdateDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Limited release notes
-                val notes = if (updateInfo.releaseNotes.length > 200) {
-                    updateInfo.releaseNotes.take(200) + "..."
-                } else {
-                    updateInfo.releaseNotes
-                }
+                val notes =
+                    if (updateInfo.releaseNotes.length > 200) {
+                        updateInfo.releaseNotes.take(200) + "..."
+                    } else {
+                        updateInfo.releaseNotes
+                    }
                 Text(
                     text = notes,
                     style = MaterialTheme.typography.bodyMedium,
