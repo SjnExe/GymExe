@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.sjn.gym.core.data.repository.LogRepository
 import com.sjn.gym.core.data.repository.UpdateInfo
 import com.sjn.gym.core.data.repository.UpdaterRepository
 import com.sjn.gym.core.data.repository.UserProfileRepository
@@ -43,6 +44,7 @@ class SettingsViewModel
         private val userProfileRepo: UserProfileRepository,
         private val backupRepository: BackupRepository,
         private val updaterRepository: UpdaterRepository,
+        private val logRepository: LogRepository,
     ) : AndroidViewModel(application) {
         val themeConfig =
             userProfileRepo.themeConfig.stateIn(
@@ -192,7 +194,7 @@ class SettingsViewModel
 
         fun copyLogs() {
             try {
-                val logFile = File(application.cacheDir, "app_logs.txt")
+                val logFile = logRepository.getLogFile()
                 if (logFile.exists()) {
                     val content = logFile.readText()
                     if (content.isNotEmpty()) {
@@ -205,21 +207,21 @@ class SettingsViewModel
                     }
                 } else {
                     // Try to list directory for debugging
-                    val list = application.cacheDir.list()?.joinToString() ?: "empty"
-                    Timber.e("Log file not found at ${logFile.absolutePath}. Dir contents: $list")
+                    val list = logFile.parentFile?.list()?.joinToString() ?: "parent empty"
+                    Timber.e("Log file not found at ${logFile.absolutePath}. Parent contents: $list")
                     _backupStatus.value = BackupStatus.Error("No logs found at ${logFile.absolutePath}")
                 }
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
                 Timber.e(e, "Failed to copy logs")
-                _backupStatus.value = BackupStatus.Error("Failed to copy logs")
+                _backupStatus.value = BackupStatus.Error("Failed to copy logs: ${e.message}")
             }
         }
 
         fun saveLogs(context: Context) {
             try {
-                val logFile = File(application.cacheDir, "app_logs.txt")
+                val logFile = logRepository.getLogFile()
                 if (logFile.exists()) {
                     val uri =
                         FileProvider.getUriForFile(
@@ -234,11 +236,14 @@ class SettingsViewModel
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
                     context.startActivity(Intent.createChooser(intent, "Save Logs"))
+                } else {
+                    _backupStatus.value = BackupStatus.Error("Log file not found")
                 }
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
                 Timber.e(e, "Failed to save logs")
+                _backupStatus.value = BackupStatus.Error("Failed to save logs: ${e.message}")
             }
         }
     }

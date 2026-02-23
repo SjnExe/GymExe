@@ -1,5 +1,6 @@
 package com.sjn.gym.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -79,6 +80,7 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
         }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
@@ -158,6 +160,12 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                             } catch (ignored: Exception) {
                                 // Ignore
                             }
+                            android.widget.Toast
+                                .makeText(
+                                    context,
+                                    "Network Inspector unavailable",
+                                    android.widget.Toast.LENGTH_SHORT,
+                                ).show()
                         }
                     },
                 )

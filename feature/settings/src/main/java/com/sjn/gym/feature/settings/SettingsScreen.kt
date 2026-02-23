@@ -141,7 +141,7 @@ fun SettingsScreen(
     }
 
     if (state.updateStatus is UpdateStatus.UpdateAvailable) {
-        val updateInfo = (state.updateStatus as UpdateStatus.UpdateAvailable).updateInfo
+        val updateInfo = state.updateStatus.updateInfo
         UpdateDialog(
             updateInfo = updateInfo,
             onDismissRequest = { viewModel.clearUpdateStatus() },
@@ -279,13 +279,13 @@ fun SettingsScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-            } else {
-                // If not dev mode, show version info here
-                AboutSection(
-                    appVersion = viewModel.appVersion,
-                    onCheckForUpdates = { viewModel.checkForUpdates() },
-                )
             }
+
+            // About Section (Always visible)
+            AboutSection(
+                appVersion = viewModel.appVersion,
+                onCheckForUpdates = { viewModel.checkForUpdates() },
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
