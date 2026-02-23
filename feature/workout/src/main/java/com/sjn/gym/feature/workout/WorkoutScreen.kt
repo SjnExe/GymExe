@@ -1,6 +1,5 @@
 package com.sjn.gym.feature.workout
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -45,38 +43,79 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Colors
+        val quantityColor = MaterialTheme.colorScheme.primary
+        val separatorColor = MaterialTheme.colorScheme.onSurfaceVariant
+        val weightColor = MaterialTheme.colorScheme.tertiary
+        val defaultColor = MaterialTheme.colorScheme.onSurface
+
         // Annotated String for Syntax Highlighting
         val annotatedString =
             buildAnnotatedString {
                 val text = viewModel.input
-                // Simple parser for highlighting:
-                // Digits -> Primary Color
-                // 'x' or '*' -> Secondary/Tertiary Color
-                // Others -> OnSurface
+                // Regex-based parser for highlighting:
+                // 1. Quantity: Digits immediately followed by 'x' or '*'
+                // 2. Separator: 'x' or '*' or '+'
+                // 3. Weight: Digits immediately following 'x' or '*' OR digits not followed by 'x' or '*'
 
-                var currentIndex = 0
-                while (currentIndex < text.length) {
-                    val char = text[currentIndex]
-                    when {
-                        char.isDigit() || char == '.' -> {
-                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
-                                append(char)
+                // Helper to determine the type of a token or character range would be complex with simple iteration.
+                // We will use Regex to find matches and color them.
+                // However, we must ensure we append the entire string in order.
+
+                // Strategy: Iterate through the string, checking current position against known patterns?
+                // Or simpler: Build the string, and keep track of "current style".
+
+                // Let's identify the ranges first.
+                // Pattern for "Quantity x Weight": (\d+)\s*([xX*])\s*(\d+(\.\d+)?)
+                // Pattern for "Weight": (\d+(\.\d+)?)(?![xX*]) -- this lookahead is tricky if not careful.
+
+                // Let's perform a simple tokenization loop.
+                var i = 0
+                while (i < text.length) {
+                    val char = text[i]
+
+                    if (char.isDigit() || char == '.') {
+                        // Scan the full number
+                        val start = i
+                        while (i < text.length && (text[i].isDigit() || text[i] == '.')) {
+                            i++
+                        }
+                        val numberStr = text.substring(start, i)
+
+                        // Look ahead for separator
+                        var isQuantity = false
+                        var lookAheadIndex = i
+                        // Skip whitespace
+                        while (lookAheadIndex < text.length && text[lookAheadIndex].isWhitespace()) {
+                            lookAheadIndex++
+                        }
+                        if (lookAheadIndex < text.length) {
+                            val nextChar = text[lookAheadIndex]
+                            if (nextChar == 'x' || nextChar == 'X' || nextChar == '*') {
+                                isQuantity = true
                             }
                         }
 
-                        char.lowercaseChar() == 'x' || char == '*' -> {
-                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)) {
-                                append(char)
-                            }
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = if (isQuantity) quantityColor else weightColor,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                        ) {
+                            append(numberStr)
                         }
-
-                        else -> {
-                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
-                                append(char)
-                            }
+                    } else if (char == 'x' || char == 'X' || char == '*' || char == '+') {
+                        withStyle(style = SpanStyle(color = separatorColor, fontWeight = FontWeight.Bold)) {
+                            append(char)
                         }
+                        i++
+                    } else {
+                        withStyle(style = SpanStyle(color = defaultColor)) {
+                            append(char)
+                        }
+                        i++
                     }
-                    currentIndex++
                 }
             }
 
