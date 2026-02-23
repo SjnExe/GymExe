@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.sjn.gym.BuildConfig
 import com.sjn.gym.R
 import com.sjn.gym.feature.onboarding.OnboardingScreen
@@ -45,7 +46,7 @@ object Settings
 object Profile
 
 @Serializable
-object Workout
+data class Workout(val exerciseId: String? = null)
 
 @Serializable
 object ExerciseList
@@ -126,17 +127,26 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
             composable<Home> {
                 HomeScreen(
                     onNavigateToExerciseList = { navController.navigate(ExerciseList) },
-                    onNavigateToWorkout = { navController.navigate(Workout) },
+                    onNavigateToWorkout = { navController.navigate(Workout(null)) },
                 )
             }
             composable<Workout> {
+                // ViewModel will retrieve arguments via SavedStateHandle
                 WorkoutScreen()
             }
             composable<Library> {
-                LibraryScreen()
+                LibraryScreen(
+                    onNavigateToWorkout = { exerciseId ->
+                        navController.navigate(Workout(exerciseId))
+                    }
+                )
             }
             composable<ExerciseList> {
-                ExerciseListScreen()
+                ExerciseListScreen(
+                    onExerciseClick = { exerciseId ->
+                        navController.navigate(Workout(exerciseId))
+                    }
+                )
             }
             composable<Settings> {
                 val context = LocalContext.current
