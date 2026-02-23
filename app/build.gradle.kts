@@ -41,7 +41,6 @@ android {
         }
     }
 
-
     signingConfigs {
         create("release") {
             storeFile = file("debug.keystore")

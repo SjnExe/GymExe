@@ -76,13 +76,14 @@ jobs:
           fi
 
           echo "Running tasks: $TASKS"
+          # Pipe output to both console and file for visibility
           ./gradlew $TASKS \
             -PversionName=${{ env.VERSION_NAME }} \
             -PversionCode=${{ env.VERSION_CODE }} \
             --info --stacktrace \
-            > build_output.log 2>&1
+            2>&1 | tee build_output.log
 
-          EXIT_CODE=$?
+          EXIT_CODE=${PIPESTATUS[0]}
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
           # Allow next steps to process logs
