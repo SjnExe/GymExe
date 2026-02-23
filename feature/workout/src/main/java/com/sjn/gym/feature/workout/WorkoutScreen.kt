@@ -36,11 +36,31 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
                 .fillMaxSize()
                 .padding(16.dp),
     ) {
-        Text(
-            text = "Log Set",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        // Exercise Header
+        if (viewModel.exercise != null) {
+            Text(
+                text = viewModel.exercise!!.name,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = viewModel.exercise!!.equipment,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        } else {
+            Text(
+                text = "Log Set",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "Generic Calculator",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Colors
@@ -53,23 +73,6 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
         val annotatedString =
             buildAnnotatedString {
                 val text = viewModel.input
-                // Regex-based parser for highlighting:
-                // 1. Quantity: Digits immediately followed by 'x' or '*'
-                // 2. Separator: 'x' or '*' or '+'
-                // 3. Weight: Digits immediately following 'x' or '*' OR digits not followed by 'x' or '*'
-
-                // Helper to determine the type of a token or character range would be complex with simple iteration.
-                // We will use Regex to find matches and color them.
-                // However, we must ensure we append the entire string in order.
-
-                // Strategy: Iterate through the string, checking current position against known patterns?
-                // Or simpler: Build the string, and keep track of "current style".
-
-                // Let's identify the ranges first.
-                // Pattern for "Quantity x Weight": (\d+)\s*([xX*])\s*(\d+(\.\d+)?)
-                // Pattern for "Weight": (\d+(\.\d+)?)(?![xX*]) -- this lookahead is tricky if not careful.
-
-                // Let's perform a simple tokenization loop.
                 var i = 0
                 while (i < text.length) {
                     val char = text[i]
@@ -121,7 +124,12 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
 
         Surface(
             shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            color =
+                if (viewModel.validationError != null) {
+                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -133,7 +141,7 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
             ) {
                 if (viewModel.input.isEmpty()) {
                     Text(
-                        text = "Enter Plates (e.g. 2x20)",
+                        text = if (viewModel.exercise?.equipment == "Dumbbell") "Enter Weight (e.g. 20)" else "Enter Plates (e.g. 2x20)",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -150,23 +158,34 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
             }
         }
 
+        if (viewModel.validationError != null) {
+            Text(
+                text = viewModel.validationError!!,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 4.dp, start = 16.dp),
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Total Weight: ${viewModel.plateResult.sumOf { it.weight * it.count }}",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.secondary,
-        )
+        if (viewModel.plateResult.isNotEmpty()) {
+            Text(
+                text = "Total Weight: ${viewModel.plateResult.sumOf { it.weight * it.count }}",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.secondary,
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            viewModel.plateResult.forEach { plate ->
-                PlateChip(plate)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                viewModel.plateResult.forEach { plate ->
+                    PlateChip(plate)
+                }
             }
         }
     }
@@ -180,16 +199,18 @@ fun PlateChip(plate: PlateCount) {
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
         Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
-            Text(
-                text = "${plate.count}",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = " x ",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-            )
+            if (plate.count > 1) {
+                Text(
+                    text = "${plate.count}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = " x ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                )
+            }
             Text(
                 text = "${plate.weight}",
                 style = MaterialTheme.typography.bodyMedium,

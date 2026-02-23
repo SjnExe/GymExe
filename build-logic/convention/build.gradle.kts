@@ -29,6 +29,10 @@ gradlePlugin {
             id = "gymexe.android.compose"
             implementationClass = "com.sjn.gym.convention.AndroidComposeConventionPlugin"
         }
+        register("androidFeature") {
+            id = "gymexe.android.feature"
+            implementationClass = "com.sjn.gym.convention.AndroidFeatureConventionPlugin"
+        }
         register("spotless") {
             id = "gymexe.spotless"
             implementationClass = "com.sjn.gym.convention.SpotlessConventionPlugin"

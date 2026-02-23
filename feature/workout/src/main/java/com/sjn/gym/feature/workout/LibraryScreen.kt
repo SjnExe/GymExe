@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen() {
+fun LibraryScreen(onNavigateToWorkout: (String) -> Unit) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Exercises", "Routines")
 
@@ -48,7 +48,7 @@ fun LibraryScreen() {
                 0 -> {
                     // Exercises (reuse existing screen but wrap it appropriately)
                     // Assuming ExerciseListScreen handles its own data
-                    ExerciseListScreen()
+                    ExerciseListScreen(onExerciseClick = onNavigateToWorkout)
                 }
 
                 1 -> {

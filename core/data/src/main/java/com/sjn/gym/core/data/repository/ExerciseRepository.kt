@@ -19,8 +19,16 @@ class ExerciseRepository
                 entities.map { it.toDomainModel() }
             }
 
-        private fun ExerciseEntity.toDomainModel(): Exercise =
-            Exercise(
+        suspend fun getExercise(id: String): Exercise? {
+            val longId = id.toLongOrNull() ?: return null
+            return exerciseDao.getById(longId)?.toDomainModel()
+        }
+
+        private fun ExerciseEntity.toDomainModel(): Exercise {
+            // "None" or "Bodyweight" might be equipment values
+            val equipmentValue = if (equipment.isBlank()) "None" else equipment
+
+            return Exercise(
                 id = id.toString(),
                 name = name,
                 bodyPart = bodyPart,
@@ -31,8 +39,9 @@ class ExerciseRepository
                     } else {
                         secondaryMuscles.split(",").map { it.trim() }
                     },
-                equipment = equipment,
+                equipment = equipmentValue,
                 type = type,
                 isCustom = isCustom,
             )
+        }
     }

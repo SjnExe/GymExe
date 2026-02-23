@@ -52,6 +52,7 @@ The app follows a modular architecture:
 *   `gymexe.android.library`: Common Android Library config.
 *   `gymexe.android.compose`: Jetpack Compose setup.
 *   `gymexe.android.hilt`: Hilt/KSP setup.
+*   `gymexe.android.feature`: Feature module config (aggregates library, hilt, compose).
 *   `gymexe.detekt`: Detekt configuration (Strict).
 *   `gymexe.spotless`: Spotless configuration.
 
@@ -67,10 +68,11 @@ The app follows a modular architecture:
 - [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled.
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
-- [x] **Icons**: Vector Assets (Adaptive) created.
+- [x] **Icons**: Vector Assets (Adaptive) created. New Splash Icon created.
 - [x] **Theming Engine**: Material 3, Dark/Light/System mode, Dynamic Color support.
 - [x] **Navigation**: Type-safe Compose Navigation set up (`GymExeNavHost`).
 - [x] **Build Logic**: Infrastructure created.
+- [x] **Splash Screen**: Implemented `androidx.core.splashscreen` for instant startup.
 
 ### Phase 3: Onboarding (Setup Wizard) (Completed)
 - [x] **Welcome Screen**: Basic UI implemented.
@@ -89,16 +91,19 @@ The app follows a modular architecture:
 - [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
 ### Phase 5: Data Layer (Room) (Implemented)
-- [x] **Entities**: `ExerciseEntity` created.
+- [x] **Entities**: `ExerciseEntity` created (with instructions). `RoutineEntity` and `WorkoutPlanEntity` created.
 - [x] **Database**: `GymDatabase` configured with pre-population callback.
 - [x] **DAO**: `ExerciseDao` implemented.
 - [ ] **Migrations**: Logic for merging user vs built-in data needed later.
 
 ### Phase 6: Workout & Intelligent Input (Partially Implemented)
-- [x] **Intelligent Text Box**: `PlateCalculator` logic implemented and unit-tested.
-- [x] **UI Integration**: `WorkoutScreen` connects input to calculator.
-- [ ] **Syntax Highlighting**: Text box needs colored syntax for Quantity, Operator, and Weight.
-- [x] **Exercise List**: `ExerciseListScreen` displays data from DB.
+- [x] **Intelligent Text Box**: `PlateCalculator` and `WeightInputParser` implemented and tested.
+- [x] **Auto-Merger**: Logic to merge weights (e.g., `5 5` -> `2x5`) for Stackable equipment.
+- [x] **Strict Mode**: Validation for non-stackable equipment (Dumbbells/Selectorized Machines).
+- [x] **UI Integration**: `WorkoutScreen` connects input to parser and validation.
+- [x] **Syntax Highlighting**: Text box colors Quantity, Operator, and Weight.
+- [x] **Library UI**: Revamped. Routines tab (Weekly/Rolling) and Exercises tab (Body Part Grid).
+- [x] **Exercise Detail**: UI skeleton implemented.
 - [ ] **Workout Session**:
     *   **Sets**: Types (Warmup, Failure, Drop set, etc.).
     *   **Timers**: Quick timer, Rest timer.
@@ -110,17 +115,18 @@ The app follows a modular architecture:
 
 ## 7. Detailed Instructions for Next Session
 
-1.  **Workout UI Polish**:
-    *   Implement `AnnotatedString` building for Syntax Highlighting in `WorkoutScreen` text field.
-    *   Improve Exercise List UI.
+1.  **Routines & Scheduling Logic**:
+    *   Implement CRUD operations for `Routine` and `WorkoutPlan`.
+    *   Connect UI to `RoutineRepository` (needs creation).
+    *   Implement logic to "Activate" a routine and reflect it on Home Screen.
 
-2.  **Database Migration**:
-    *   Handle data persistence during updates.
+2.  **Exercise Data Population**:
+    *   Add real data for `instructions` and more exercises.
 
 ## 8. Improvements & Optimizations (Backlog)
 
 ### Build Logic & Infrastructure
-- [ ] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
+- [x] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
 - [ ] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
 - [ ] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
 - [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.

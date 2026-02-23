@@ -1,5 +1,6 @@
 package com.sjn.gym.feature.workout
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -15,11 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,8 +35,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sjn.gym.core.model.Exercise
 
 @Composable
-fun ExerciseListScreen(viewModel: ExerciseListViewModel = hiltViewModel()) {
-    val exercises by viewModel.exercises.collectAsStateWithLifecycle(initialValue = emptyList())
+fun ExerciseListScreen(
+    viewModel: ExerciseListViewModel = hiltViewModel(),
+    onExerciseClick: (String) -> Unit,
+) {
+    val exercises by viewModel.exercises.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -43,12 +50,28 @@ fun ExerciseListScreen(viewModel: ExerciseListViewModel = hiltViewModel()) {
             modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
         )
 
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = viewModel::onSearchQueryChange,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            placeholder = { Text("Search Exercises") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            singleLine = true,
+            shape = MaterialTheme.shapes.medium,
+        )
+
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(exercises) { exercise ->
-                ExerciseCard(exercise)
+            items(exercises, key = { it.id }) { exercise ->
+                ExerciseCard(
+                    exercise = exercise,
+                    onClick = { onExerciseClick(exercise.id) },
+                )
             }
         }
     }
@@ -56,9 +79,15 @@ fun ExerciseListScreen(viewModel: ExerciseListViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ExerciseCard(exercise: Exercise) {
+fun ExerciseCard(
+    exercise: Exercise,
+    onClick: () -> Unit,
+) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
