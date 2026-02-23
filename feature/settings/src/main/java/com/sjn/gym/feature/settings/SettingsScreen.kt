@@ -86,11 +86,6 @@ fun SettingsScreen(
     var showRestoreDialog by remember { mutableStateOf(false) }
     var restoreUri by remember { mutableStateOf<Uri?>(null) }
 
-    // State for dialogs
-    var showWeightUnitDialog by remember { mutableStateOf(false) }
-    var showHeightUnitDialog by remember { mutableStateOf(false) }
-    var showDistanceUnitDialog by remember { mutableStateOf(false) }
-
     val createDocumentLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
@@ -198,20 +193,26 @@ fun SettingsScreen(
 
             // Units Section
             SettingsSectionHeader("Units")
-            SettingsDetailRow(
+
+            SettingsUnitRow(
                 title = "Weight Unit",
-                value = state.weightUnit.name,
-                onClick = { showWeightUnitDialog = true },
+                options = WeightUnit.entries,
+                selectedOption = state.weightUnit,
+                onOptionSelected = { viewModel.setWeightUnit(it) }
             )
-            SettingsDetailRow(
+
+            SettingsUnitRow(
                 title = "Height Unit",
-                value = state.heightUnit.name,
-                onClick = { showHeightUnitDialog = true },
+                options = HeightUnit.entries,
+                selectedOption = state.heightUnit,
+                onOptionSelected = { viewModel.setHeightUnit(it) }
             )
-            SettingsDetailRow(
+
+            SettingsUnitRow(
                 title = "Distance Unit",
-                value = state.distanceUnit.name,
-                onClick = { showDistanceUnitDialog = true },
+                options = DistanceUnit.entries,
+                selectedOption = state.distanceUnit,
+                onOptionSelected = { viewModel.setDistanceUnit(it) }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -272,55 +273,38 @@ fun SettingsScreen(
         }
     }
 
-    SettingsDialogs(
-        state = state,
-        showWeightUnitDialog = showWeightUnitDialog,
-        showHeightUnitDialog = showHeightUnitDialog,
-        showDistanceUnitDialog = showDistanceUnitDialog,
-        onDismissWeightUnit = { showWeightUnitDialog = false },
-        onDismissHeightUnit = { showHeightUnitDialog = false },
-        onDismissDistanceUnit = { showDistanceUnitDialog = false },
-        viewModel = viewModel,
-    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsDialogs(
-    state: SettingsState,
-    showWeightUnitDialog: Boolean,
-    showHeightUnitDialog: Boolean,
-    showDistanceUnitDialog: Boolean,
-    onDismissWeightUnit: () -> Unit,
-    onDismissHeightUnit: () -> Unit,
-    onDismissDistanceUnit: () -> Unit,
-    viewModel: SettingsViewModel,
+fun <T : Enum<T>> SettingsUnitRow(
+    title: String,
+    options: List<T>,
+    selectedOption: T,
+    onOptionSelected: (T) -> Unit,
 ) {
-    if (showWeightUnitDialog) {
-        SelectionDialog(
-            title = "Weight Unit",
-            options = WeightUnit.entries,
-            selectedOption = state.weightUnit,
-            onOptionSelected = { viewModel.setWeightUnit(it) },
-            onDismissRequest = onDismissWeightUnit,
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
-    }
-    if (showHeightUnitDialog) {
-        SelectionDialog(
-            title = "Height Unit",
-            options = HeightUnit.entries,
-            selectedOption = state.heightUnit,
-            onOptionSelected = { viewModel.setHeightUnit(it) },
-            onDismissRequest = onDismissHeightUnit,
-        )
-    }
-    if (showDistanceUnitDialog) {
-        SelectionDialog(
-            title = "Distance Unit",
-            options = DistanceUnit.entries,
-            selectedOption = state.distanceUnit,
-            onOptionSelected = { viewModel.setDistanceUnit(it) },
-            onDismissRequest = onDismissDistanceUnit,
-        )
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            options.forEachIndexed { index, option ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    onClick = { onOptionSelected(option) },
+                    selected = option == selectedOption,
+                    label = { Text(option.name) }
+                )
+            }
+        }
     }
 }
 

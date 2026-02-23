@@ -22,6 +22,9 @@ class FileLoggingTree(
         t: Throwable?,
     ) {
         try {
+            // Ensure directory exists
+            logFile.parentFile?.mkdirs()
+
             val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())
             val priorityString =
                 when (priority) {
