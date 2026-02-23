@@ -68,10 +68,11 @@ The app follows a modular architecture:
 - [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled.
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
-- [x] **Icons**: Vector Assets (Adaptive) created.
+- [x] **Icons**: Vector Assets (Adaptive) created. New Splash Icon created.
 - [x] **Theming Engine**: Material 3, Dark/Light/System mode, Dynamic Color support.
 - [x] **Navigation**: Type-safe Compose Navigation set up (`GymExeNavHost`).
 - [x] **Build Logic**: Infrastructure created.
+- [x] **Splash Screen**: Implemented `androidx.core.splashscreen` for instant startup.
 
 ### Phase 3: Onboarding (Setup Wizard) (Completed)
 - [x] **Welcome Screen**: Basic UI implemented.
@@ -90,7 +91,7 @@ The app follows a modular architecture:
 - [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
 ### Phase 5: Data Layer (Room) (Implemented)
-- [x] **Entities**: `ExerciseEntity` created.
+- [x] **Entities**: `ExerciseEntity` created (with instructions). `RoutineEntity` and `WorkoutPlanEntity` created.
 - [x] **Database**: `GymDatabase` configured with pre-population callback.
 - [x] **DAO**: `ExerciseDao` implemented.
 - [ ] **Migrations**: Logic for merging user vs built-in data needed later.
@@ -101,7 +102,8 @@ The app follows a modular architecture:
 - [x] **Strict Mode**: Validation for non-stackable equipment (Dumbbells/Selectorized Machines).
 - [x] **UI Integration**: `WorkoutScreen` connects input to parser and validation.
 - [x] **Syntax Highlighting**: Text box colors Quantity, Operator, and Weight.
-- [x] **Exercise List**: Searchable list with polished UI.
+- [x] **Library UI**: Revamped. Routines tab (Weekly/Rolling) and Exercises tab (Body Part Grid).
+- [x] **Exercise Detail**: UI skeleton implemented.
 - [ ] **Workout Session**:
     *   **Sets**: Types (Warmup, Failure, Drop set, etc.).
     *   **Timers**: Quick timer, Rest timer.
@@ -113,12 +115,13 @@ The app follows a modular architecture:
 
 ## 7. Detailed Instructions for Next Session
 
-1.  **Workout Session Logic**:
-    *   Persist the logged sets to the database.
-    *   Implement "Previous Set" history display.
+1.  **Routines & Scheduling Logic**:
+    *   Implement CRUD operations for `Routine` and `WorkoutPlan`.
+    *   Connect UI to `RoutineRepository` (needs creation).
+    *   Implement logic to "Activate" a routine and reflect it on Home Screen.
 
-2.  **Database Migration**:
-    *   Handle data persistence during updates.
+2.  **Exercise Data Population**:
+    *   Add real data for `instructions` and more exercises.
 
 ## 8. Improvements & Optimizations (Backlog)
 
