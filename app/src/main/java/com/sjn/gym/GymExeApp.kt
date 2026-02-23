@@ -20,6 +20,13 @@ class GymExeApp : Application() {
         if (BuildConfig.FLAVOR == "dev") {
             // Ensure logRepository is initialized before use (Hilt does this)
             Timber.plant(FileLoggingTree(logRepository))
+
+            // Capture uncaught exceptions
+            val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+                Timber.e(throwable, "Uncaught Exception on thread ${thread.name}")
+                defaultHandler?.uncaughtException(thread, throwable)
+            }
         }
     }
 }
