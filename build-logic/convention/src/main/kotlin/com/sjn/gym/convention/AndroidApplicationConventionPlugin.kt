@@ -23,6 +23,20 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
                 // Common configuration function
                 configureKotlinAndroid(this)
+
+                flavorDimensions += "env"
+                productFlavors {
+                    create("dev") {
+                        dimension = "env"
+                        applicationIdSuffix = ".dev"
+                        if (!project.hasProperty("versionName")) {
+                            versionNameSuffix = "-dev"
+                        }
+                    }
+                    create("stable") {
+                        dimension = "env"
+                    }
+                }
             }
         }
     }

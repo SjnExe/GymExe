@@ -22,6 +22,16 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 defaultConfig.consumerProguardFiles("consumer-rules.pro")
 
                 configureKotlinAndroid(this)
+
+                flavorDimensions += "env"
+                productFlavors {
+                    create("dev") {
+                        dimension = "env"
+                    }
+                    create("stable") {
+                        dimension = "env"
+                    }
+                }
             }
         }
     }

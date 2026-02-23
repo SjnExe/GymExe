@@ -41,19 +41,6 @@ android {
         }
     }
 
-    flavorDimensions += "env"
-    productFlavors {
-        create("dev") {
-            dimension = "env"
-            applicationIdSuffix = ".dev"
-            if (!project.hasProperty("versionName")) {
-                versionNameSuffix = "-dev"
-            }
-        }
-        create("stable") {
-            dimension = "env"
-        }
-    }
 
     signingConfigs {
         create("release") {
