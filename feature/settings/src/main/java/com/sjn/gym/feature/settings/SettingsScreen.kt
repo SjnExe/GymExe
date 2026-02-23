@@ -2,7 +2,6 @@
 
 package com.sjn.gym.feature.settings
 
-import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,12 +31,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -61,10 +63,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sjn.gym.core.data.repository.DownloadStatus
 import com.sjn.gym.core.data.repository.UpdateInfo
 import com.sjn.gym.core.model.DistanceUnit
 import com.sjn.gym.core.model.HeightUnit
@@ -116,7 +120,7 @@ fun SettingsScreen(
             }
         }
 
-    HandleEffects(state.backupStatus, state.updateStatus, snackbarHostState, viewModel)
+    HandleEffects(state.backupStatus, state.updateStatus, state.downloadStatus, snackbarHostState, viewModel)
 
     if (showRestoreDialog && restoreUri != null) {
         RestoreOptionsDialog(
@@ -143,14 +147,11 @@ fun SettingsScreen(
     if (state.updateStatus is UpdateStatus.UpdateAvailable) {
         val updateInfo = state.updateStatus.updateInfo
         UpdateDialog(
+            currentVersion = viewModel.appVersion,
             updateInfo = updateInfo,
+            downloadStatus = state.downloadStatus,
             onDismissRequest = { viewModel.clearUpdateStatus() },
-            onUpdate = {
-                // Launch browser download
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateInfo.downloadUrl))
-                context.startActivity(intent)
-                viewModel.clearUpdateStatus()
-            },
+            onUpdate = { viewModel.downloadUpdate(updateInfo.downloadUrl) },
         )
     }
 
@@ -293,11 +294,13 @@ fun SettingsScreen(
 
 @Composable
 fun UpdateDialog(
+    currentVersion: String,
     updateInfo: UpdateInfo,
+    downloadStatus: DownloadStatus,
     onDismissRequest: () -> Unit,
     onUpdate: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = { if (downloadStatus !is DownloadStatus.Downloading) onDismissRequest() }) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,
@@ -310,11 +313,37 @@ fun UpdateDialog(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "New Version: ${updateInfo.version}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column {
+                        Text(
+                            text = "Current: $currentVersion",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), contentAlignment = Alignment.Center) {
+                    Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = "To")
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "New: ${updateInfo.version}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    if (updateInfo.architecture != null) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(updateInfo.architecture ?: "") },
+                            modifier = Modifier.height(24.dp),
+                        )
+                    }
+                }
+
                 if (updateInfo.isStable) {
                     Text(
                         text = "(Stable Release)",
@@ -338,16 +367,26 @@ fun UpdateDialog(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    androidx.compose.material3.TextButton(onClick = onDismissRequest) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    FilledTonalButton(onClick = onUpdate) {
-                        Text("Download")
+
+                if (downloadStatus is DownloadStatus.Downloading) {
+                    Text("Downloading... ${downloadStatus.progress}%")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = { downloadStatus.progress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        androidx.compose.material3.TextButton(onClick = onDismissRequest) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        FilledTonalButton(onClick = onUpdate) {
+                            Text("Download & Install")
+                        }
                     }
                 }
             }
@@ -511,6 +550,7 @@ fun SettingsActionRow(
 fun HandleEffects(
     backupStatus: BackupStatus,
     updateStatus: UpdateStatus,
+    downloadStatus: DownloadStatus,
     snackbarHostState: SnackbarHostState,
     viewModel: SettingsViewModel,
 ) {
@@ -543,6 +583,14 @@ fun HandleEffects(
             }
 
             else -> {}
+        }
+    }
+
+    LaunchedEffect(downloadStatus) {
+        if (downloadStatus is DownloadStatus.Error) {
+            snackbarHostState.showSnackbar(downloadStatus.message)
+            // We don't clear status immediately so dialog stays open?
+            // Actually dialog relies on updateStatus too.
         }
     }
 }
@@ -582,15 +630,29 @@ fun AboutSection(
     onCheckForUpdates: () -> Unit,
 ) {
     SettingsSectionTitle("About")
-    SettingsDetailRow(
-        title = "Version",
-        value = appVersion,
-        onClick = {},
-    )
-    SettingsActionRow(
-        title = "Check for Updates",
-        onClick = onCheckForUpdates,
-    )
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text(
+                text = "Version",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = appVersion,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        FilledTonalButton(onClick = onCheckForUpdates) {
+            Text("Check for Updates")
+        }
+    }
 }
 
 data class SettingsState(
@@ -602,6 +664,7 @@ data class SettingsState(
     val distanceUnit: DistanceUnit,
     val backupStatus: BackupStatus,
     val updateStatus: UpdateStatus,
+    val downloadStatus: DownloadStatus,
 )
 
 @Composable
@@ -614,9 +677,30 @@ fun rememberSettingsState(viewModel: SettingsViewModel): SettingsState {
     val distanceUnit by viewModel.distanceUnit.collectAsStateWithLifecycle()
     val backupStatus by viewModel.backupStatus.collectAsStateWithLifecycle()
     val updateStatus by viewModel.updateStatus.collectAsStateWithLifecycle()
+    val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
 
-    return remember(themeConfig, themeStyle, customThemeColor, weightUnit, heightUnit, distanceUnit, backupStatus, updateStatus) {
-        SettingsState(themeConfig, themeStyle, customThemeColor, weightUnit, heightUnit, distanceUnit, backupStatus, updateStatus)
+    return remember(
+        themeConfig,
+        themeStyle,
+        customThemeColor,
+        weightUnit,
+        heightUnit,
+        distanceUnit,
+        backupStatus,
+        updateStatus,
+        downloadStatus,
+    ) {
+        SettingsState(
+            themeConfig,
+            themeStyle,
+            customThemeColor,
+            weightUnit,
+            heightUnit,
+            distanceUnit,
+            backupStatus,
+            updateStatus,
+            downloadStatus,
+        )
     }
 }
 

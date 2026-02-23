@@ -98,8 +98,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)
     debugImplementation(libs.leakcanary.android)
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
+    "devImplementation"(libs.chucker.debug)
+    "stableImplementation"(libs.chucker.release)
     implementation(libs.timber)
 
     // Modular dependencies

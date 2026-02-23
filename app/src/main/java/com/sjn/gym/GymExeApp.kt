@@ -16,10 +16,10 @@ class GymExeApp : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-            if (BuildConfig.FLAVOR == "dev") {
-                // Ensure logRepository is initialized before use (Hilt does this)
-                Timber.plant(FileLoggingTree(logRepository))
-            }
+        }
+        if (BuildConfig.FLAVOR == "dev") {
+            // Ensure logRepository is initialized before use (Hilt does this)
+            Timber.plant(FileLoggingTree(logRepository))
         }
     }
 }

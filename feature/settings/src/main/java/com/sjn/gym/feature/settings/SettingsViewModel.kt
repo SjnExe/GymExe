@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.sjn.gym.core.data.repository.DownloadStatus
 import com.sjn.gym.core.data.repository.LogRepository
 import com.sjn.gym.core.data.repository.UpdateInfo
 import com.sjn.gym.core.data.repository.UpdaterRepository
@@ -94,6 +95,9 @@ class SettingsViewModel
         private val _updateStatus = MutableStateFlow<UpdateStatus>(UpdateStatus.Idle)
         val updateStatus: StateFlow<UpdateStatus> = _updateStatus.asStateFlow()
 
+        private val _downloadStatus = MutableStateFlow<DownloadStatus>(DownloadStatus.Idle)
+        val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus.asStateFlow()
+
         val appVersion: String = com.sjn.gym.feature.settings.BuildConfig.VERSION_NAME
 
         fun setThemeConfig(config: ThemeConfig) {
@@ -172,6 +176,7 @@ class SettingsViewModel
         fun checkForUpdates() {
             viewModelScope.launch {
                 _updateStatus.value = UpdateStatus.Checking
+                _downloadStatus.value = DownloadStatus.Idle
 
                 val isDevBuild = appVersion.contains("dev", ignoreCase = true)
                 val updateInfo = updaterRepository.checkForUpdates(appVersion, isDevBuild)
@@ -184,12 +189,50 @@ class SettingsViewModel
             }
         }
 
+        fun downloadUpdate(url: String) {
+            viewModelScope.launch {
+                val updatesDir = File(application.filesDir, "updates")
+                if (!updatesDir.exists()) updatesDir.mkdirs()
+                val destination = File(updatesDir, "update.apk")
+
+                updaterRepository
+                    .downloadApk(url, destination)
+                    .collect { status ->
+                        _downloadStatus.value = status
+                        if (status is DownloadStatus.Success) {
+                            installApk(status.file)
+                        }
+                    }
+            }
+        }
+
+        private fun installApk(file: File) {
+            try {
+                val uri =
+                    FileProvider.getUriForFile(
+                        application,
+                        "${application.packageName}.fileprovider",
+                        file,
+                    )
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri, "application/vnd.android.package-archive")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                application.startActivity(intent)
+            } catch (e: Exception) {
+                _downloadStatus.value = DownloadStatus.Error("Failed to install APK: ${e.message}")
+            }
+        }
+
         fun clearStatus() {
             _backupStatus.value = BackupStatus.Idle
         }
 
         fun clearUpdateStatus() {
             _updateStatus.value = UpdateStatus.Idle
+            _downloadStatus.value = DownloadStatus.Idle
         }
 
         fun copyLogs() {
