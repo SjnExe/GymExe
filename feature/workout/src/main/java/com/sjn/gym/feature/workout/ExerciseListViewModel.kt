@@ -18,7 +18,6 @@ class ExerciseListViewModel
     constructor(
         private val exerciseRepository: ExerciseRepository,
     ) : ViewModel() {
-
         private val _searchQuery = MutableStateFlow("")
         val searchQuery: StateFlow<String> = _searchQuery
 

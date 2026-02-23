@@ -46,7 +46,9 @@ object Settings
 object Profile
 
 @Serializable
-data class Workout(val exerciseId: String? = null)
+data class Workout(
+    val exerciseId: String? = null,
+)
 
 @Serializable
 object ExerciseList
@@ -138,14 +140,14 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                 LibraryScreen(
                     onNavigateToWorkout = { exerciseId ->
                         navController.navigate(Workout(exerciseId))
-                    }
+                    },
                 )
             }
             composable<ExerciseList> {
                 ExerciseListScreen(
                     onExerciseClick = { exerciseId ->
                         navController.navigate(Workout(exerciseId))
-                    }
+                    },
                 )
             }
             composable<Settings> {

@@ -124,10 +124,12 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
 
         Surface(
             shape = MaterialTheme.shapes.medium,
-            color = if (viewModel.validationError != null)
-                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            color =
+                if (viewModel.validationError != null) {
+                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                },
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -161,7 +163,7 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
                 text = viewModel.validationError!!,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 4.dp, start = 16.dp)
+                modifier = Modifier.padding(top = 4.dp, start = 16.dp),
             )
         }
 

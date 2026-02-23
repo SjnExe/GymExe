@@ -23,7 +23,6 @@ class WorkoutViewModel
         private val weightInputParser: WeightInputParser,
         savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
-
         // Argument from Navigation
         private val exerciseId: String? = savedStateHandle.get<String>("exerciseId")
 
@@ -42,13 +41,14 @@ class WorkoutViewModel
         // Derived property for UI to know if we are in "Strict Mode" (Dumbbell/Machine)
         // defaulting to Stackable (false) if exercise is null (Generic Mode)
         val isStrictEquipment: Boolean
-            get() = exercise?.equipment?.let { equip ->
-                // This logic is duplicated from Parser, maybe Parser should expose it?
-                // Or just rely on parser result.
-                // For UI purposes, we might want to know.
-                // But let's just use the parser's behavior.
-                false // Placeholder, UI logic can be simpler
-            } ?: false
+            get() =
+                exercise?.equipment?.let { equip ->
+                    // This logic is duplicated from Parser, maybe Parser should expose it?
+                    // Or just rely on parser result.
+                    // For UI purposes, we might want to know.
+                    // But let's just use the parser's behavior.
+                    false // Placeholder, UI logic can be simpler
+                } ?: false
 
         init {
             if (exerciseId != null) {
@@ -70,11 +70,13 @@ class WorkoutViewModel
                 is WeightParsingResult.Success -> {
                     validationError = null
                     // Convert List<Double> to List<PlateCount>
-                    plateResult = result.weights
-                        .groupBy { it }
-                        .map { (weight, list) -> PlateCount(weight, list.size) }
-                        .sortedBy { it.weight }
+                    plateResult =
+                        result.weights
+                            .groupBy { it }
+                            .map { (weight, list) -> PlateCount(weight, list.size) }
+                            .sortedBy { it.weight }
                 }
+
                 is WeightParsingResult.Failure -> {
                     validationError = result.message
                     plateResult = emptyList()

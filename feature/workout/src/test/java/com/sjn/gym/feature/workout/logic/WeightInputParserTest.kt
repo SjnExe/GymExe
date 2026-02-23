@@ -5,7 +5,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WeightInputParserTest {
-
     private val parser = WeightInputParser()
 
     @Test

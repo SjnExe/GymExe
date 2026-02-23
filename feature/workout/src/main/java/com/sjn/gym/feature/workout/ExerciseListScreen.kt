@@ -37,7 +37,7 @@ import com.sjn.gym.core.model.Exercise
 @Composable
 fun ExerciseListScreen(
     viewModel: ExerciseListViewModel = hiltViewModel(),
-    onExerciseClick: (String) -> Unit
+    onExerciseClick: (String) -> Unit,
 ) {
     val exercises by viewModel.exercises.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -53,13 +53,14 @@ fun ExerciseListScreen(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             placeholder = { Text("Search Exercises") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             singleLine = true,
-            shape = MaterialTheme.shapes.medium
+            shape = MaterialTheme.shapes.medium,
         )
 
         LazyColumn(
@@ -69,7 +70,7 @@ fun ExerciseListScreen(
             items(exercises, key = { it.id }) { exercise ->
                 ExerciseCard(
                     exercise = exercise,
-                    onClick = { onExerciseClick(exercise.id) }
+                    onClick = { onExerciseClick(exercise.id) },
                 )
             }
         }
@@ -80,12 +81,13 @@ fun ExerciseListScreen(
 @Composable
 fun ExerciseCard(
     exercise: Exercise,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
