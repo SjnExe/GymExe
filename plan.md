@@ -72,12 +72,12 @@ The app follows a modular architecture:
 - [x] **Navigation**: Type-safe Compose Navigation set up (`GymExeNavHost`).
 - [x] **Build Logic**: Infrastructure created.
 
-### Phase 3: Onboarding (Setup Wizard) (Partially Implemented)
+### Phase 3: Onboarding (Setup Wizard) (Completed)
 - [x] **Welcome Screen**: Basic UI implemented.
 - [x] **DataStore**: `UserPreferencesRepository` stores onboarding status.
-- [ ] **Profile Setup**: Input fields for gender/height/weight (UI needed).
-- [ ] **Experience Level**: Selection UI needed (Free style, Fixed Day/Week, Splits).
-- [ ] **Equipment Setup**: Selection UI needed (None, Full Gym, Specific Machines/Weights).
+- [x] **Profile Setup**: Input fields for gender/height/weight.
+- [x] **Experience Level**: Selection UI implemented.
+- [x] **Equipment Setup**: Selection UI implemented.
 
 ### Phase 4: Settings Feature (Partially Implemented)
 - [x] **Theme Settings**: Functional UI for switching themes (System/Light/Dark).
@@ -110,18 +110,11 @@ The app follows a modular architecture:
 
 ## 7. Detailed Instructions for Next Session
 
-1.  **Migrate to Convention Plugins**:
-    *   Refactor module `build.gradle.kts` files to use the convention plugins.
-
-2.  **Onboarding Flow Completion**:
-    *   Implement screens for Profile Setup, Experience Level, and Equipment Selection.
-    *   Connect to `UserPreferencesRepository`.
-
-3.  **Workout UI Polish**:
+1.  **Workout UI Polish**:
     *   Implement `AnnotatedString` building for Syntax Highlighting in `WorkoutScreen` text field.
     *   Improve Exercise List UI.
 
-4.  **Database Migration**:
+2.  **Database Migration**:
     *   Handle data persistence during updates.
 
 ## 8. Improvements & Optimizations (Backlog)

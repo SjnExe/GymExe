@@ -1,5 +1,6 @@
 package com.sjn.gym.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -79,6 +80,7 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
         }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
@@ -150,7 +152,20 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                                 getLaunchIntentMethod.invoke(null, context) as android.content.Intent
                             context.startActivity(intent)
                         } catch (e: Exception) {
-                            // Handle or log error if Chucker is not available or crashes
+                            // Check if Timber is available, otherwise just ignore
+                            try {
+                                val timberClass = Class.forName("timber.log.Timber")
+                                val eMethod = timberClass.getMethod("e", Throwable::class.java, String::class.java, Array<Any>::class.java)
+                                eMethod.invoke(null, e, "Failed to launch Chucker", emptyArray<Any>())
+                            } catch (ignored: Exception) {
+                                // Ignore
+                            }
+                            android.widget.Toast
+                                .makeText(
+                                    context,
+                                    "Network Inspector unavailable",
+                                    android.widget.Toast.LENGTH_SHORT,
+                                ).show()
                         }
                     },
                 )

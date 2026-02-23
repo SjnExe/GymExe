@@ -79,15 +79,15 @@ fun ProfileSetupScreen(
             GenderCard(
                 gender = "Male",
                 icon = Icons.Filled.Man,
-                isSelected = gender == "Male",
-                onClick = { gender = "Male" },
+                isSelected = gender == "MALE",
+                onClick = { gender = "MALE" },
                 modifier = Modifier.weight(1f),
             )
             GenderCard(
                 gender = "Female",
                 icon = Icons.Filled.Woman,
-                isSelected = gender == "Female",
-                onClick = { gender = "Female" },
+                isSelected = gender == "FEMALE",
+                onClick = { gender = "FEMALE" },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -109,7 +109,16 @@ fun ProfileSetupScreen(
         ) {
             OutlinedTextField(
                 value = weightValue,
-                onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) weightValue = it },
+                onValueChange = { newValue ->
+                    if (newValue.all { char -> char.isDigit() || char == '.' } &&
+                        newValue.count { it == '.' } <= 1
+                    ) {
+                        val decimalIndex = newValue.indexOf('.')
+                        if (decimalIndex == -1 || newValue.length - decimalIndex <= 3) {
+                            weightValue = newValue
+                        }
+                    }
+                },
                 label = { Text("Weight") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),
@@ -141,9 +150,26 @@ fun ProfileSetupScreen(
         ) {
             OutlinedTextField(
                 value = heightValue,
-                onValueChange = { if (it.all { char -> char.isDigit() || char == '.' }) heightValue = it },
-                label = { Text("Height") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = { newValue ->
+                    if (heightUnit == "CM") {
+                        if (newValue.all { char -> char.isDigit() || char == '.' } &&
+                            newValue.count { it == '.' } <= 1
+                        ) {
+                            val decimalIndex = newValue.indexOf('.')
+                            if (decimalIndex == -1 || newValue.length - decimalIndex <= 2) {
+                                heightValue = newValue
+                            }
+                        }
+                    } else {
+                        // For Feet, allow digits, ', ", and .
+                        if (newValue.all { char -> char.isDigit() || char == '.' || char == '\'' || char == '"' }) {
+                            heightValue = newValue
+                        }
+                    }
+                },
+                label = { Text(if (heightUnit == "CM") "Height (cm)" else "Height (ft'in\")") },
+                // Use Text keyboard to allow special chars for Feet/Inches if needed
+                keyboardOptions = KeyboardOptions(keyboardType = if (heightUnit == "FT") KeyboardType.Text else KeyboardType.Number),
                 modifier = Modifier.weight(1f),
                 singleLine = true,
             )
@@ -151,7 +177,11 @@ fun ProfileSetupScreen(
                 SegmentedButton(
                     options = listOf("CM", "FT"),
                     selectedOption = heightUnit,
-                    onOptionSelected = { heightUnit = it },
+                    onOptionSelected = {
+                        // Reset value when switching units to prevent invalid states
+                        heightUnit = it
+                        heightValue = ""
+                    },
                 )
             }
         }
@@ -160,16 +190,55 @@ fun ProfileSetupScreen(
 
         Button(
             onClick = {
+                // Parse Height if FT
+                var finalHeight: Double? = null
+                if (heightUnit == "CM") {
+                    finalHeight = heightValue.toDoubleOrNull()
+                } else if (heightUnit == "FT") {
+                    // Try parsing 5'11" format
+                    try {
+                        val feetIndex = heightValue.indexOf('\'')
+                        val inchIndex = heightValue.indexOf('"')
+
+                        if (feetIndex != -1) {
+                            val feet = heightValue.substring(0, feetIndex).trim().toDouble()
+                            val inches =
+                                if (inchIndex != -1 && inchIndex > feetIndex) {
+                                    heightValue.substring(feetIndex + 1, inchIndex).trim().toDouble()
+                                } else if (feetIndex < heightValue.length - 1) {
+                                    heightValue.substring(feetIndex + 1).trim().toDoubleOrNull() ?: 0.0
+                                } else {
+                                    0.0
+                                }
+                            // Convert to decimal feet: 5'6" -> 5.5
+                            finalHeight = feet + (inches / 12.0)
+                        } else {
+                            // Try parsing as simple double if no ' symbol
+                            finalHeight = heightValue.toDoubleOrNull()
+                        }
+                    } catch (e: Exception) {
+                        // ignore parsing error, button validation should handle
+                    }
+                }
+
                 viewModel.saveProfileData(
                     gender = gender,
                     weight = weightValue.toDoubleOrNull(),
                     weightUnit = weightUnit,
-                    height = heightValue.toDoubleOrNull(),
+                    height = finalHeight,
                     heightUnit = heightUnit,
                 )
                 onNext()
             },
-            enabled = gender != null && weightValue.isNotEmpty() && heightValue.isNotEmpty(),
+            enabled =
+                gender != null &&
+                    weightValue.isNotEmpty() &&
+                    weightValue.toDoubleOrNull()?.let { it > 0 } == true &&
+                    heightValue.isNotEmpty() &&
+                    (
+                        (heightUnit == "CM" && heightValue.toDoubleOrNull()?.let { it > 0 } == true) ||
+                            (heightUnit == "FT" && heightValue.any { it.isDigit() })
+                    ),
             modifier =
                 Modifier
                     .fillMaxWidth()
