@@ -20,8 +20,9 @@ class LogRepository
     constructor(
         @ApplicationContext private val context: Context,
     ) {
-        // Use filesDir for persistence, easier to find/share
-        private val logFile: File = File(context.filesDir, "gymexe_logs.txt")
+        // Store logs in /Android/data/com.sjn.gym.dev.debug/files/
+        // This makes them accessible via USB/MTP on non-rooted devices without special permissions.
+        private val logFile: File = File(context.getExternalFilesDir(null), "gymexe_logs.txt")
 
         fun getLogFile(): File = logFile
 

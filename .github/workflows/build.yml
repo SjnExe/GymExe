@@ -91,6 +91,21 @@ jobs:
           # Allow next steps to process logs
           exit 0
 
+      # Emulator Test Step - Runs only on Dev Builds (PRs or Push to dev)
+      # This catches runtime crashes (like R8 issues) that unit tests miss.
+      - name: Run Instrumented Tests (Dev Release)
+        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          # Run tests against the Minified Dev Release to catch R8 crashes
+          script: ./gradlew connectedDevReleaseAndroidTest -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }}
+
       - name: Log Processing & Report Collection
         if: always()
         run: |
@@ -105,6 +120,7 @@ jobs:
           # 2. Collect Reports
           mkdir -p reports/lint
           mkdir -p reports/tests
+          mkdir -p reports/androidTests
 
           # Find and copy Lint reports (preserve path to avoid overwrite)
           find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
@@ -112,6 +128,7 @@ jobs:
 
           # Find and copy Test reports directories
           find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
+          find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
 
           # 3. Zip everything
           zip -r build_logs.zip build_output.log build_summary.txt reports/

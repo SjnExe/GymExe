@@ -1,4 +1,4 @@
-# Room
+# Support for Room
 -keep class androidx.room.RoomMasterTable {
     public static java.lang.String createInsertQuery(java.lang.String);
 }
@@ -29,3 +29,20 @@
 
 # Keep Dagger/Hilt generated code
 -keep class com.sjn.gym.GymExeApp_HiltComponents { *; }
+
+# --- TEMPORARY DEBUGGING RULES FOR R8 CRASH ---
+# Broadly keep serialization and networking libraries to identify the culprit.
+# TODO: Narrow these down after the crash is resolved.
+
+-keep class kotlinx.serialization.** { *; }
+-keep class retrofit2.** { *; }
+-keep class okhttp3.** { *; }
+-keep class com.google.gson.** { *; }
+
+# Preserve all Room Database implementations
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep class * extends androidx.room.RoomDatabase_Impl { *; }
+
+# Print configuration for debugging
+-printconfiguration build/outputs/mapping/release/configuration.txt
+-printusage build/outputs/mapping/release/usage.txt
