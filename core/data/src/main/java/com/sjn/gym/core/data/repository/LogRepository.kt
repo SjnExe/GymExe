@@ -18,13 +18,14 @@ import javax.inject.Singleton
 class LogRepository
     @Inject
     constructor(
-        @param:ApplicationContext private val context: Context,
+        @ApplicationContext private val context: Context,
     ) {
         // Use filesDir for persistence, easier to find/share
         private val logFile: File = File(context.filesDir, "gymexe_logs.txt")
 
         fun getLogFile(): File = logFile
 
+        @Synchronized
         fun appendLog(
             priority: Int,
             tag: String?,
