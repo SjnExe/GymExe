@@ -28,8 +28,8 @@ dependencies {
     implementation(libs.okhttp)
 
     // Chucker
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
+    "devImplementation"(libs.chucker.debug)
+    "stableImplementation"(libs.chucker.release)
 
     // Hilt handled by convention plugin (hilt-android, hilt-compiler)
 

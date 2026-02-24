@@ -41,20 +41,6 @@ android {
         }
     }
 
-    flavorDimensions += "env"
-    productFlavors {
-        create("dev") {
-            dimension = "env"
-            applicationIdSuffix = ".dev"
-            if (!project.hasProperty("versionName")) {
-                versionNameSuffix = "-dev"
-            }
-        }
-        create("stable") {
-            dimension = "env"
-        }
-    }
-
     signingConfigs {
         create("release") {
             storeFile = file("debug.keystore")
@@ -97,9 +83,9 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)
-    debugImplementation(libs.leakcanary.android)
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
+    "devImplementation"(libs.leakcanary.android)
+    "devImplementation"(libs.chucker.debug)
+    "stableImplementation"(libs.chucker.release)
     implementation(libs.timber)
 
     // Modular dependencies

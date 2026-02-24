@@ -36,13 +36,14 @@ import com.sjn.gym.core.model.Exercise
 
 @Composable
 fun ExerciseListScreen(
+    modifier: Modifier = Modifier,
     viewModel: ExerciseListViewModel = hiltViewModel(),
     onExerciseClick: (String) -> Unit,
 ) {
     val exercises by viewModel.exercises.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize()) {
         Text(
             text = "Exercises",
             style = MaterialTheme.typography.headlineMedium,

@@ -48,7 +48,10 @@ fun LibraryScreen(onNavigateToWorkout: (String) -> Unit) {
                 0 -> {
                     // Exercises (reuse existing screen but wrap it appropriately)
                     // Assuming ExerciseListScreen handles its own data
-                    ExerciseListScreen(onExerciseClick = onNavigateToWorkout)
+                    ExerciseListScreen(
+                        modifier = Modifier.weight(1f),
+                        onExerciseClick = onNavigateToWorkout,
+                    )
                 }
 
                 1 -> {
