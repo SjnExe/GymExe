@@ -92,6 +92,8 @@ jobs:
           # Run without --info --stacktrace for cleaner logs
           # Pipe output to file for artifact collection but keep console clean
           ./gradlew $TASKS \
+            --max-workers=4 \
+            --build-cache \
             -PversionName=${{ env.VERSION_NAME }} \
             -PversionCode=${{ env.VERSION_CODE }} \
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
