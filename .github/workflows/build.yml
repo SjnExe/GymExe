@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -124,8 +124,11 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           emulator-boot-timeout: 600
-          ram-size: 2048M
-          heap-size: 512M
+          # Optimize for GitHub Runner (2 cores, 7GB RAM). Gradle uses 3GB.
+          # Allocating 3GB to Emulator leaves ~1GB for OS overhead.
+          ram-size: 3072M
+          heap-size: 1024M
+          disk-size: 6000M
           # Run tests against the Minified Dev Release to catch R8 crashes
           script: ./gradlew connectedDevReleaseAndroidTest -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }}
 
@@ -158,14 +161,14 @@ jobs:
 
       - name: Upload Logs & Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: build-logs-reports
           path: build_logs.zip
 
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gym-exe-dev-${{ env.VERSION_NAME }}
           path: |
@@ -175,7 +178,7 @@ jobs:
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gym-exe-stable
           path: |
