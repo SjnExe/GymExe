@@ -30,6 +30,19 @@ jobs:
         with:
           gradle-version: '9.3.1'
           cache-read-only: false
+          # Enable saving the build cache to speed up subsequent runs
+          arguments: --build-cache
+
+      # Cache Android Emulator AVD to speed up startup
+      - name: AVD Cache
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+        uses: actions/cache@v5
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ runner.os }}-api34-x86_64
 
       - name: Calculate Version
         id: version
