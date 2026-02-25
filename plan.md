@@ -113,6 +113,12 @@ The app follows a modular architecture:
 - [x] **Basic Screen**: Placeholder UI.
 - [ ] **Graphs**: Charts and stats logic needed.
 
+### Phase 8: Stability & Debugging (New)
+- [x] **R8 Support**: ProGuard rules added for Room, Serialization, and Retrofit to support `android.enableR8.fullMode=true`.
+- [x] **Global Crash Handler**: `CrashActivity` catches uncaught exceptions in `dev` builds and offers log sharing.
+- [x] **Robust Logging**: `LogRepository` is now synchronized. `build.yml` captures CI logs efficiently.
+- [x] **CI Optimization**: Removed redundant ARM64 tests and reduced log verbosity.
+
 ## 7. Detailed Instructions for Next Session
 
 1.  **Routines & Scheduling Logic**:
@@ -144,3 +150,4 @@ The app follows a modular architecture:
 ### CI/CD Enhancements
 - [ ] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
 - [ ] **Release Drafter**: Consider automating release notes generation further.
+- [ ] **Instrumented Tests**: Add Emulator-based tests (`managed devices`) to catch runtime crashes on CI.
