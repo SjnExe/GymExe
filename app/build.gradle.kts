@@ -59,6 +59,13 @@ android {
     }
 }
 
+// Enable AndroidTest for devRelease to allow testing R8 builds
+androidComponents {
+    beforeVariants(selector().withFlavor(Pair("env", "dev")).withBuildType("release")) { variantBuilder ->
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = true
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -80,10 +87,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.tracing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)
-    "devImplementation"(libs.leakcanary.android)
+    debugImplementation(libs.leakcanary.android)
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
     implementation(libs.timber)
