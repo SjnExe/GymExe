@@ -30,8 +30,6 @@ jobs:
         with:
           gradle-version: '9.3.1'
           cache-read-only: false
-          # Enable saving the build cache to speed up subsequent runs
-          arguments: --build-cache
 
       # Cache Android Emulator AVD to speed up startup
       - name: AVD Cache
