@@ -59,6 +59,13 @@ android {
     }
 }
 
+// Enable AndroidTest for devRelease to allow testing R8 builds
+androidComponents {
+    beforeVariants(selector().withFlavor(Pair("env", "dev")).withBuildType("release")) { variantBuilder ->
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = true
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

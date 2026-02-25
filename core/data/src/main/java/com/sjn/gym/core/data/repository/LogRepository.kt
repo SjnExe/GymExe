@@ -18,7 +18,7 @@ import javax.inject.Singleton
 class LogRepository
     @Inject
     constructor(
-        @ApplicationContext private val context: Context,
+        @param:ApplicationContext private val context: Context,
     ) {
         // Store logs in /Android/data/com.sjn.gym.dev.debug/files/
         // This makes them accessible via USB/MTP on non-rooted devices without special permissions.

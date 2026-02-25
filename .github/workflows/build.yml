@@ -91,6 +91,15 @@ jobs:
           # Allow next steps to process logs
           exit 0
 
+      # Enable KVM group permissions for the runner user to prevent emulator hangs
+      - name: Enable KVM group perms
+        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo usermod -a -G kvm $USER
+
       # Emulator Test Step - Runs only on Dev Builds (PRs or Push to dev)
       # This catches runtime crashes (like R8 issues) that unit tests miss.
       - name: Run Instrumented Tests (Dev Release)

@@ -28,7 +28,7 @@ val Context.userProfileDataStore: DataStore<Preferences> by preferencesDataStore
 class UserProfileRepository
     @Inject
     constructor(
-        @ApplicationContext private val context: Context,
+        @param:ApplicationContext private val context: Context,
     ) {
         private val dataStore = context.userProfileDataStore
 
