@@ -27,6 +27,7 @@ roborazzi = "1.59.0"
 room = "2.8.4"
 spotless = "8.2.1"
 timber = "5.0.1"
+tracing = "1.2.0"
 versionCatalogUpdate = "1.1.0"
 
 [libraries]
@@ -49,6 +50,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-tracing = { module = "androidx.tracing:tracing", version.ref = "tracing" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
