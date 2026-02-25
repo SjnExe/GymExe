@@ -103,6 +103,9 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
+          emulator-boot-timeout: 600
+          ram-size: 2048M
+          heap-size: 512M
           # Run tests against the Minified Dev Release to catch R8 crashes
           script: ./gradlew connectedDevReleaseAndroidTest -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }}
 
