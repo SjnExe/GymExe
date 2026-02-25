@@ -90,7 +90,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)
-    "devImplementation"(libs.leakcanary.android)
+    debugImplementation(libs.leakcanary.android)
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
     implementation(libs.timber)
