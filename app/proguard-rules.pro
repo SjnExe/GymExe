@@ -43,6 +43,10 @@
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep class * extends androidx.room.RoomDatabase_Impl { *; }
 
+# Fix for AndroidJUnitRunner crash on minified builds (devRelease)
+# androidx.tracing.Trace is used by the runner but stripped by R8 if unused by the app.
+-keep class androidx.tracing.** { *; }
+
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
 -printusage build/outputs/mapping/release/usage.txt
