@@ -54,6 +54,9 @@
 -keep class kotlinx.coroutines.** { *; }
 # kotlin.coroutines.CoroutineContext$Key (and others) are used by AndroidComposeUiTestEnvironment
 -keep class kotlin.coroutines.** { *; }
+# kotlin.Result is used by the test environment but stripped by R8
+-keep class kotlin.Result { *; }
+-keep class kotlin.Result$Companion { *; }
 # androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy$DefaultImpls { *; }
