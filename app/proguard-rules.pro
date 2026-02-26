@@ -68,6 +68,8 @@
 -keep class io.netty.** { *; }
 # javax.inject.Provider is used by Dagger/Hilt and can be stripped in R8 full mode
 -keep interface javax.inject.Provider { *; }
+# com.google.common.util.concurrent.ListenableFuture is used by AndroidX Test libraries
+-keep class com.google.common.util.concurrent.ListenableFuture { *; }
 # androidx.compose.runtime.MonotonicFrameClock$DefaultImpls is used by TestMonotonicFrameClock
 -keep class androidx.compose.runtime.** { *; }
 
