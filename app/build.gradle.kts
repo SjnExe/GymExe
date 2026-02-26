@@ -64,12 +64,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
 
-    // Rename APKs using Legacy API (applicationVariants)
-    // This is safer for renaming than onVariants in KTS for now.
+// Rename APKs using Legacy API (applicationVariants) via AppExtension
+// We must access the legacy AppExtension to use applicationVariants in KTS
+extensions.configure<com.android.build.gradle.AppExtension> {
     applicationVariants.all {
         val variant = this
-        outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
                 val flavorName = variant.flavorName
                 val buildType = variant.buildType.name
