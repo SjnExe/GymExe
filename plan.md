@@ -125,9 +125,9 @@ The app follows a modular architecture:
 1.  **Instrumented Test Stability**:
     *   **Architecture:** The project now uses a `benchmark` build type (inheriting from `release`) specifically for CI instrumented tests. This build type applies `app/proguard-test-rules.pro` to prevent test runner crashes while keeping R8 full mode enabled.
     *   **Workflow:**
-        *   **Manual QA:** Build/Install `devRelease`. This is a strict R8 build (identical to production `stableRelease`). If it crashes here, it's a real bug.
+        *   **Manual QA:** Build/Install `devRelease`. This is a strict R8 build (identical to production `stableRelease`).
         *   **CI Testing:** The CI runs `connectedDevBenchmarkAndroidTest`. This uses the `benchmark` build type which includes the necessary keep rules for the test harness.
-    *   **Maintenance:** If CI tests crash with `NoClassDefFoundError` or `NoSuchMethodError`, add the missing class to `app/proguard-test-rules.pro`. Do NOT add these to the main `proguard-rules.pro` unless the app *itself* crashes in `devRelease`.
+    *   **Constraint:** Instrumented tests currently require a CI environment with KVM (hardware acceleration) support. The local agent environment does NOT support KVM, so tests must be verified via GitHub Actions logs.
 
 2.  **Routines & Scheduling Logic**:
     *   Implement CRUD operations for `Routine` and `WorkoutPlan`.

@@ -54,7 +54,7 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 
 ## Environment Setup
 
-The following script is already ran on Jules environment. This ensures all system dependencies are updated and the emulator is ready.
+The following script is already ran on Jules environment. This ensures all system dependencies are updated.
 
 ```bash
 sudo apt update
@@ -66,7 +66,6 @@ sudo apt autoremove -y
 sudo apt clean
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-if ! avdmanager list avd | grep -q "test"; then echo "no" | avdmanager create avd -n test -k "system-images;android-34;google_apis;x86_64" --force; fi
 ./gradlew :app:dependencies --configuration devBenchmarkRuntimeClasspath
 ```
 
@@ -87,10 +86,6 @@ Run this before submitting any change:
 *   **Run Lint:** `./gradlew lintDevDebug`
 *   **Run Unit Tests:** `./gradlew testDevDebugUnitTest`
 *   **Format Code:** `./gradlew spotlessApply`
-*   **Run Instrumented Tests (CI/Agent):**
-    1.  Start Emulator: `emulator -avd test -no-window -gpu swiftshader_indirect -noaudio &`
-    2.  Wait for boot: `adb wait-for-device`
-    3.  Run Tests: `./gradlew connectedDevBenchmarkAndroidTest`
 
 ### Modularization
 *   **Sync Project:** `./gradlew --refresh-dependencies`
