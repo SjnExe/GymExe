@@ -52,6 +52,12 @@ android {
 
     buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
 
+    productFlavors {
+        named("dev") {
+            proguardFile("proguard-test-rules.pro")
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
