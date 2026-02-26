@@ -93,6 +93,7 @@ jobs:
             --parallel \
             --max-workers=4 \
             --build-cache \
+            --no-configuration-cache \
             -PversionName=${{ env.VERSION_NAME }} \
             -PversionCode=${{ env.VERSION_CODE }} \
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
@@ -117,6 +118,7 @@ jobs:
             --parallel \
             --max-workers=4 \
             --build-cache \
+            --no-configuration-cache \
             -PversionName=${{ env.VERSION_NAME }} \
             -PversionCode=${{ env.VERSION_CODE }} \
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
