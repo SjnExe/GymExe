@@ -54,6 +54,8 @@
 -keep class kotlinx.coroutines.** { *; }
 # kotlin.coroutines.CoroutineContext$Key (and others) are used by AndroidComposeUiTestEnvironment
 -keep class kotlin.coroutines.** { *; }
+# androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
+-keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
