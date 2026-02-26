@@ -79,7 +79,9 @@ jobs:
       - name: Build with Gradle
         id: gradle_build
         run: |
-          set +e
+          # Use pipefail to catch gradle errors even when piping to tee
+          set -o pipefail
+
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
             TASKS="spotlessCheck assembleStableRelease lintStableRelease testStableDebugUnitTest"
           else
@@ -92,6 +94,7 @@ jobs:
           # Run without --info --stacktrace for cleaner logs
           # Pipe output to file for artifact collection but keep console clean
           ./gradlew $TASKS \
+            --parallel \
             --max-workers=4 \
             --build-cache \
             -PversionName=${{ env.VERSION_NAME }} \
@@ -99,25 +102,22 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
-          EXIT_CODE=${PIPESTATUS[0]}
-          echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
-
-          # Allow next steps to process logs
-          exit 0
-
       # Enable KVM group permissions for the runner user to prevent emulator hangs
+      # chmod 666 ensures immediate access without re-login
       - name: Enable KVM group perms
-        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'dev'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           sudo usermod -a -G kvm $USER
+          sudo chmod 666 /dev/kvm
+          sudo chown $USER /dev/kvm
 
       # Emulator Test Step - Runs only on Dev Builds (PRs or Push to dev)
       # This catches runtime crashes (like R8 issues) that unit tests miss.
       - name: Run Instrumented Tests (Dev Release)
-        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'dev'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -126,7 +126,8 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          emulator-boot-timeout: 600
+          disable-linux-hw-accel: false
+          emulator-boot-timeout: 300
           # Optimize for GitHub Runner (4 cores, 16GB RAM / 14GB Usable).
           # Gradle (8GB) + Emulator (4GB) + OS (~2GB).
           ram-size: 4096M
@@ -171,7 +172,7 @@ jobs:
           path: build_logs.zip
 
       - name: Upload APKs (Dev)
-        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'dev'
         uses: actions/upload-artifact@v6
         with:
           name: gym-exe-dev-${{ env.VERSION_NAME }}
@@ -181,7 +182,7 @@ jobs:
           compression-level: 0
 
       - name: Upload APKs (Stable)
-        if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'stable'
         uses: actions/upload-artifact@v6
         with:
           name: gym-exe-stable
@@ -189,7 +190,7 @@ jobs:
             app/build/outputs/apk/stable/release/*.apk
 
       - name: Create Release (Stable)
-        if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'stable'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -203,7 +204,7 @@ jobs:
              --target ${{ github.sha }}
 
       - name: Create/Update Dev Release
-        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'dev'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_NAME: ${{ env.VERSION_NAME }}
@@ -223,11 +224,3 @@ jobs:
             --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
             --target ${{ github.sha }}
-
-      - name: Check Build Status
-        if: always()
-        run: |
-          if [ "${{ env.EXIT_CODE }}" != "0" ]; then
-            echo "Build failed with exit code ${{ env.EXIT_CODE }}"
-            exit ${{ env.EXIT_CODE }}
-          fi
