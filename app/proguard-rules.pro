@@ -46,6 +46,8 @@
 # Fix for AndroidJUnitRunner crash on minified builds (devRelease)
 # androidx.tracing.Trace is used by the runner but stripped by R8 if unused by the app.
 -keep class androidx.tracing.** { *; }
+# kotlin.LazyKt is used by androidx.test.platform.io.TestDirCalculator but stripped by R8
+-keep class kotlin.LazyKt { *; }
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
