@@ -53,6 +53,10 @@
 -keep class androidx.lifecycle.ViewTreeViewModelStoreOwner { *; }
 -keep class androidx.savedstate.ViewTreeSavedStateRegistryOwner { *; }
 
+# Fix for NoClassDefFoundError: kotlin.collections.CollectionsKt in instrumented tests
+# Used by ComposeRootRegistry dispatchOnRegistrationChanged
+-keep class kotlin.collections.** { *; }
+
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes
 # when running against minified builds (R8 full mode).
