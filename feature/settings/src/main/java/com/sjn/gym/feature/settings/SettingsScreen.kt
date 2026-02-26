@@ -372,16 +372,17 @@ fun UpdateDialog(
                     val progress = downloadStatus.progress
                     val downloaded = formatFileSize(downloadStatus.downloadedBytes)
                     val total = formatFileSize(downloadStatus.totalBytes)
-                    val statusText = if (downloadStatus.totalBytes > 0) {
-                        "Downloading... $downloaded / $total ($progress%)"
-                    } else {
-                        "Downloading... $downloaded"
-                    }
+                    val statusText =
+                        if (downloadStatus.totalBytes > 0) {
+                            "Downloading... $downloaded / $total ($progress%)"
+                        } else {
+                            "Downloading... $downloaded"
+                        }
 
                     Text(
                         text = statusText,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     LinearProgressIndicator(
