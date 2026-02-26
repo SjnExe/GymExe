@@ -47,6 +47,12 @@
 -keep class androidx.compose.ui.platform.** { *; }
 -keep class androidx.compose.ui.test.** { *; }
 
+# Fix for NoClassDefFoundError: ViewTreeLifecycleOwner in instrumented tests
+# androidx.lifecycle.ViewTreeLifecycleOwner is used by ComposeRootRegistry$StateChangeHandler
+-keep class androidx.lifecycle.ViewTreeLifecycleOwner { *; }
+-keep class androidx.lifecycle.ViewTreeViewModelStoreOwner { *; }
+-keep class androidx.savedstate.ViewTreeSavedStateRegistryOwner { *; }
+
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes
 # when running against minified builds (R8 full mode).
