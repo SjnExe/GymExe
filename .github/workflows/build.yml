@@ -76,24 +76,43 @@ jobs:
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "Calculated Version: $VERSION_NAME ($VERSION_CODE)"
 
-      - name: Build with Gradle
-        id: gradle_build
+      - name: Run Checks (Spotless, Lint, Unit Tests)
+        id: run_checks
         run: |
-          # Use pipefail to catch gradle errors even when piping to tee
           set -o pipefail
 
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="spotlessCheck assembleStableRelease lintStableRelease testStableDebugUnitTest"
+            TASKS="spotlessCheck lintStableRelease testStableDebugUnitTest"
           else
-            # Build Dev Release (R8) to catch obfuscation issues
-            # Also compile test APKs here to separate build failures from test execution
-            TASKS="spotlessCheck assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest assembleDevBenchmarkAndroidTest"
+            TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
           fi
 
-          echo "Running tasks: $TASKS"
+          echo "Running checks: $TASKS"
 
-          # Run without --info --stacktrace for cleaner logs
-          # Pipe output to file for artifact collection but keep console clean
+          ./gradlew $TASKS \
+            --parallel \
+            --max-workers=4 \
+            --build-cache \
+            -PversionName=${{ env.VERSION_NAME }} \
+            -PversionCode=${{ env.VERSION_CODE }} \
+            -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
+            2>&1 | tee checks_output.log
+
+      - name: Build APKs
+        id: build_apks
+        # Run only if checks passed
+        run: |
+          set -o pipefail
+
+          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
+            TASKS="assembleStableRelease"
+          else
+            # Build Dev Release (R8), Debug, and Benchmark Test APK
+            TASKS="assembleDevRelease assembleDevDebug assembleDevBenchmarkAndroidTest"
+          fi
+
+          echo "Building artifacts: $TASKS"
+
           ./gradlew $TASKS \
             --parallel \
             --max-workers=4 \
@@ -103,14 +122,10 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
-      # Enable KVM group permissions and install native deps to prevent emulator hangs
-      # chmod 666 ensures immediate access without re-login
+      # Enable KVM group permissions (Required for Emulator)
       - name: Prepare Test Environment
         if: env.BUILD_TYPE == 'dev'
         run: |
-          # Install native libraries required by the emulator
-          sudo apt-get update && sudo apt-get install -y libx11-6 libx11-xcb1 libxcb1 libxcursor1 libxi6 libxtst6 nss-passwords
-
           # Enable KVM
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
@@ -119,8 +134,7 @@ jobs:
           sudo chmod 666 /dev/kvm
           sudo chown $USER /dev/kvm
 
-      # Emulator Test Step - Runs only on Dev Builds (PRs or Push to dev)
-      # This catches runtime crashes (like R8 issues) that unit tests miss.
+      # Emulator Test Step - Runs only on Dev Builds
       - name: Run Instrumented Tests (Dev Benchmark)
         if: env.BUILD_TYPE == 'dev'
         uses: reactivecircus/android-emulator-runner@v2
@@ -133,38 +147,37 @@ jobs:
           disable-animations: true
           disable-linux-hw-accel: false
           emulator-boot-timeout: 300
-          # Optimize for GitHub Runner (4 cores, 16GB RAM / 14GB Usable).
-          # Gradle (8GB) + Emulator (4GB) + OS (~2GB).
           ram-size: 4096M
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          # Run tests against the Minified Dev Benchmark (R8 + Test Rules) to catch R8 crashes
-          # Override JVM memory for CI to 8GB (default 3GB in gradle.properties)
-          # Use max-workers=4 to utilize all cores
+          # Use connectedDevBenchmarkAndroidTest to run the tests on the device
           script: ./gradlew connectedDevBenchmarkAndroidTest --max-workers=4 -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g"
-
-      - name: Stop Gradle Daemons
-        if: always()
-        run: ./gradlew --stop
 
       - name: Log Processing & Report Collection
         if: always()
         run: |
           # 1. Summary
-          echo "=== BUILD LOG HEAD ===" > build_summary.txt
-          head -n 100 build_output.log >> build_summary.txt
-          echo -e "\n=== BUILD LOG TAIL ===" >> build_summary.txt
-          tail -n 100 build_output.log >> build_summary.txt
-          echo -e "\n=== ERRORS/WARNINGS ===" >> build_summary.txt
-          grep -iE "error|warning|failed|exception" build_output.log | head -n 500 >> build_summary.txt || true
+          echo "=== CHECKS LOG ===" > build_summary.txt
+          if [ -f checks_output.log ]; then
+            head -n 50 checks_output.log >> build_summary.txt
+            tail -n 50 checks_output.log >> build_summary.txt
+          fi
+
+          echo -e "\n=== BUILD LOG ===" >> build_summary.txt
+          if [ -f build_output.log ]; then
+            head -n 100 build_output.log >> build_summary.txt
+            tail -n 100 build_output.log >> build_summary.txt
+            echo -e "\n=== ERRORS/WARNINGS ===" >> build_summary.txt
+            grep -iE "error|warning|failed|exception" build_output.log | head -n 500 >> build_summary.txt || true
+          fi
 
           # 2. Collect Reports
           mkdir -p reports/lint
           mkdir -p reports/tests
           mkdir -p reports/androidTests
 
-          # Find and copy Lint reports (preserve path to avoid overwrite)
+          # Find and copy Lint reports
           find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
           find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
 
@@ -173,7 +186,11 @@ jobs:
           find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
 
           # 3. Zip everything
-          zip -r build_logs.zip build_output.log build_summary.txt reports/
+          FILES_TO_ZIP="build_summary.txt reports/"
+          if [ -f checks_output.log ]; then FILES_TO_ZIP="$FILES_TO_ZIP checks_output.log"; fi
+          if [ -f build_output.log ]; then FILES_TO_ZIP="$FILES_TO_ZIP build_output.log"; fi
+
+          zip -r build_logs.zip $FILES_TO_ZIP
 
       - name: Upload Logs & Reports
         if: always()
@@ -205,7 +222,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-           # Find APK paths
            APK_RELEASE=$(find app/build/outputs/apk/stable/release -name "*.apk" | head -n 1)
 
            gh release create ${{ env.VERSION_NAME }} \
@@ -220,14 +236,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_NAME: ${{ env.VERSION_NAME }}
         run: |
-          # Delete existing 'dev' tag and release to keep it floating
           gh release delete dev --cleanup-tag -y || true
 
-          # Find APK paths dynamically
           APK_RELEASE=$(find app/build/outputs/apk/dev/release -name "*.apk" | head -n 1)
           APK_DEBUG=$(find app/build/outputs/apk/dev/debug -name "*.apk" | head -n 1)
 
-          # Create new Dev Release
           gh release create dev \
             "$APK_RELEASE" \
             "$APK_DEBUG" \
