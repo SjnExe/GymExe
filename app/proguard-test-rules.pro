@@ -42,6 +42,11 @@
 # androidx.compose.ui.platform.ViewRootForTest is used by ComposeRootRegistry during teardown
 -keep class androidx.compose.ui.platform.ViewRootForTest { *; }
 
+# Fix for NoSuchMethodError: setOnViewCreatedCallback in instrumented tests
+# Preserve Compose platform internals used by the test runner
+-keep class androidx.compose.ui.platform.** { *; }
+-keep class androidx.compose.ui.test.** { *; }
+
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes
 # when running against minified builds (R8 full mode).
