@@ -48,6 +48,8 @@
 -keep class androidx.tracing.** { *; }
 # kotlin.LazyKt is used by androidx.test.platform.io.TestDirCalculator but stripped by R8
 -keep class kotlin.LazyKt { *; }
+# kotlin.time.Duration is used by AndroidComposeTestRule but methods like getINFINITE are stripped/renamed
+-keep class kotlin.time.** { *; }
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
