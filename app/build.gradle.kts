@@ -59,9 +59,6 @@ android {
     buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
     buildTypes.getByName("benchmark").signingConfig = signingConfigs.getByName("release")
 
-    // Removed: productFlavors.named("dev") block.
-    // Test rules are now applied via the 'benchmark' build type above.
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -78,6 +75,33 @@ androidComponents {
     beforeVariants(selector().withBuildType("release")) { variantBuilder ->
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
     }
+
+    // Rename APKs to format: GymExe-{flavor}-{buildType}.apk
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            if (output is com.android.build.api.variant.VariantOutputConfiguration) {
+                // Not supported directly via output.outputFileName in new API in some versions,
+                // but usually handled via onVariants for APKs.
+                // Actually, the new Variant API requires a slightly different approach for file naming if strict.
+                // However, assigning to outputFileName on the VariantOutput works for now in KTS for AGP 8+.
+            }
+        }
+    }
+}
+
+// Legacy variant API for output renaming as it's simpler and still supported
+android.applicationVariants.all {
+    val variant = this
+    variant.outputs
+        .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+        .forEach { output ->
+            val flavor = variant.flavorName
+            val buildType = variant.buildType.name
+            // Ensure format: GymExe-{flavor}-{buildType}.apk
+            // Example: GymExe-dev-release.apk
+            val newName = "GymExe-$flavor-$buildType.apk"
+            output.outputFileName = newName
+        }
 }
 
 dependencies {

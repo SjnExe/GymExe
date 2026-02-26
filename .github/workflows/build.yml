@@ -124,23 +124,6 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
-      - name: Rename APKs
-        if: success()
-        run: |
-          # Rename Dev APKs
-          if [ "${{ env.BUILD_TYPE }}" == "dev" ]; then
-            # Dev Release
-            find app/build/outputs/apk/dev/release -name "*.apk" -exec mv {} app/build/outputs/apk/dev/release/GymExe-dev-release.apk \;
-            # Dev Debug
-            find app/build/outputs/apk/dev/debug -name "*.apk" -exec mv {} app/build/outputs/apk/dev/debug/GymExe-dev-debug.apk \;
-          fi
-
-          # Rename Stable APKs
-          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            # Stable Release
-            find app/build/outputs/apk/stable/release -name "*.apk" -exec mv {} app/build/outputs/apk/stable/release/GymExe-stable-release.apk \;
-          fi
-
       # Enable KVM group permissions (Required for Emulator)
       - name: Prepare Test Environment
         if: env.BUILD_TYPE == 'dev'
@@ -224,8 +207,8 @@ jobs:
         with:
           name: gym-exe-dev-${{ env.VERSION_NAME }}
           path: |
-            app/build/outputs/apk/dev/release/*.apk
-            app/build/outputs/apk/dev/debug/*.apk
+            app/build/outputs/apk/dev/release/GymExe-dev-release.apk
+            app/build/outputs/apk/dev/debug/GymExe-dev-debug.apk
           compression-level: 0
 
       - name: Upload APKs (Stable)
@@ -234,14 +217,14 @@ jobs:
         with:
           name: gym-exe-stable
           path: |
-            app/build/outputs/apk/stable/release/*.apk
+            app/build/outputs/apk/stable/release/GymExe-stable-release.apk
 
       - name: Create Release (Stable)
         if: env.BUILD_TYPE == 'stable'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-           APK_RELEASE=$(find app/build/outputs/apk/stable/release -name "*.apk" | head -n 1)
+           APK_RELEASE=$(find app/build/outputs/apk/stable/release -name "GymExe-stable-release.apk" | head -n 1)
 
            gh release create ${{ env.VERSION_NAME }} \
              "$APK_RELEASE" \
@@ -257,8 +240,8 @@ jobs:
         run: |
           gh release delete dev --cleanup-tag -y || true
 
-          APK_RELEASE=$(find app/build/outputs/apk/dev/release -name "*.apk" | head -n 1)
-          APK_DEBUG=$(find app/build/outputs/apk/dev/debug -name "*.apk" | head -n 1)
+          APK_RELEASE=$(find app/build/outputs/apk/dev/release -name "GymExe-dev-release.apk" | head -n 1)
+          APK_DEBUG=$(find app/build/outputs/apk/dev/debug -name "GymExe-dev-debug.apk" | head -n 1)
 
           gh release create dev \
             "$APK_RELEASE" \
