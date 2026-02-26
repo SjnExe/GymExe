@@ -66,7 +66,7 @@ sudo apt autoremove -y
 sudo apt clean
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew :app:dependencies --configuration devBenchmarkRuntimeClasspath
+./gradlew assembleDevRelease
 ```
 
 ## Useful Commands
