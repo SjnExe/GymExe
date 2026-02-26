@@ -133,9 +133,20 @@ jobs:
           ram-size: 4096M
           heap-size: 2048M
           disk-size: 6000M
+          cores: 4
           # Run tests against the Minified Dev Release to catch R8 crashes
           # Override JVM memory for CI to 8GB (default 3GB in gradle.properties)
-          script: ./gradlew connectedDevReleaseAndroidTest -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g"
+          # Use max-workers=4 to utilize all cores
+          script: |
+            ./gradlew connectedDevReleaseAndroidTest \
+              --max-workers=4 \
+              -PversionName=${{ env.VERSION_NAME }} \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g"
+
+      - name: Stop Gradle Daemons
+        if: always()
+        run: ./gradlew --stop
 
       - name: Log Processing & Report Collection
         if: always()
