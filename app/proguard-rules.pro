@@ -59,6 +59,8 @@
 -keep class kotlin.Result$Companion { *; }
 -keep class kotlin.ResultKt { *; }
 -keep class kotlin.Result** { *; }
+# kotlin.jvm.internal.FunctionReferenceImpl and other internal classes are used by TestScope
+-keep class kotlin.jvm.internal.** { *; }
 # androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy$DefaultImpls { *; }
