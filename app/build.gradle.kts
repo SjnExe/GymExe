@@ -76,32 +76,21 @@ androidComponents {
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
     }
 
-    // Rename APKs to format: GymExe-{flavor}-{buildType}.apk
     onVariants { variant ->
         variant.outputs.forEach { output ->
-            if (output is com.android.build.api.variant.VariantOutputConfiguration) {
-                // Not supported directly via output.outputFileName in new API in some versions,
-                // but usually handled via onVariants for APKs.
-                // Actually, the new Variant API requires a slightly different approach for file naming if strict.
-                // However, assigning to outputFileName on the VariantOutput works for now in KTS for AGP 8+.
+            if (output is com.android.build.api.variant.VariantOutput) {
+                val flavorName = variant.flavorName
+                val buildType = variant.buildType
+                // Format: GymExe-{flavor}-{buildType}.apk
+                // Example: GymExe-dev-release.apk
+                if (flavorName != null) {
+                    output.outputFileName.set("GymExe-$flavorName-$buildType.apk")
+                } else {
+                    output.outputFileName.set("GymExe-$buildType.apk")
+                }
             }
         }
     }
-}
-
-// Legacy variant API for output renaming as it's simpler and still supported
-android.applicationVariants.all {
-    val variant = this
-    variant.outputs
-        .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-        .forEach { output ->
-            val flavor = variant.flavorName
-            val buildType = variant.buildType.name
-            // Ensure format: GymExe-{flavor}-{buildType}.apk
-            // Example: GymExe-dev-release.apk
-            val newName = "GymExe-$flavor-$buildType.apk"
-            output.outputFileName = newName
-        }
 }
 
 dependencies {
