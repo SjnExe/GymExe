@@ -40,7 +40,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ runner.os }}-api34-x86_64
+          key: avd-${{ runner.os }}-api36-x86_64
 
       - name: Calculate Version
         id: version
@@ -124,6 +124,23 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
+      - name: Rename APKs
+        if: success()
+        run: |
+          # Rename Dev APKs
+          if [ "${{ env.BUILD_TYPE }}" == "dev" ]; then
+            # Dev Release
+            find app/build/outputs/apk/dev/release -name "*.apk" -exec mv {} app/build/outputs/apk/dev/release/GymExe-dev-release.apk \;
+            # Dev Debug
+            find app/build/outputs/apk/dev/debug -name "*.apk" -exec mv {} app/build/outputs/apk/dev/debug/GymExe-dev-debug.apk \;
+          fi
+
+          # Rename Stable APKs
+          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
+            # Stable Release
+            find app/build/outputs/apk/stable/release -name "*.apk" -exec mv {} app/build/outputs/apk/stable/release/GymExe-stable-release.apk \;
+          fi
+
       # Enable KVM group permissions (Required for Emulator)
       - name: Prepare Test Environment
         if: env.BUILD_TYPE == 'dev'
@@ -141,7 +158,7 @@ jobs:
         if: env.BUILD_TYPE == 'dev'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 36
           target: google_apis
           arch: x86_64
           force-avd-creation: false

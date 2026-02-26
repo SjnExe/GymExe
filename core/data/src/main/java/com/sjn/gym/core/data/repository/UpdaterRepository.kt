@@ -26,6 +26,8 @@ sealed class DownloadStatus {
 
     data class Downloading(
         val progress: Int,
+        val downloadedBytes: Long,
+        val totalBytes: Long,
     ) : DownloadStatus()
 
     data class Success(
@@ -63,13 +65,10 @@ class UpdaterRepository
 
                     if (remoteVersion == currentVersion) return null
 
-                    // Find APK (Universal only for dev, avoid debug apk)
-                    // User said: "it shouldn't download the dev debug apk"
-                    // Assets: app-dev-release.apk, app-dev-debug.apk
+                    // Find APK: Must be GymExe-dev-release.apk
                     val asset =
                         devRelease.assets.find {
-                            it.name.endsWith(".apk") &&
-                                !it.name.contains("debug", ignoreCase = true)
+                            it.name.equals("GymExe-dev-release.apk", ignoreCase = true)
                         } ?: return null
 
                     UpdateInfo(
@@ -84,7 +83,7 @@ class UpdaterRepository
                     val stableRelease = releases.firstOrNull { !it.prerelease } ?: return null
 
                     // Compare versions
-                    val remoteVersion = stableRelease.tagName.removePrefix("v")
+                    val remoteVersion = stableRelease.tagName
                     if (remoteVersion == currentVersion) return null
 
                     // Find APK: Architecture specific > Universal > Any
@@ -92,10 +91,12 @@ class UpdaterRepository
                     var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
                     var arch: String? = null
 
+                    // 1. Check for GymExe-stable-release-{abi}.apk
                     for (abi in supportedAbis) {
                         selectedAsset =
                             stableRelease.assets.find {
-                                it.name.contains(abi, ignoreCase = true) && it.name.endsWith(".apk")
+                                it.name.contains("GymExe-stable-release-$abi", ignoreCase = true) &&
+                                    it.name.endsWith(".apk")
                             }
                         if (selectedAsset != null) {
                             arch = abi
@@ -103,24 +104,19 @@ class UpdaterRepository
                         }
                     }
 
+                    // 2. Fallback to GymExe-stable-release.apk (Universal)
                     if (selectedAsset == null) {
                         selectedAsset =
                             stableRelease.assets.find {
-                                it.name.contains("universal", ignoreCase = true) &&
-                                    it.name.endsWith(".apk")
+                                it.name.equals("GymExe-stable-release.apk", ignoreCase = true)
                             }
                         if (selectedAsset != null) arch = "universal"
-                    }
-
-                    if (selectedAsset == null) {
-                        // Fallback to main APK if no specific arch or universal found
-                        selectedAsset = stableRelease.assets.find { it.name.endsWith(".apk") }
                     }
 
                     if (selectedAsset == null) return null
 
                     UpdateInfo(
-                        version = stableRelease.tagName, // Keep v-prefix if preferred, or remove it. Keeping tag name is safer.
+                        version = stableRelease.tagName,
                         releaseNotes = stableRelease.body,
                         downloadUrl = selectedAsset.downloadUrl,
                         isStable = true,
@@ -138,7 +134,7 @@ class UpdaterRepository
             destinationFile: File,
         ): Flow<DownloadStatus> =
             flow {
-                emit(DownloadStatus.Downloading(0))
+                emit(DownloadStatus.Downloading(0, 0, 0))
                 try {
                     val connection = URL(url).openConnection() as HttpURLConnection
                     connection.connect()
@@ -148,7 +144,7 @@ class UpdaterRepository
                         return@flow
                     }
 
-                    val fileLength = connection.contentLength
+                    val fileLength = connection.contentLength.toLong()
                     val input = connection.inputStream
                     val output = FileOutputStream(destinationFile)
 
@@ -160,7 +156,10 @@ class UpdaterRepository
                         total += count
                         if (fileLength > 0) {
                             val progress = (total * 100 / fileLength).toInt()
-                            emit(DownloadStatus.Downloading(progress))
+                            emit(DownloadStatus.Downloading(progress, total, fileLength))
+                        } else {
+                            // If content-length is unknown, progress is indeterminate (-1 or just total bytes)
+                            emit(DownloadStatus.Downloading(-1, total, -1))
                         }
                         output.write(data, 0, count)
                     }
