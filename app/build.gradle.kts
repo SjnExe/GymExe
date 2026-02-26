@@ -64,6 +64,23 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // Rename APKs using Legacy API (applicationVariants)
+    // This is safer for renaming than onVariants in KTS for now.
+    applicationVariants.all {
+        val variant = this
+        outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val flavorName = variant.flavorName
+                val buildType = variant.buildType.name
+                val newName = if (flavorName.isNullOrEmpty()) {
+                    "GymExe-$buildType.apk"
+                } else {
+                    "GymExe-$flavorName-$buildType.apk"
+                }
+                output.outputFileName = newName
+            }
+    }
 }
 
 // Enable AndroidTest ONLY for devBenchmark to allow testing R8 builds
@@ -74,22 +91,6 @@ androidComponents {
     }
     beforeVariants(selector().withBuildType("release")) { variantBuilder ->
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
-    }
-
-    onVariants { variant ->
-        variant.outputs.forEach { output ->
-            if (output is com.android.build.api.variant.VariantOutput) {
-                val flavorName = variant.flavorName
-                val buildType = variant.buildType
-                // Format: GymExe-{flavor}-{buildType}.apk
-                // Example: GymExe-dev-release.apk
-                if (flavorName != null) {
-                    output.outputFileName.set("GymExe-$flavorName-$buildType.apk")
-                } else {
-                    output.outputFileName.set("GymExe-$buildType.apk")
-                }
-            }
-        }
     }
 }
 
