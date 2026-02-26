@@ -118,13 +118,13 @@ The app follows a modular architecture:
 - [x] **Global Crash Handler**: `CrashActivity` catches uncaught exceptions in `dev` builds and offers log sharing.
 - [x] **Robust Logging**: `LogRepository` is now synchronized. `build.yml` captures CI logs efficiently.
 - [x] **CI Optimization**: Removed redundant ARM64 tests and reduced log verbosity.
-- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, etc.) to prevent test runner crashes against minified builds, ensuring full-mode R8 coverage.
+- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, `kotlin.collections`, etc.) to prevent test runner crashes against minified builds, ensuring full-mode R8 coverage.
 
 ## 7. Detailed Instructions for Next Session
 
 1.  **Instrumented Test Stability**:
     *   Continue monitoring CI runs for further `NoClassDefFoundError` or `NoSuchMethodError` crashes in the test runner.
-    *   **Strategy:** Do NOT disable `android.enableR8.fullMode`. Instead, use `app/proguard-rules.pro` to add specific `-keep` rules for the missing classes (e.g., `kotlin.*`, `androidx.compose.ui.test.*`) as discovered. This maintains the production fidelity of the test environment.
+    *   **Strategy:** Do NOT disable `android.enableR8.fullMode` and do NOT pollute the main `app/proguard-rules.pro`. Instead, use the dedicated `app/proguard-test-rules.pro` file which is applied *only* to the `dev` flavor. This maintains the production fidelity of the test environment while keeping `stableRelease` optimized.
 
 2.  **Routines & Scheduling Logic**:
     *   Implement CRUD operations for `Routine` and `WorkoutPlan`.
