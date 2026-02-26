@@ -43,7 +43,9 @@
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep class * extends androidx.room.RoomDatabase_Impl { *; }
 
-# (Test-specific rules moved to proguard-test-rules.pro)
+# NOTE: Test-specific rules are maintained in 'proguard-test-rules.pro'.
+# That file is only applied to the 'dev' flavor for instrumented testing (connectedCheck).
+# This file (proguard-rules.pro) contains rules required for the production app to run.
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt

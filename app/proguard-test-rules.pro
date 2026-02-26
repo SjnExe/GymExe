@@ -38,3 +38,11 @@
 
 # androidx.compose.runtime.MonotonicFrameClock$DefaultImpls is used by TestMonotonicFrameClock
 -keep class androidx.compose.runtime.** { *; }
+
+# androidx.compose.ui.platform.ViewRootForTest is used by ComposeRootRegistry during teardown
+-keep class androidx.compose.ui.platform.ViewRootForTest { *; }
+
+# NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
+# These rules are only applied to the 'dev' flavor to prevent test crashes
+# when running against minified builds (R8 full mode).
+# Rules required for the production app should go in 'proguard-rules.pro'.
