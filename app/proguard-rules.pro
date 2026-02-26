@@ -56,6 +56,9 @@
 -keep class kotlin.coroutines.** { *; }
 # androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
+-keep class androidx.compose.ui.platform.InfiniteAnimationPolicy$DefaultImpls { *; }
+# io.netty (used by gRPC in test runner infrastructure)
+-keep class io.netty.** { *; }
 # androidx.compose.runtime.MonotonicFrameClock$DefaultImpls is used by TestMonotonicFrameClock
 -keep class androidx.compose.runtime.** { *; }
 
