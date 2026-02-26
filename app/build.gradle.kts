@@ -39,19 +39,11 @@ android {
         debug {
             applicationIdSuffix = ".debug"
         }
-    }
-
-    flavorDimensions += "env"
-    productFlavors {
-        create("dev") {
-            dimension = "env"
-            applicationIdSuffix = ".dev"
-            if (!project.hasProperty("versionName")) {
-                versionNameSuffix = "-dev"
-            }
-        }
-        create("stable") {
-            dimension = "env"
+        create("benchmark") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            // Apply test-specific rules ONLY to this build type
+            proguardFile("proguard-test-rules.pro")
         }
     }
 
@@ -65,11 +57,26 @@ android {
     }
 
     buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
+    buildTypes.getByName("benchmark").signingConfig = signingConfigs.getByName("release")
+
+    // Removed: productFlavors.named("dev") block.
+    // Test rules are now applied via the 'benchmark' build type above.
 
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+// Enable AndroidTest ONLY for devBenchmark to allow testing R8 builds
+// We disable it for standard Release to save build time and keep it pure.
+androidComponents {
+    beforeVariants(selector().withBuildType("benchmark")) { variantBuilder ->
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = true
+    }
+    beforeVariants(selector().withBuildType("release")) { variantBuilder ->
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
     }
 }
 
@@ -94,12 +101,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.tracing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)
     debugImplementation(libs.leakcanary.android)
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
+    "devImplementation"(libs.chucker.debug)
+    "stableImplementation"(libs.chucker.release)
     implementation(libs.timber)
 
     // Modular dependencies

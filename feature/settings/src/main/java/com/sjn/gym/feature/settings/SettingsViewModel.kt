@@ -8,6 +8,10 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.sjn.gym.core.data.repository.DownloadStatus
+import com.sjn.gym.core.data.repository.LogRepository
+import com.sjn.gym.core.data.repository.UpdateInfo
+import com.sjn.gym.core.data.repository.UpdaterRepository
 import com.sjn.gym.core.data.repository.UserProfileRepository
 import com.sjn.gym.core.data.repository.backup.BackupRepository
 import com.sjn.gym.core.model.DistanceUnit
@@ -40,6 +44,8 @@ class SettingsViewModel
         private val application: Application,
         private val userProfileRepo: UserProfileRepository,
         private val backupRepository: BackupRepository,
+        private val updaterRepository: UpdaterRepository,
+        private val logRepository: LogRepository,
     ) : AndroidViewModel(application) {
         val themeConfig =
             userProfileRepo.themeConfig.stateIn(
@@ -88,6 +94,9 @@ class SettingsViewModel
 
         private val _updateStatus = MutableStateFlow<UpdateStatus>(UpdateStatus.Idle)
         val updateStatus: StateFlow<UpdateStatus> = _updateStatus.asStateFlow()
+
+        private val _downloadStatus = MutableStateFlow<DownloadStatus>(DownloadStatus.Idle)
+        val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus.asStateFlow()
 
         val appVersion: String = com.sjn.gym.feature.settings.BuildConfig.VERSION_NAME
 
@@ -167,8 +176,53 @@ class SettingsViewModel
         fun checkForUpdates() {
             viewModelScope.launch {
                 _updateStatus.value = UpdateStatus.Checking
-                delay(MOCK_DELAY) // Mock network delay
-                _updateStatus.value = UpdateStatus.NoUpdate
+                _downloadStatus.value = DownloadStatus.Idle
+
+                val isDevBuild = appVersion.contains("dev", ignoreCase = true)
+                val updateInfo = updaterRepository.checkForUpdates(appVersion, isDevBuild)
+
+                if (updateInfo != null) {
+                    _updateStatus.value = UpdateStatus.UpdateAvailable(updateInfo)
+                } else {
+                    _updateStatus.value = UpdateStatus.NoUpdate
+                }
+            }
+        }
+
+        fun downloadUpdate(url: String) {
+            viewModelScope.launch {
+                val updatesDir = File(application.filesDir, "updates")
+                if (!updatesDir.exists()) updatesDir.mkdirs()
+                val destination = File(updatesDir, "update.apk")
+
+                updaterRepository
+                    .downloadApk(url, destination)
+                    .collect { status ->
+                        _downloadStatus.value = status
+                        if (status is DownloadStatus.Success) {
+                            installApk(status.file)
+                        }
+                    }
+            }
+        }
+
+        private fun installApk(file: File) {
+            try {
+                val uri =
+                    FileProvider.getUriForFile(
+                        application,
+                        "${application.packageName}.fileprovider",
+                        file,
+                    )
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri, "application/vnd.android.package-archive")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                application.startActivity(intent)
+            } catch (e: Exception) {
+                _downloadStatus.value = DownloadStatus.Error("Failed to install APK: ${e.message}")
             }
         }
 
@@ -178,31 +232,39 @@ class SettingsViewModel
 
         fun clearUpdateStatus() {
             _updateStatus.value = UpdateStatus.Idle
+            _downloadStatus.value = DownloadStatus.Idle
         }
 
         fun copyLogs() {
             try {
-                val logFile = File(application.cacheDir, "app_logs.txt")
+                val logFile = logRepository.getLogFile()
                 if (logFile.exists()) {
                     val content = logFile.readText()
-                    val clipboard = application.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("App Logs", content)
-                    clipboard.setPrimaryClip(clip)
-                    _backupStatus.value = BackupStatus.Success("Logs copied to clipboard")
+                    if (content.isNotEmpty()) {
+                        val clipboard = application.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("App Logs", content)
+                        clipboard.setPrimaryClip(clip)
+                        _backupStatus.value = BackupStatus.Success("Logs copied to clipboard")
+                    } else {
+                        _backupStatus.value = BackupStatus.Error("Log file is empty")
+                    }
                 } else {
-                    _backupStatus.value = BackupStatus.Error("No logs found")
+                    // Try to list directory for debugging
+                    val list = logFile.parentFile?.list()?.joinToString() ?: "parent empty"
+                    Timber.e("Log file not found at ${logFile.absolutePath}. Parent contents: $list")
+                    _backupStatus.value = BackupStatus.Error("No logs found at ${logFile.absolutePath}")
                 }
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
                 Timber.e(e, "Failed to copy logs")
-                _backupStatus.value = BackupStatus.Error("Failed to copy logs")
+                _backupStatus.value = BackupStatus.Error("Failed to copy logs: ${e.message}")
             }
         }
 
         fun saveLogs(context: Context) {
             try {
-                val logFile = File(application.cacheDir, "app_logs.txt")
+                val logFile = logRepository.getLogFile()
                 if (logFile.exists()) {
                     val uri =
                         FileProvider.getUriForFile(
@@ -217,11 +279,14 @@ class SettingsViewModel
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
                     context.startActivity(Intent.createChooser(intent, "Save Logs"))
+                } else {
+                    _backupStatus.value = BackupStatus.Error("Log file not found")
                 }
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
                 Timber.e(e, "Failed to save logs")
+                _backupStatus.value = BackupStatus.Error("Failed to save logs: ${e.message}")
             }
         }
     }
@@ -249,7 +314,9 @@ sealed class UpdateStatus {
 
     object NoUpdate : UpdateStatus()
 
-    object UpdateAvailable : UpdateStatus()
+    data class UpdateAvailable(
+        val updateInfo: UpdateInfo,
+    ) : UpdateStatus()
 
     data class Error(
         val message: String,

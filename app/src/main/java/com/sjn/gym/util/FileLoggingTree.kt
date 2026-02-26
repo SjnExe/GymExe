@@ -1,50 +1,20 @@
 package com.sjn.gym.util
 
-import android.content.Context
 import android.util.Log
+import com.sjn.gym.core.data.repository.LogRepository
 import timber.log.Timber
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class FileLoggingTree(
-    context: Context,
+    private val logRepository: LogRepository,
 ) : Timber.DebugTree() {
-    private val logFile: File = File(context.cacheDir, "app_logs.txt")
-
     override fun log(
         priority: Int,
         tag: String?,
         message: String,
         t: Throwable?,
     ) {
-        try {
-            val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US).format(Date())
-            val priorityString =
-                when (priority) {
-                    Log.VERBOSE -> "VERBOSE"
-                    Log.DEBUG -> "DEBUG"
-                    Log.INFO -> "INFO"
-                    Log.WARN -> "WARN"
-                    Log.ERROR -> "ERROR"
-                    Log.ASSERT -> "ASSERT"
-                    else -> "UNKNOWN"
-                }
-
-            val logMessage = "$timestamp $priorityString/$tag: $message\n"
-
-            // Append to file
-            FileWriter(logFile, true).use { writer ->
-                writer.append(logMessage)
-                t?.printStackTrace(java.io.PrintWriter(writer))
-            }
-        } catch (e: IOException) {
-            Log.e("FileLoggingTree", "Error writing to log file", e)
-        }
+        logRepository.appendLog(priority, tag, message, t)
     }
 
-    fun getLogFile(): File = logFile
+    fun getLogFile() = logRepository.getLogFile()
 }

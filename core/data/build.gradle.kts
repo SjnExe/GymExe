@@ -6,21 +6,6 @@ plugins {
 
 android {
     namespace = "com.sjn.gym.core.data"
-
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-    }
 }
 
 dependencies {
@@ -39,11 +24,12 @@ dependencies {
 
     // Retrofit
     implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.okhttp)
 
     // Chucker
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
+    "devImplementation"(libs.chucker.debug)
+    "stableImplementation"(libs.chucker.release)
 
     // Hilt handled by convention plugin (hilt-android, hilt-compiler)
 

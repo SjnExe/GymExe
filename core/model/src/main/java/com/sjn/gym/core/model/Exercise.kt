@@ -16,6 +16,7 @@ data class Exercise(
 
 enum class ExerciseType {
     WEIGHT_REPS, // Standard
+    REPS_ONLY, // Bodyweight (Pullups, Pushups)
     TIME, // Plank
     CARDIO, // Distance/Time/Speed
 }

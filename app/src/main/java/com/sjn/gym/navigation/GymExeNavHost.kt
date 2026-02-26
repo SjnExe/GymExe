@@ -1,5 +1,6 @@
 package com.sjn.gym.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -23,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.sjn.gym.BuildConfig
 import com.sjn.gym.R
 import com.sjn.gym.feature.onboarding.OnboardingScreen
@@ -44,7 +46,9 @@ object Settings
 object Profile
 
 @Serializable
-object Workout
+data class Workout(
+    val exerciseId: String? = null,
+)
 
 @Serializable
 object ExerciseList
@@ -79,6 +83,7 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
         }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
@@ -124,17 +129,26 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
             composable<Home> {
                 HomeScreen(
                     onNavigateToExerciseList = { navController.navigate(ExerciseList) },
-                    onNavigateToWorkout = { navController.navigate(Workout) },
+                    onNavigateToWorkout = { navController.navigate(Workout(null)) },
                 )
             }
             composable<Workout> {
+                // ViewModel will retrieve arguments via SavedStateHandle
                 WorkoutScreen()
             }
             composable<Library> {
-                LibraryScreen()
+                LibraryScreen(
+                    onNavigateToWorkout = { exerciseId ->
+                        navController.navigate(Workout(exerciseId))
+                    },
+                )
             }
             composable<ExerciseList> {
-                ExerciseListScreen()
+                ExerciseListScreen(
+                    onExerciseClick = { exerciseId ->
+                        navController.navigate(Workout(exerciseId))
+                    },
+                )
             }
             composable<Settings> {
                 val context = LocalContext.current
@@ -150,7 +164,20 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                                 getLaunchIntentMethod.invoke(null, context) as android.content.Intent
                             context.startActivity(intent)
                         } catch (e: Exception) {
-                            // Handle or log error if Chucker is not available or crashes
+                            // Check if Timber is available, otherwise just ignore
+                            try {
+                                val timberClass = Class.forName("timber.log.Timber")
+                                val eMethod = timberClass.getMethod("e", Throwable::class.java, String::class.java, Array<Any>::class.java)
+                                eMethod.invoke(null, e, "Failed to launch Chucker", emptyArray<Any>())
+                            } catch (ignored: Exception) {
+                                // Ignore
+                            }
+                            android.widget.Toast
+                                .makeText(
+                                    context,
+                                    "Network Inspector unavailable",
+                                    android.widget.Toast.LENGTH_SHORT,
+                                ).show()
                         }
                     },
                 )

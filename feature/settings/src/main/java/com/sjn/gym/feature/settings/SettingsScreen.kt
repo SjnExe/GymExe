@@ -25,17 +25,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -59,10 +63,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sjn.gym.core.data.repository.DownloadStatus
+import com.sjn.gym.core.data.repository.UpdateInfo
 import com.sjn.gym.core.model.DistanceUnit
 import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.ThemeConfig
@@ -85,11 +92,6 @@ fun SettingsScreen(
     // State for restore flow
     var showRestoreDialog by remember { mutableStateOf(false) }
     var restoreUri by remember { mutableStateOf<Uri?>(null) }
-
-    // State for dialogs
-    var showWeightUnitDialog by remember { mutableStateOf(false) }
-    var showHeightUnitDialog by remember { mutableStateOf(false) }
-    var showDistanceUnitDialog by remember { mutableStateOf(false) }
 
     val createDocumentLauncher =
         rememberLauncherForActivityResult(
@@ -118,7 +120,7 @@ fun SettingsScreen(
             }
         }
 
-    HandleEffects(state.backupStatus, state.updateStatus, snackbarHostState, viewModel)
+    HandleEffects(state.backupStatus, state.updateStatus, state.downloadStatus, snackbarHostState, viewModel)
 
     if (showRestoreDialog && restoreUri != null) {
         RestoreOptionsDialog(
@@ -139,6 +141,17 @@ fun SettingsScreen(
                 showRestoreDialog = false
                 restoreUri = null
             },
+        )
+    }
+
+    if (state.updateStatus is UpdateStatus.UpdateAvailable) {
+        val updateInfo = state.updateStatus.updateInfo
+        UpdateDialog(
+            currentVersion = viewModel.appVersion,
+            updateInfo = updateInfo,
+            downloadStatus = state.downloadStatus,
+            onDismissRequest = { viewModel.clearUpdateStatus() },
+            onUpdate = { viewModel.downloadUpdate(updateInfo.downloadUrl) },
         )
     }
 
@@ -198,20 +211,26 @@ fun SettingsScreen(
 
             // Units Section
             SettingsSectionHeader("Units")
-            SettingsDetailRow(
+
+            SettingsUnitRow(
                 title = "Weight Unit",
-                value = state.weightUnit.name,
-                onClick = { showWeightUnitDialog = true },
+                options = WeightUnit.entries,
+                selectedOption = state.weightUnit,
+                onOptionSelected = { viewModel.setWeightUnit(it) },
             )
-            SettingsDetailRow(
+
+            SettingsUnitRow(
                 title = "Height Unit",
-                value = state.heightUnit.name,
-                onClick = { showHeightUnitDialog = true },
+                options = HeightUnit.entries,
+                selectedOption = state.heightUnit,
+                onOptionSelected = { viewModel.setHeightUnit(it) },
             )
-            SettingsDetailRow(
+
+            SettingsUnitRow(
                 title = "Distance Unit",
-                value = state.distanceUnit.name,
-                onClick = { showDistanceUnitDialog = true },
+                options = DistanceUnit.entries,
+                selectedOption = state.distanceUnit,
+                onOptionSelected = { viewModel.setDistanceUnit(it) },
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -261,66 +280,151 @@ fun SettingsScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-            } else {
-                // If not dev mode, show version info here
-                AboutSection(
-                    appVersion = viewModel.appVersion,
-                    onCheckForUpdates = { viewModel.checkForUpdates() },
-                )
             }
+
+            // About Section (Always visible)
+            AboutSection(
+                appVersion = viewModel.appVersion,
+                onCheckForUpdates = { viewModel.checkForUpdates() },
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
-
-    SettingsDialogs(
-        state = state,
-        showWeightUnitDialog = showWeightUnitDialog,
-        showHeightUnitDialog = showHeightUnitDialog,
-        showDistanceUnitDialog = showDistanceUnitDialog,
-        onDismissWeightUnit = { showWeightUnitDialog = false },
-        onDismissHeightUnit = { showHeightUnitDialog = false },
-        onDismissDistanceUnit = { showDistanceUnitDialog = false },
-        viewModel = viewModel,
-    )
 }
 
 @Composable
-fun SettingsDialogs(
-    state: SettingsState,
-    showWeightUnitDialog: Boolean,
-    showHeightUnitDialog: Boolean,
-    showDistanceUnitDialog: Boolean,
-    onDismissWeightUnit: () -> Unit,
-    onDismissHeightUnit: () -> Unit,
-    onDismissDistanceUnit: () -> Unit,
-    viewModel: SettingsViewModel,
+fun UpdateDialog(
+    currentVersion: String,
+    updateInfo: UpdateInfo,
+    downloadStatus: DownloadStatus,
+    onDismissRequest: () -> Unit,
+    onUpdate: () -> Unit,
 ) {
-    if (showWeightUnitDialog) {
-        SelectionDialog(
-            title = "Weight Unit",
-            options = WeightUnit.entries,
-            selectedOption = state.weightUnit,
-            onOptionSelected = { viewModel.setWeightUnit(it) },
-            onDismissRequest = onDismissWeightUnit,
-        )
+    Dialog(onDismissRequest = { if (downloadStatus !is DownloadStatus.Downloading) onDismissRequest() }) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp,
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Update Available",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column {
+                        Text(
+                            text = "Current: $currentVersion",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), contentAlignment = Alignment.Center) {
+                    Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = "To")
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "New: ${updateInfo.version}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    if (updateInfo.architecture != null) {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(updateInfo.architecture ?: "") },
+                            modifier = Modifier.height(24.dp),
+                        )
+                    }
+                }
+
+                if (updateInfo.isStable) {
+                    Text(
+                        text = "(Stable Release)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Limited release notes
+                val notes =
+                    if (updateInfo.releaseNotes.length > 200) {
+                        updateInfo.releaseNotes.take(200) + "..."
+                    } else {
+                        updateInfo.releaseNotes
+                    }
+                Text(
+                    text = notes,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (downloadStatus is DownloadStatus.Downloading) {
+                    Text("Downloading... ${downloadStatus.progress}%")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = { downloadStatus.progress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        androidx.compose.material3.TextButton(onClick = onDismissRequest) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        FilledTonalButton(onClick = onUpdate) {
+                            Text("Download & Install")
+                        }
+                    }
+                }
+            }
+        }
     }
-    if (showHeightUnitDialog) {
-        SelectionDialog(
-            title = "Height Unit",
-            options = HeightUnit.entries,
-            selectedOption = state.heightUnit,
-            onOptionSelected = { viewModel.setHeightUnit(it) },
-            onDismissRequest = onDismissHeightUnit,
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T : Enum<T>> SettingsUnitRow(
+    title: String,
+    options: List<T>,
+    selectedOption: T,
+    onOptionSelected: (T) -> Unit,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp),
         )
-    }
-    if (showDistanceUnitDialog) {
-        SelectionDialog(
-            title = "Distance Unit",
-            options = DistanceUnit.entries,
-            selectedOption = state.distanceUnit,
-            onOptionSelected = { viewModel.setDistanceUnit(it) },
-            onDismissRequest = onDismissDistanceUnit,
-        )
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            options.forEachIndexed { index, option ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    onClick = { onOptionSelected(option) },
+                    selected = option == selectedOption,
+                    label = { Text(option.name) },
+                )
+            }
+        }
     }
 }
 
@@ -446,6 +550,7 @@ fun SettingsActionRow(
 fun HandleEffects(
     backupStatus: BackupStatus,
     updateStatus: UpdateStatus,
+    downloadStatus: DownloadStatus,
     snackbarHostState: SnackbarHostState,
     viewModel: SettingsViewModel,
 ) {
@@ -478,6 +583,14 @@ fun HandleEffects(
             }
 
             else -> {}
+        }
+    }
+
+    LaunchedEffect(downloadStatus) {
+        if (downloadStatus is DownloadStatus.Error) {
+            snackbarHostState.showSnackbar(downloadStatus.message)
+            // We don't clear status immediately so dialog stays open?
+            // Actually dialog relies on updateStatus too.
         }
     }
 }
@@ -517,15 +630,29 @@ fun AboutSection(
     onCheckForUpdates: () -> Unit,
 ) {
     SettingsSectionTitle("About")
-    SettingsDetailRow(
-        title = "Version",
-        value = appVersion,
-        onClick = {},
-    )
-    SettingsActionRow(
-        title = "Check for Updates",
-        onClick = onCheckForUpdates,
-    )
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text(
+                text = "Version",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = appVersion,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        FilledTonalButton(onClick = onCheckForUpdates) {
+            Text("Check for Updates")
+        }
+    }
 }
 
 data class SettingsState(
@@ -537,6 +664,7 @@ data class SettingsState(
     val distanceUnit: DistanceUnit,
     val backupStatus: BackupStatus,
     val updateStatus: UpdateStatus,
+    val downloadStatus: DownloadStatus,
 )
 
 @Composable
@@ -549,9 +677,30 @@ fun rememberSettingsState(viewModel: SettingsViewModel): SettingsState {
     val distanceUnit by viewModel.distanceUnit.collectAsStateWithLifecycle()
     val backupStatus by viewModel.backupStatus.collectAsStateWithLifecycle()
     val updateStatus by viewModel.updateStatus.collectAsStateWithLifecycle()
+    val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
 
-    return remember(themeConfig, themeStyle, customThemeColor, weightUnit, heightUnit, distanceUnit, backupStatus, updateStatus) {
-        SettingsState(themeConfig, themeStyle, customThemeColor, weightUnit, heightUnit, distanceUnit, backupStatus, updateStatus)
+    return remember(
+        themeConfig,
+        themeStyle,
+        customThemeColor,
+        weightUnit,
+        heightUnit,
+        distanceUnit,
+        backupStatus,
+        updateStatus,
+        downloadStatus,
+    ) {
+        SettingsState(
+            themeConfig,
+            themeStyle,
+            customThemeColor,
+            weightUnit,
+            heightUnit,
+            distanceUnit,
+            backupStatus,
+            updateStatus,
+            downloadStatus,
+        )
     }
 }
 

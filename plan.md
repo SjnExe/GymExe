@@ -52,6 +52,7 @@ The app follows a modular architecture:
 *   `gymexe.android.library`: Common Android Library config.
 *   `gymexe.android.compose`: Jetpack Compose setup.
 *   `gymexe.android.hilt`: Hilt/KSP setup.
+*   `gymexe.android.feature`: Feature module config (aggregates library, hilt, compose).
 *   `gymexe.detekt`: Detekt configuration (Strict).
 *   `gymexe.spotless`: Spotless configuration.
 
@@ -67,17 +68,18 @@ The app follows a modular architecture:
 - [x] **Strict Linting**: Spotless applied, Detekt strict mode enabled.
 
 ### Phase 2: Core Architecture & UI Foundation (Completed)
-- [x] **Icons**: Vector Assets (Adaptive) created.
+- [x] **Icons**: Vector Assets (Adaptive) created. New Splash Icon created.
 - [x] **Theming Engine**: Material 3, Dark/Light/System mode, Dynamic Color support.
 - [x] **Navigation**: Type-safe Compose Navigation set up (`GymExeNavHost`).
 - [x] **Build Logic**: Infrastructure created.
+- [x] **Splash Screen**: Implemented `androidx.core.splashscreen` for instant startup.
 
-### Phase 3: Onboarding (Setup Wizard) (Partially Implemented)
+### Phase 3: Onboarding (Setup Wizard) (Completed)
 - [x] **Welcome Screen**: Basic UI implemented.
 - [x] **DataStore**: `UserPreferencesRepository` stores onboarding status.
-- [ ] **Profile Setup**: Input fields for gender/height/weight (UI needed).
-- [ ] **Experience Level**: Selection UI needed (Free style, Fixed Day/Week, Splits).
-- [ ] **Equipment Setup**: Selection UI needed (None, Full Gym, Specific Machines/Weights).
+- [x] **Profile Setup**: Input fields for gender/height/weight.
+- [x] **Experience Level**: Selection UI implemented.
+- [x] **Equipment Setup**: Selection UI implemented.
 
 ### Phase 4: Settings Feature (Partially Implemented)
 - [x] **Theme Settings**: Functional UI for switching themes (System/Light/Dark).
@@ -89,16 +91,19 @@ The app follows a modular architecture:
 - [ ] **First Day of Week**: Auto-detect from Calendar or manual override.
 
 ### Phase 5: Data Layer (Room) (Implemented)
-- [x] **Entities**: `ExerciseEntity` created.
+- [x] **Entities**: `ExerciseEntity` created (with instructions). `RoutineEntity` and `WorkoutPlanEntity` created.
 - [x] **Database**: `GymDatabase` configured with pre-population callback.
 - [x] **DAO**: `ExerciseDao` implemented.
 - [ ] **Migrations**: Logic for merging user vs built-in data needed later.
 
 ### Phase 6: Workout & Intelligent Input (Partially Implemented)
-- [x] **Intelligent Text Box**: `PlateCalculator` logic implemented and unit-tested.
-- [x] **UI Integration**: `WorkoutScreen` connects input to calculator.
-- [ ] **Syntax Highlighting**: Text box needs colored syntax for Quantity, Operator, and Weight.
-- [x] **Exercise List**: `ExerciseListScreen` displays data from DB.
+- [x] **Intelligent Text Box**: `PlateCalculator` and `WeightInputParser` implemented and tested.
+- [x] **Auto-Merger**: Logic to merge weights (e.g., `5 5` -> `2x5`) for Stackable equipment.
+- [x] **Strict Mode**: Validation for non-stackable equipment (Dumbbells/Selectorized Machines).
+- [x] **UI Integration**: `WorkoutScreen` connects input to parser and validation.
+- [x] **Syntax Highlighting**: Text box colors Quantity, Operator, and Weight.
+- [x] **Library UI**: Revamped. Routines tab (Weekly/Rolling) and Exercises tab (Body Part Grid).
+- [x] **Exercise Detail**: UI skeleton implemented.
 - [ ] **Workout Session**:
     *   **Sets**: Types (Warmup, Failure, Drop set, etc.).
     *   **Timers**: Quick timer, Rest timer.
@@ -108,26 +113,34 @@ The app follows a modular architecture:
 - [x] **Basic Screen**: Placeholder UI.
 - [ ] **Graphs**: Charts and stats logic needed.
 
+### Phase 8: Stability & Debugging (New)
+- [x] **R8 Support**: ProGuard rules added for Room, Serialization, and Retrofit to support `android.enableR8.fullMode=true`.
+- [x] **Global Crash Handler**: `CrashActivity` catches uncaught exceptions in `dev` builds and offers log sharing.
+- [x] **Robust Logging**: `LogRepository` is now synchronized. `build.yml` captures CI logs efficiently.
+- [x] **CI Optimization**: Removed redundant ARM64 tests and reduced log verbosity.
+- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, `kotlin.collections`, etc.) via a dedicated `benchmark` build type.
+
 ## 7. Detailed Instructions for Next Session
 
-1.  **Migrate to Convention Plugins**:
-    *   Refactor module `build.gradle.kts` files to use the convention plugins.
+1.  **Instrumented Test Stability**:
+    *   **Architecture:** The project now uses a `benchmark` build type (inheriting from `release`) specifically for CI instrumented tests. This build type applies `app/proguard-test-rules.pro` to prevent test runner crashes while keeping R8 full mode enabled.
+    *   **Workflow:**
+        *   **Manual QA:** Build/Install `devRelease`. This is a strict R8 build (identical to production `stableRelease`).
+        *   **CI Testing:** The CI runs `connectedDevBenchmarkAndroidTest`. This uses the `benchmark` build type which includes the necessary keep rules for the test harness.
+    *   **Constraint:** Instrumented tests currently require a CI environment with KVM (hardware acceleration) support. The local agent environment does NOT support KVM, so tests must be verified via GitHub Actions logs.
 
-2.  **Onboarding Flow Completion**:
-    *   Implement screens for Profile Setup, Experience Level, and Equipment Selection.
-    *   Connect to `UserPreferencesRepository`.
+2.  **Routines & Scheduling Logic**:
+    *   Implement CRUD operations for `Routine` and `WorkoutPlan`.
+    *   Connect UI to `RoutineRepository` (needs creation).
+    *   Implement logic to "Activate" a routine and reflect it on Home Screen.
 
-3.  **Workout UI Polish**:
-    *   Implement `AnnotatedString` building for Syntax Highlighting in `WorkoutScreen` text field.
-    *   Improve Exercise List UI.
-
-4.  **Database Migration**:
-    *   Handle data persistence during updates.
+3.  **Exercise Data Population**:
+    *   Add real data for `instructions` and more exercises.
 
 ## 8. Improvements & Optimizations (Backlog)
 
 ### Build Logic & Infrastructure
-- [ ] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
+- [x] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
 - [ ] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
 - [ ] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
 - [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.
@@ -145,3 +158,4 @@ The app follows a modular architecture:
 ### CI/CD Enhancements
 - [ ] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
 - [ ] **Release Drafter**: Consider automating release notes generation further.
+- [x] **Instrumented Tests**: Add Emulator-based tests (`managed devices`) to catch runtime crashes on CI.

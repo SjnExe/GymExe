@@ -19,8 +19,24 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 defaultConfig.minSdk = 26
                 compileSdk = 36
 
+                defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
                 // Common configuration function
                 configureKotlinAndroid(this)
+
+                flavorDimensions += "env"
+                productFlavors {
+                    create("dev") {
+                        dimension = "env"
+                        applicationIdSuffix = ".dev"
+                        if (!project.hasProperty("versionName")) {
+                            versionNameSuffix = "-dev"
+                        }
+                    }
+                    create("stable") {
+                        dimension = "env"
+                    }
+                }
             }
         }
     }

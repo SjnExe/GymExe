@@ -15,21 +15,32 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.3.1'
           cache-read-only: false
+
+      # Cache Android Emulator AVD to speed up startup
+      - name: AVD Cache
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+        uses: actions/cache@v5
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ runner.os }}-api34-x86_64
 
       - name: Calculate Version
         id: version
@@ -68,25 +79,69 @@ jobs:
       - name: Build with Gradle
         id: gradle_build
         run: |
-          set +e
+          # Use pipefail to catch gradle errors even when piping to tee
+          set -o pipefail
+
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
             TASKS="spotlessCheck assembleStableRelease lintStableRelease testStableDebugUnitTest"
           else
+            # Build Dev Release (R8) to catch obfuscation issues
             TASKS="spotlessCheck assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest"
           fi
 
           echo "Running tasks: $TASKS"
+
+          # Run without --info --stacktrace for cleaner logs
+          # Pipe output to file for artifact collection but keep console clean
           ./gradlew $TASKS \
+            --parallel \
+            --max-workers=4 \
+            --build-cache \
             -PversionName=${{ env.VERSION_NAME }} \
             -PversionCode=${{ env.VERSION_CODE }} \
-            --info --stacktrace \
-            > build_output.log 2>&1
+            -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
+            2>&1 | tee build_output.log
 
-          EXIT_CODE=$?
-          echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
+      # Enable KVM group permissions for the runner user to prevent emulator hangs
+      # chmod 666 ensures immediate access without re-login
+      - name: Enable KVM group perms
+        if: env.BUILD_TYPE == 'dev'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo usermod -a -G kvm $USER
+          sudo chmod 666 /dev/kvm
+          sudo chown $USER /dev/kvm
 
-          # Allow next steps to process logs
-          exit 0
+      # Emulator Test Step - Runs only on Dev Builds (PRs or Push to dev)
+      # This catches runtime crashes (like R8 issues) that unit tests miss.
+      - name: Run Instrumented Tests (Dev Benchmark)
+        if: env.BUILD_TYPE == 'dev'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          disable-linux-hw-accel: false
+          emulator-boot-timeout: 300
+          # Optimize for GitHub Runner (4 cores, 16GB RAM / 14GB Usable).
+          # Gradle (8GB) + Emulator (4GB) + OS (~2GB).
+          ram-size: 4096M
+          heap-size: 2048M
+          disk-size: 6000M
+          cores: 4
+          # Run tests against the Minified Dev Benchmark (R8 + Test Rules) to catch R8 crashes
+          # Override JVM memory for CI to 8GB (default 3GB in gradle.properties)
+          # Use max-workers=4 to utilize all cores
+          script: ./gradlew connectedDevBenchmarkAndroidTest --max-workers=4 -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g"
+
+      - name: Stop Gradle Daemons
+        if: always()
+        run: ./gradlew --stop
 
       - name: Log Processing & Report Collection
         if: always()
@@ -102,6 +157,7 @@ jobs:
           # 2. Collect Reports
           mkdir -p reports/lint
           mkdir -p reports/tests
+          mkdir -p reports/androidTests
 
           # Find and copy Lint reports (preserve path to avoid overwrite)
           find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
@@ -109,20 +165,21 @@ jobs:
 
           # Find and copy Test reports directories
           find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
+          find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
 
           # 3. Zip everything
           zip -r build_logs.zip build_output.log build_summary.txt reports/
 
       - name: Upload Logs & Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: build-logs-reports
           path: build_logs.zip
 
       - name: Upload APKs (Dev)
-        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
-        uses: actions/upload-artifact@v4
+        if: env.BUILD_TYPE == 'dev'
+        uses: actions/upload-artifact@v6
         with:
           name: gym-exe-dev-${{ env.VERSION_NAME }}
           path: |
@@ -131,15 +188,15 @@ jobs:
           compression-level: 0
 
       - name: Upload APKs (Stable)
-        if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
-        uses: actions/upload-artifact@v4
+        if: env.BUILD_TYPE == 'stable'
+        uses: actions/upload-artifact@v6
         with:
           name: gym-exe-stable
           path: |
             app/build/outputs/apk/stable/release/*.apk
 
       - name: Create Release (Stable)
-        if: env.BUILD_TYPE == 'stable' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'stable'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -153,7 +210,7 @@ jobs:
              --target ${{ github.sha }}
 
       - name: Create/Update Dev Release
-        if: env.BUILD_TYPE == 'dev' && env.EXIT_CODE == '0'
+        if: env.BUILD_TYPE == 'dev'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_NAME: ${{ env.VERSION_NAME }}
@@ -173,11 +230,3 @@ jobs:
             --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
             --target ${{ github.sha }}
-
-      - name: Check Build Status
-        if: always()
-        run: |
-          if [ "${{ env.EXIT_CODE }}" != "0" ]; then
-            echo "Build failed with exit code ${{ env.EXIT_CODE }}"
-            exit ${{ env.EXIT_CODE }}
-          fi
