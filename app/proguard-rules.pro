@@ -66,6 +66,8 @@
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy$DefaultImpls { *; }
 # io.netty (used by gRPC in test runner infrastructure)
 -keep class io.netty.** { *; }
+# javax.inject.Provider is used by Dagger/Hilt and can be stripped in R8 full mode
+-keep interface javax.inject.Provider { *; }
 # androidx.compose.runtime.MonotonicFrameClock$DefaultImpls is used by TestMonotonicFrameClock
 -keep class androidx.compose.runtime.** { *; }
 
