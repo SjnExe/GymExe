@@ -56,6 +56,8 @@
 -keep class kotlin.coroutines.** { *; }
 # androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
+# androidx.compose.runtime.MonotonicFrameClock$DefaultImpls is used by TestMonotonicFrameClock
+-keep class androidx.compose.runtime.** { *; }
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
