@@ -118,13 +118,16 @@ The app follows a modular architecture:
 - [x] **Global Crash Handler**: `CrashActivity` catches uncaught exceptions in `dev` builds and offers log sharing.
 - [x] **Robust Logging**: `LogRepository` is now synchronized. `build.yml` captures CI logs efficiently.
 - [x] **CI Optimization**: Removed redundant ARM64 tests and reduced log verbosity.
-- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, `kotlin.collections`, etc.) to prevent test runner crashes against minified builds, ensuring full-mode R8 coverage.
+- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, `kotlin.collections`, etc.) via a dedicated `benchmark` build type.
 
 ## 7. Detailed Instructions for Next Session
 
 1.  **Instrumented Test Stability**:
-    *   Continue monitoring CI runs for further `NoClassDefFoundError` or `NoSuchMethodError` crashes in the test runner.
-    *   **Strategy:** Do NOT disable `android.enableR8.fullMode` and do NOT pollute the main `app/proguard-rules.pro`. Instead, use the dedicated `app/proguard-test-rules.pro` file which is applied *only* to the `dev` flavor. This maintains the production fidelity of the test environment while keeping `stableRelease` optimized.
+    *   **Architecture:** The project now uses a `benchmark` build type (inheriting from `release`) specifically for CI instrumented tests. This build type applies `app/proguard-test-rules.pro` to prevent test runner crashes while keeping R8 full mode enabled.
+    *   **Workflow:**
+        *   **Manual QA:** Build/Install `devRelease`. This is a strict R8 build (identical to production `stableRelease`). If it crashes here, it's a real bug.
+        *   **CI Testing:** The CI runs `connectedDevBenchmarkAndroidTest`. This uses the `benchmark` build type which includes the necessary keep rules for the test harness.
+    *   **Maintenance:** If CI tests crash with `NoClassDefFoundError` or `NoSuchMethodError`, add the missing class to `app/proguard-test-rules.pro`. Do NOT add these to the main `proguard-rules.pro` unless the app *itself* crashes in `devRelease`.
 
 2.  **Routines & Scheduling Logic**:
     *   Implement CRUD operations for `Routine` and `WorkoutPlan`.
