@@ -52,6 +52,8 @@
 -keep class kotlin.time.** { *; }
 # kotlinx.coroutines.JobKt is used by androidx.compose.ui.test.IdlingResourceRegistry but stripped by R8
 -keep class kotlinx.coroutines.** { *; }
+# kotlin.coroutines.CoroutineContext$Key (and others) are used by AndroidComposeUiTestEnvironment
+-keep class kotlin.coroutines.** { *; }
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
