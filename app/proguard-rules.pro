@@ -57,6 +57,8 @@
 # kotlin.Result is used by the test environment but stripped by R8
 -keep class kotlin.Result { *; }
 -keep class kotlin.Result$Companion { *; }
+-keep class kotlin.ResultKt { *; }
+-keep class kotlin.Result** { *; }
 # androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
 -keep class androidx.compose.ui.platform.InfiniteAnimationPolicy$DefaultImpls { *; }
