@@ -86,7 +86,8 @@ jobs:
             TASKS="spotlessCheck assembleStableRelease lintStableRelease testStableDebugUnitTest"
           else
             # Build Dev Release (R8) to catch obfuscation issues
-            TASKS="spotlessCheck assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest"
+            # Also compile test APKs here to separate build failures from test execution
+            TASKS="spotlessCheck assembleDevRelease assembleDevDebug lintDevDebug testDevDebugUnitTest assembleDevBenchmarkAndroidTest"
           fi
 
           echo "Running tasks: $TASKS"
@@ -102,11 +103,15 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
-      # Enable KVM group permissions for the runner user to prevent emulator hangs
+      # Enable KVM group permissions and install native deps to prevent emulator hangs
       # chmod 666 ensures immediate access without re-login
-      - name: Enable KVM group perms
+      - name: Prepare Test Environment
         if: env.BUILD_TYPE == 'dev'
         run: |
+          # Install native libraries required by the emulator
+          sudo apt-get update && sudo apt-get install -y libx11-6 libx11-xcb1 libxcb1 libxcursor1 libxi6 libxtst6 nss-passwords
+
+          # Enable KVM
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
