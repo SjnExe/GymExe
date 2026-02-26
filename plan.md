@@ -118,13 +118,16 @@ The app follows a modular architecture:
 - [x] **Global Crash Handler**: `CrashActivity` catches uncaught exceptions in `dev` builds and offers log sharing.
 - [x] **Robust Logging**: `LogRepository` is now synchronized. `build.yml` captures CI logs efficiently.
 - [x] **CI Optimization**: Removed redundant ARM64 tests and reduced log verbosity.
-- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, etc.) to prevent test runner crashes against minified builds, ensuring full-mode R8 coverage.
+- [x] **Instrumented Tests on R8 builds**: Implemented specific, targeted ProGuard rules (`androidx.tracing`, `kotlin.time`, `kotlin.collections`, etc.) via a dedicated `benchmark` build type.
 
 ## 7. Detailed Instructions for Next Session
 
 1.  **Instrumented Test Stability**:
-    *   Continue monitoring CI runs for further `NoClassDefFoundError` or `NoSuchMethodError` crashes in the test runner.
-    *   **Strategy:** Do NOT disable `android.enableR8.fullMode`. Instead, use `app/proguard-rules.pro` to add specific `-keep` rules for the missing classes (e.g., `kotlin.*`, `androidx.compose.ui.test.*`) as discovered. This maintains the production fidelity of the test environment.
+    *   **Architecture:** The project now uses a `benchmark` build type (inheriting from `release`) specifically for CI instrumented tests. This build type applies `app/proguard-test-rules.pro` to prevent test runner crashes while keeping R8 full mode enabled.
+    *   **Workflow:**
+        *   **Manual QA:** Build/Install `devRelease`. This is a strict R8 build (identical to production `stableRelease`).
+        *   **CI Testing:** The CI runs `connectedDevBenchmarkAndroidTest`. This uses the `benchmark` build type which includes the necessary keep rules for the test harness.
+    *   **Constraint:** Instrumented tests currently require a CI environment with KVM (hardware acceleration) support. The local agent environment does NOT support KVM, so tests must be verified via GitHub Actions logs.
 
 2.  **Routines & Scheduling Logic**:
     *   Implement CRUD operations for `Routine` and `WorkoutPlan`.

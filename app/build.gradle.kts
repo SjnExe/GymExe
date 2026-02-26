@@ -39,6 +39,12 @@ android {
         debug {
             applicationIdSuffix = ".debug"
         }
+        create("benchmark") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            // Apply test-specific rules ONLY to this build type
+            proguardFile("proguard-test-rules.pro")
+        }
     }
 
     signingConfigs {
@@ -51,6 +57,10 @@ android {
     }
 
     buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
+    buildTypes.getByName("benchmark").signingConfig = signingConfigs.getByName("release")
+
+    // Removed: productFlavors.named("dev") block.
+    // Test rules are now applied via the 'benchmark' build type above.
 
     packaging {
         resources {
@@ -59,10 +69,14 @@ android {
     }
 }
 
-// Enable AndroidTest for devRelease to allow testing R8 builds
+// Enable AndroidTest ONLY for devBenchmark to allow testing R8 builds
+// We disable it for standard Release to save build time and keep it pure.
 androidComponents {
-    beforeVariants(selector().withFlavor(Pair("env", "dev")).withBuildType("release")) { variantBuilder ->
+    beforeVariants(selector().withBuildType("benchmark")) { variantBuilder ->
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = true
+    }
+    beforeVariants(selector().withBuildType("release")) { variantBuilder ->
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
     }
 }
 

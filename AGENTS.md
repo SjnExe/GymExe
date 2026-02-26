@@ -40,6 +40,10 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 - **Flavors:**
   - `dev`: For development and PR checks (Debuggable, suffix `-dev`). Includes Dev Tools (Chucker, LeakCanary, File Logging).
   - `stable`: For production release (Minified).
+- **Build Types:**
+  - `release`: Minified, optimized, no test rules. Used for `devRelease` (manual QA) and `stableRelease` (Production).
+  - `debug`: Non-minified, debuggable.
+  - `benchmark`: Inherits from `release`. Minified but includes extra ProGuard rules to allow instrumented tests to run. Used for CI (`connectedDevBenchmarkAndroidTest`).
 - **Versioning:** Automated via GitHub Actions.
   - Strategy: `v{Tag}-dev-PR{Num}.{Commits}`
   - Version Code: `Total Commits - 1`
@@ -62,7 +66,7 @@ sudo apt autoremove -y
 sudo apt clean
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew
+./gradlew :app:dependencies --configuration devBenchmarkRuntimeClasspath
 ```
 
 ## Useful Commands
@@ -72,8 +76,6 @@ Run this before submitting any change:
 ```bash
 ./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest
 ```
-
-### Building
 
 ### Building
 *   **Build Debug APK (Dev):** `./gradlew assembleDevDebug`

@@ -43,21 +43,9 @@
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep class * extends androidx.room.RoomDatabase_Impl { *; }
 
-# Fix for AndroidJUnitRunner crash on minified builds (devRelease)
-# androidx.tracing.Trace is used by the runner but stripped by R8 if unused by the app.
--keep class androidx.tracing.** { *; }
-# kotlin.LazyKt is used by androidx.test.platform.io.TestDirCalculator but stripped by R8
--keep class kotlin.LazyKt { *; }
-# kotlin.time.Duration is used by AndroidComposeTestRule but methods like getINFINITE are stripped/renamed
--keep class kotlin.time.** { *; }
-# kotlinx.coroutines.JobKt is used by androidx.compose.ui.test.IdlingResourceRegistry but stripped by R8
--keep class kotlinx.coroutines.** { *; }
-# kotlin.coroutines.CoroutineContext$Key (and others) are used by AndroidComposeUiTestEnvironment
--keep class kotlin.coroutines.** { *; }
-# androidx.compose.ui.platform.InfiniteAnimationPolicy is used by AndroidComposeTestRule
--keep class androidx.compose.ui.platform.InfiniteAnimationPolicy { *; }
-# androidx.compose.runtime.MonotonicFrameClock$DefaultImpls is used by TestMonotonicFrameClock
--keep class androidx.compose.runtime.** { *; }
+# NOTE: Test-specific rules are maintained in 'proguard-test-rules.pro'.
+# That file is only applied to the 'dev' flavor for instrumented testing (connectedCheck).
+# This file (proguard-rules.pro) contains rules required for the production app to run.
 
 # Print configuration for debugging
 -printconfiguration build/outputs/mapping/release/configuration.txt
