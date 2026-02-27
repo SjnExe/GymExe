@@ -65,18 +65,42 @@ class UpdaterRepository
 
                     if (remoteVersion == currentVersion) return null
 
-                    // Find APK: Must be GymExe-dev-release.apk (Universal)
-                    val asset =
-                        devRelease.assets.find {
-                            it.name.equals("GymExe-dev-release.apk", ignoreCase = true)
-                        } ?: return null
+                    // Find APK: Architecture specific > Universal
+                    // Format: GymExe-dev-release-{abi}.apk
+                    // We target 'release' build type for updates even if running debug
+                    val supportedAbis = Build.SUPPORTED_ABIS
+                    var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
+                    var arch: String? = null
+
+                    // 1. Check for GymExe-dev-release-{abi}.apk
+                    for (abi in supportedAbis) {
+                        selectedAsset =
+                            devRelease.assets.find {
+                                it.name.equals("GymExe-dev-release-$abi.apk", ignoreCase = true)
+                            }
+                        if (selectedAsset != null) {
+                            arch = abi
+                            break
+                        }
+                    }
+
+                    // 2. Fallback to GymExe-dev-release-universal.apk
+                    if (selectedAsset == null) {
+                        selectedAsset =
+                            devRelease.assets.find {
+                                it.name.equals("GymExe-dev-release-universal.apk", ignoreCase = true)
+                            }
+                        if (selectedAsset != null) arch = "universal"
+                    }
+
+                    if (selectedAsset == null) return null
 
                     UpdateInfo(
                         version = remoteVersion,
                         releaseNotes = devRelease.body,
-                        downloadUrl = asset.downloadUrl,
+                        downloadUrl = selectedAsset.downloadUrl,
                         isStable = false,
-                        architecture = "universal",
+                        architecture = arch ?: "universal",
                     )
                 } else {
                     // Stable Build Logic: Check latest stable release

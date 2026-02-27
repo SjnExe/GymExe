@@ -66,15 +66,15 @@ sudo apt autoremove -y
 sudo apt clean
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew assembleDevRelease
+./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest assembleDevDebug
 ```
 
 ## Useful Commands
 
-### Quick Verification (Jules Default Check)
+### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest
+./gradlew versionCatalogUpdate spotlessApply lintDevDebug testDevDebugUnitTest assembleDevDebug
 ```
 
 ### Building

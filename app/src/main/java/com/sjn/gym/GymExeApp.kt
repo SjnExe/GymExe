@@ -20,13 +20,14 @@ class GymExeApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || BuildConfig.FLAVOR == "dev") {
             Timber.plant(Timber.DebugTree())
         }
 
         // Plant FileLoggingTree for all dev builds (debug and release)
         if (BuildConfig.FLAVOR == "dev") {
             Timber.plant(FileLoggingTree(logRepository))
+            Timber.i("App started") // Ensure log file is created
 
             // Capture uncaught exceptions
             val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()

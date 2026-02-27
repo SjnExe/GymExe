@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SelectableCard(
     title: String,
-    description: String? = null,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    description: String? = null,
 ) {
     Card(
         modifier =
