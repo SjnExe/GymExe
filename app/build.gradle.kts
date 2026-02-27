@@ -27,6 +27,16 @@ android {
         }
     }
 
+    // Configure APK Splits for Architecture-specific builds
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -76,10 +86,28 @@ extensions.configure<com.android.build.gradle.AppExtension> {
             .forEach { output ->
                 val flavorName = variant.flavorName
                 val buildType = variant.buildType.name
-                val newName = if (flavorName.isNullOrEmpty()) {
-                    "GymExe-$buildType.apk"
+
+                val abiName = output.getFilter(com.android.build.OutputFile.ABI)
+
+                val newName = if (flavorName == "stable") {
+                    // Stable Format: GymExe-{architecture}.apk
+                    // Example: GymExe-arm64-v8a.apk, GymExe-universal.apk
+                    if (abiName != null) {
+                        "GymExe-$abiName.apk"
+                    } else {
+                        "GymExe-universal.apk"
+                    }
                 } else {
-                    "GymExe-$flavorName-$buildType.apk"
+                    // Dev/Default Format: GymExe-{flavor}-{buildType}.apk
+                    // We only care about Universal for Dev usually, but splits are enabled globally.
+                    // If universal, we name it GymExe-dev-release.apk
+                    // If split, we append ABI: GymExe-dev-release-arm64-v8a.apk
+                    val base = if (flavorName.isNullOrEmpty()) "GymExe-$buildType" else "GymExe-$flavorName-$buildType"
+                    if (abiName != null) {
+                        "$base-$abiName.apk"
+                    } else {
+                        "$base.apk"
+                    }
                 }
                 output.outputFileName = newName
             }

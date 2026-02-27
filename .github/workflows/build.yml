@@ -207,8 +207,8 @@ jobs:
         with:
           name: gym-exe-dev-${{ env.VERSION_NAME }}
           path: |
-            app/build/outputs/apk/dev/release/GymExe-dev-release.apk
-            app/build/outputs/apk/dev/debug/GymExe-dev-debug.apk
+            app/build/outputs/apk/dev/release/*.apk
+            app/build/outputs/apk/dev/debug/*.apk
           compression-level: 0
 
       - name: Upload APKs (Stable)
@@ -217,17 +217,17 @@ jobs:
         with:
           name: gym-exe-stable
           path: |
-            app/build/outputs/apk/stable/release/GymExe-stable-release.apk
+            app/build/outputs/apk/stable/release/*.apk
 
       - name: Create Release (Stable)
         if: env.BUILD_TYPE == 'stable'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-           APK_RELEASE=$(find app/build/outputs/apk/stable/release -name "GymExe-stable-release.apk" | head -n 1)
-
+           # Use wildcard to capture all splits (universal + per-ABI)
+           # They are all in the release folder
            gh release create ${{ env.VERSION_NAME }} \
-             "$APK_RELEASE" \
+             app/build/outputs/apk/stable/release/*.apk \
              --title "Release ${{ env.VERSION_NAME }}" \
              --notes "Stable release ${{ env.VERSION_NAME }}" \
              --target ${{ github.sha }}
@@ -240,12 +240,14 @@ jobs:
         run: |
           gh release delete dev --cleanup-tag -y || true
 
-          APK_RELEASE=$(find app/build/outputs/apk/dev/release -name "GymExe-dev-release.apk" | head -n 1)
-          APK_DEBUG=$(find app/build/outputs/apk/dev/debug -name "GymExe-dev-debug.apk" | head -n 1)
+          # Upload all Dev APKs (Release & Debug)
+          # Note: If splits are active, this might upload many files.
+          # Assuming Dev splits are renamed to GymExe-dev-release-abi.apk or similar if splits are on.
+          # Or if splits are off for Dev, just universal.
 
           gh release create dev \
-            "$APK_RELEASE" \
-            "$APK_DEBUG" \
+            app/build/outputs/apk/dev/release/*.apk \
+            app/build/outputs/apk/dev/debug/*.apk \
             --title "Development Build $VERSION_NAME" \
             --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
