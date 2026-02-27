@@ -2,6 +2,7 @@ package com.sjn.gym.navigation
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalLibrary
@@ -79,16 +80,16 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
     val currentDestination = navBackStackEntry?.destination
 
     val showBottomBar =
-        TopLevelDestination.values().any { topLevelRoute ->
+        TopLevelDestination.entries.any { topLevelRoute ->
             currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true
         }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets.safeDrawing,
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
-                    TopLevelDestination.values().forEach { topLevelRoute ->
+                    TopLevelDestination.entries.forEach { topLevelRoute ->
                         val isSelected =
                             currentDestination?.hierarchy?.any {
                                 it.hasRoute(topLevelRoute.route::class)
