@@ -76,6 +76,7 @@ import com.sjn.gym.core.model.ThemeConfig
 import com.sjn.gym.core.model.ThemeStyle
 import com.sjn.gym.core.model.WeightUnit
 import com.sjn.gym.core.ui.components.RestoreOptionsDialog
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -412,7 +413,12 @@ private fun formatFileSize(bytes: Long): String {
     if (bytes <= 0) return "0 B"
     val units = arrayOf("B", "KB", "MB", "GB", "TB")
     val digitGroups = (Math.log10(bytes.toDouble()) / Math.log10(1024.0)).toInt()
-    return String.format("%.1f %s", bytes / Math.pow(1024.0, digitGroups.toDouble()), units[digitGroups])
+    return String.format(
+        Locale.US,
+        "%.1f %s",
+        bytes / Math.pow(1024.0, digitGroups.toDouble()),
+        units[digitGroups],
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
