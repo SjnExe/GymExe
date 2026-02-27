@@ -27,6 +27,16 @@ android {
         }
     }
 
+    // Configure APK Splits for Architecture-specific builds
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -59,13 +69,48 @@ android {
     buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
     buildTypes.getByName("benchmark").signingConfig = signingConfigs.getByName("release")
 
-    // Removed: productFlavors.named("dev") block.
-    // Test rules are now applied via the 'benchmark' build type above.
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+// Rename APKs using Legacy API (applicationVariants) via explicit cast
+// This allows access to the legacy API even if AppExtension isn't the primary extension type
+val androidExtension = extensions.getByName("android")
+if (androidExtension is com.android.build.gradle.AppExtension) {
+    androidExtension.applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val flavorName = variant.flavorName
+                val buildType = variant.buildType.name
+
+                val abiName = output.getFilter(com.android.build.OutputFile.ABI)
+
+                val newName =
+                    if (flavorName == "stable") {
+                        // Stable Format: GymExe-{architecture}.apk
+                        // Example: GymExe-arm64-v8a.apk, GymExe-universal.apk
+                        if (abiName != null) {
+                            "GymExe-$abiName.apk"
+                        } else {
+                            "GymExe-universal.apk"
+                        }
+                    } else {
+                        // Dev/Default Format: GymExe-{flavor}-{buildType}-{architecture}.apk
+                        // Example: GymExe-dev-release-universal.apk, GymExe-dev-debug-arm64-v8a.apk
+                        val base = if (flavorName.isNullOrEmpty()) "GymExe-$buildType" else "GymExe-$flavorName-$buildType"
+                        if (abiName != null) {
+                            "$base-$abiName.apk"
+                        } else {
+                            "$base-universal.apk"
+                        }
+                    }
+                output.outputFileName = newName
+            }
     }
 }
 
@@ -91,6 +136,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.tracing)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -99,6 +145,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.tracing)

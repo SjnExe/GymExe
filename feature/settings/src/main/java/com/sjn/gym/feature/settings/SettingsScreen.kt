@@ -76,6 +76,7 @@ import com.sjn.gym.core.model.ThemeConfig
 import com.sjn.gym.core.model.ThemeStyle
 import com.sjn.gym.core.model.WeightUnit
 import com.sjn.gym.core.ui.components.RestoreOptionsDialog
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -369,10 +370,24 @@ fun UpdateDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 if (downloadStatus is DownloadStatus.Downloading) {
-                    Text("Downloading... ${downloadStatus.progress}%")
+                    val progress = downloadStatus.progress
+                    val downloaded = formatFileSize(downloadStatus.downloadedBytes)
+                    val total = formatFileSize(downloadStatus.totalBytes)
+                    val statusText =
+                        if (downloadStatus.totalBytes > 0) {
+                            "Downloading... $downloaded / $total ($progress%)"
+                        } else {
+                            "Downloading... $downloaded"
+                        }
+
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
                     LinearProgressIndicator(
-                        progress = { downloadStatus.progress / 100f },
+                        progress = { if (progress >= 0) progress / 100f else 0f },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
@@ -392,6 +407,18 @@ fun UpdateDialog(
             }
         }
     }
+}
+
+private fun formatFileSize(bytes: Long): String {
+    if (bytes <= 0) return "0 B"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    val digitGroups = (Math.log10(bytes.toDouble()) / Math.log10(1024.0)).toInt()
+    return String.format(
+        Locale.US,
+        "%.1f %s",
+        bytes / Math.pow(1024.0, digitGroups.toDouble()),
+        units[digitGroups],
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

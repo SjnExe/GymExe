@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.chuckerteam.chucker.api.Chucker
 import com.sjn.gym.BuildConfig
 import com.sjn.gym.R
 import com.sjn.gym.feature.onboarding.OnboardingScreen
@@ -156,29 +157,7 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
                     onNavigateUp = { navController.navigateUp() },
                     isDevMode = BuildConfig.FLAVOR == "dev",
                     onLaunchNetworkInspector = {
-                        try {
-                            val chuckerClass = Class.forName("com.chuckerteam.chucker.api.Chucker")
-                            val getLaunchIntentMethod =
-                                chuckerClass.getMethod("getLaunchIntent", android.content.Context::class.java)
-                            val intent =
-                                getLaunchIntentMethod.invoke(null, context) as android.content.Intent
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            // Check if Timber is available, otherwise just ignore
-                            try {
-                                val timberClass = Class.forName("timber.log.Timber")
-                                val eMethod = timberClass.getMethod("e", Throwable::class.java, String::class.java, Array<Any>::class.java)
-                                eMethod.invoke(null, e, "Failed to launch Chucker", emptyArray<Any>())
-                            } catch (ignored: Exception) {
-                                // Ignore
-                            }
-                            android.widget.Toast
-                                .makeText(
-                                    context,
-                                    "Network Inspector unavailable",
-                                    android.widget.Toast.LENGTH_SHORT,
-                                ).show()
-                        }
+                        context.startActivity(Chucker.getLaunchIntent(context))
                     },
                 )
             }
