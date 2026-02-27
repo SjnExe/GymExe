@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
+    implementation(libs.roborazzi.gradlePlugin)
 }
 
 gradlePlugin {
@@ -40,6 +41,10 @@ gradlePlugin {
         register("detekt") {
             id = "gymexe.detekt"
             implementationClass = "com.sjn.gym.convention.DetektConventionPlugin"
+        }
+        register("roborazzi") {
+            id = "gymexe.roborazzi"
+            implementationClass = "com.sjn.gym.convention.RoborazziConventionPlugin"
         }
     }
 }

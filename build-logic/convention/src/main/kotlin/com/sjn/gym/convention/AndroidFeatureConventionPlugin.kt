@@ -12,6 +12,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             pluginManager.apply("gymexe.android.library")
             pluginManager.apply("gymexe.android.hilt")
             pluginManager.apply("gymexe.android.compose")
+            pluginManager.apply("gymexe.roborazzi")
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
