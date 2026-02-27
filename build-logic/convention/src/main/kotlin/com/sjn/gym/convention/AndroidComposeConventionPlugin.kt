@@ -13,9 +13,10 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
-            val extension = extensions.findByType(LibraryExtension::class.java)
-                ?: extensions.findByType(ApplicationExtension::class.java)
-                ?: return
+            val extension =
+                extensions.findByType(LibraryExtension::class.java)
+                    ?: extensions.findByType(ApplicationExtension::class.java)
+                    ?: return
 
             if (extension is ApplicationExtension) {
                 extension.buildFeatures {

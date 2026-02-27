@@ -1,5 +1,6 @@
 plugins {
     `kotlin-dsl`
+    alias(libs.plugins.spotless)
 }
 
 group = "com.sjn.gym.buildlogic"
@@ -46,5 +47,16 @@ gradlePlugin {
             id = "gymexe.roborazzi"
             implementationClass = "com.sjn.gym.convention.RoborazziConventionPlugin"
         }
+    }
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktlint()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint()
     }
 }
