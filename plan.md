@@ -34,7 +34,7 @@ The app follows a modular architecture:
 **File:** `.github/workflows/build.yml`
 **Features:**
 *   **JDK 25 Setup**: Uses Temurin distribution.
-*   **Caching**: Gradle build/cache restored effectively.
+*   **Caching**: Gradle build/cache restored effectively. AVD caching (API 36).
 *   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity.
 *   **Versioning**:
     *   **Stable**: Tag `v*` -> Version `1.2.3`.
@@ -42,7 +42,10 @@ The app follows a modular architecture:
     *   **Fallback**: Defaults to `v0.0.0` if no tags exist.
     *   **Version Code**: `Total Commits - 1`.
 *   **Flavors**: Builds `dev` (debuggable, suffixed) and `stable` (minified) variants.
-*   **Artifacts**: Uploads `gym-exe-dev-{version}` (uncompressed zip artifact).
+*   **Artifacts**:
+    *   `GymExe-dev-release.apk` / `GymExe-dev-debug.apk` (Dev builds).
+    *   `GymExe-stable-release.apk` (Stable builds).
+*   **Emulator**: Uses `api-level: 36`.
 
 ## 5. Build Logic (Implemented Infrastructure)
 **Directory:** `build-logic/`
@@ -84,7 +87,10 @@ The app follows a modular architecture:
 ### Phase 4: Settings Feature (Partially Implemented)
 - [x] **Theme Settings**: Functional UI for switching themes (System/Light/Dark).
 - [x] **Settings UI**: "Hexium" style implementation (Segmented Buttons, Developer Options).
-- [x] **Updater**: Mock logic implemented. Shows version from BuildConfig.
+- [x] **Updater**:
+    *   **Stable**: Checks latest tag, prioritizes ABI-specific APKs.
+    *   **Dev**: Checks dev tag changelog, forces `dev-release`.
+    *   **UI**: Dialog shows version diff, changelog, and download progress/size.
 - [x] **Backup & Restore**: Functional integration with `BackupRepository` (File picker/saver).
 - [x] **Unit Configuration**: Metric/Imperial toggle (Weight: kg/lbs, Dist: km/mi, Size: cm/in).
 - [x] **Developer Options**: Copy Logs / Save Logs, Network Inspector launch.
