@@ -76,10 +76,11 @@ android {
     }
 }
 
-// Rename APKs using Legacy API (applicationVariants) via AppExtension
-// We must access the legacy AppExtension to use applicationVariants in KTS
-extensions.configure<com.android.build.gradle.AppExtension> {
-    applicationVariants.all {
+// Rename APKs using Legacy API (applicationVariants) via explicit cast
+// This allows access to the legacy API even if AppExtension isn't the primary extension type
+val androidExtension = extensions.getByName("android")
+if (androidExtension is com.android.build.gradle.AppExtension) {
+    androidExtension.applicationVariants.all {
         val variant = this
         variant.outputs
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }

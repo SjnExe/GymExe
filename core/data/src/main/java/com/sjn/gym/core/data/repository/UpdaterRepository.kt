@@ -65,7 +65,7 @@ class UpdaterRepository
 
                     if (remoteVersion == currentVersion) return null
 
-                    // Find APK: Must be GymExe-dev-release.apk
+                    // Find APK: Must be GymExe-dev-release.apk (Universal)
                     val asset =
                         devRelease.assets.find {
                             it.name.equals("GymExe-dev-release.apk", ignoreCase = true)
@@ -91,12 +91,12 @@ class UpdaterRepository
                     var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
                     var arch: String? = null
 
-                    // 1. Check for GymExe-stable-release-{abi}.apk
+                    // 1. Check for GymExe-{abi}.apk
+                    // Example: GymExe-arm64-v8a.apk
                     for (abi in supportedAbis) {
                         selectedAsset =
                             stableRelease.assets.find {
-                                it.name.contains("GymExe-stable-release-$abi", ignoreCase = true) &&
-                                    it.name.endsWith(".apk")
+                                it.name.equals("GymExe-$abi.apk", ignoreCase = true)
                             }
                         if (selectedAsset != null) {
                             arch = abi
@@ -104,11 +104,11 @@ class UpdaterRepository
                         }
                     }
 
-                    // 2. Fallback to GymExe-stable-release.apk (Universal)
+                    // 2. Fallback to GymExe-universal.apk
                     if (selectedAsset == null) {
                         selectedAsset =
                             stableRelease.assets.find {
-                                it.name.equals("GymExe-stable-release.apk", ignoreCase = true)
+                                it.name.equals("GymExe-universal.apk", ignoreCase = true)
                             }
                         if (selectedAsset != null) arch = "universal"
                     }
