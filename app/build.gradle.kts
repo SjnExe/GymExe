@@ -100,15 +100,13 @@ if (androidExtension is com.android.build.gradle.AppExtension) {
                             "GymExe-universal.apk"
                         }
                     } else {
-                        // Dev/Default Format: GymExe-{flavor}-{buildType}.apk
-                        // We only care about Universal for Dev usually, but splits are enabled globally.
-                        // If universal, we name it GymExe-dev-release.apk
-                        // If split, we append ABI: GymExe-dev-release-arm64-v8a.apk
+                        // Dev/Default Format: GymExe-{flavor}-{buildType}-{architecture}.apk
+                        // Example: GymExe-dev-release-universal.apk, GymExe-dev-debug-arm64-v8a.apk
                         val base = if (flavorName.isNullOrEmpty()) "GymExe-$buildType" else "GymExe-$flavorName-$buildType"
                         if (abiName != null) {
                             "$base-$abiName.apk"
                         } else {
-                            "$base.apk"
+                            "$base-universal.apk"
                         }
                     }
                 output.outputFileName = newName
