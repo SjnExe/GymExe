@@ -85,7 +85,7 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
         }
 
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {
