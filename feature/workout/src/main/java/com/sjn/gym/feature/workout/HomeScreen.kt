@@ -21,8 +21,10 @@ import androidx.compose.ui.unit.dp
 fun HomeScreen(
     onNavigateToExerciseList: () -> Unit,
     onNavigateToWorkout: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("GymExe") },

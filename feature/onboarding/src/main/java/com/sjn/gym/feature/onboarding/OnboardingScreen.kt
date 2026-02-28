@@ -26,6 +26,7 @@ import com.sjn.gym.core.ui.components.RestoreOptionsDialog
 @Composable
 fun OnboardingScreen(
     onOnboardingComplete: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val currentStep by viewModel.currentStep.collectAsState()
@@ -93,7 +94,7 @@ fun OnboardingScreen(
         )
     }
 
-    Box(modifier = Modifier.systemBarsPadding()) {
+    Box(modifier = modifier.systemBarsPadding()) {
         when (currentStep) {
             0 -> {
                 WelcomeScreen(

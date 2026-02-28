@@ -20,10 +20,11 @@ import androidx.compose.ui.unit.dp
 fun WelcomeScreen(
     onNewUser: () -> Unit,
     onRestoreBackup: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

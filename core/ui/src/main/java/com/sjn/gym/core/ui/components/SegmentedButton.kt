@@ -15,9 +15,10 @@ fun SegmentedButton(
     options: List<String>,
     selectedOption: String,
     onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier.padding(8.dp),
+        modifier = modifier.padding(8.dp),
     ) {
         options.forEachIndexed { index, option ->
             val isSelected = option == selectedOption

@@ -29,10 +29,13 @@ import com.sjn.gym.feature.workout.logic.PlateCount
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
+fun WorkoutScreen(
+    modifier: Modifier = Modifier,
+    viewModel: WorkoutViewModel = hiltViewModel(),
+) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .padding(16.dp),
     ) {
@@ -192,8 +195,12 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun PlateChip(plate: PlateCount) {
+fun PlateChip(
+    plate: PlateCount,
+    modifier: Modifier = Modifier,
+) {
     Surface(
+        modifier = modifier,
         shape = MaterialTheme.shapes.small,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,

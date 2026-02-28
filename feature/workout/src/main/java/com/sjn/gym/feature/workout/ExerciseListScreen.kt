@@ -83,10 +83,11 @@ fun ExerciseListScreen(
 fun ExerciseCard(
     exercise: Exercise,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     ElevatedCard(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
     ) {
