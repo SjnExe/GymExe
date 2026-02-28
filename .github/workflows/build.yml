@@ -7,12 +7,19 @@ on:
   push:
     tags: [ "v*" ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+env:
+  # Base Gradle args to maximize performance.
+  # Total runner memory is 16GB (14GB usable).
+  # For non-emulator jobs, give Gradle 10GB. Emulator needs its own RAM, so we'll adjust for the test job.
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
+jobs:
+  # --------------------------------------------------------------------------------
+  # JOB 1: CHECKS (Spotless, Lint, Unit Tests)
+  # --------------------------------------------------------------------------------
+  checks:
+    name: Run Checks
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -29,28 +36,79 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.3.1'
-          cache-read-only: false
-
-      # Cache Android Emulator AVD to speed up startup
-      - name: AVD Cache
-        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
-        uses: actions/cache@v5
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ runner.os }}-api36-x86_64-${{ github.run_id }}
-          restore-keys: |
-            avd-${{ runner.os }}-api36-x86_64-
 
       - name: Calculate Version
         id: version
         run: |
-          # Fetch tags for versioning
+          # Same logic to determine version context
           git fetch --tags --force
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          VERSION_BASE=${LATEST_TAG#v}
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            BUILD_TYPE=stable
+          else
+            BUILD_TYPE=dev
+          fi
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
 
-          # Get latest stable tag or default to v0.0.0
+      - name: Run Checks
+        run: |
+          set -o pipefail
+          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
+            TASKS="spotlessCheck lintStableRelease testStableDebugUnitTest"
+          else
+            TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
+          fi
+          ./gradlew $TASKS \
+            --parallel --max-workers=4 --build-cache --no-configuration-cache \
+            -Dorg.gradle.jvmargs="-Xmx10g -XX:MaxMetaspaceSize=1g" \
+            2>&1 | tee checks_output.log
+
+      - name: Collect & Upload Reports
+        if: always()
+        run: |
+          mkdir -p reports/lint reports/tests
+          find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
+          find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
+          find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
+          zip -r checks_logs.zip checks_output.log reports/ || true
+      - name: Upload Checks Logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: checks-logs
+          path: checks_logs.zip
+
+  # --------------------------------------------------------------------------------
+  # JOB 2: BUILD APKs
+  # --------------------------------------------------------------------------------
+  build_apks:
+    name: Build APKs
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
+      BUILD_TYPE: ${{ steps.version.outputs.BUILD_TYPE }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Calculate Version
+        id: version
+        run: |
+          git fetch --tags --force
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           VERSION_BASE=${LATEST_TAG#v}
           RAW_COUNT=$(git rev-list --count HEAD)
@@ -61,7 +119,6 @@ jobs:
             BUILD_TYPE=stable
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             PR_NUMBER=${{ github.event.pull_request.number }}
-            # Count commits in this PR
             RAW_PR_COMMITS=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
             PR_COMMITS=$((RAW_PR_COMMITS - 1))
             if [ $PR_COMMITS -lt 0 ]; then PR_COMMITS=0; fi
@@ -76,65 +133,102 @@ jobs:
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-          echo "Calculated Version: $VERSION_NAME ($VERSION_CODE)"
 
-      - name: Run Checks (Spotless, Lint, Unit Tests)
-        id: run_checks
-        run: |
-          set -o pipefail
-
-          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="spotlessCheck lintStableRelease testStableDebugUnitTest"
-          else
-            TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
-          fi
-
-          echo "Running checks: $TASKS"
-
-          ./gradlew $TASKS \
-            --parallel \
-            --max-workers=4 \
-            --build-cache \
-            --no-configuration-cache \
-            -PversionName=${{ env.VERSION_NAME }} \
-            -PversionCode=${{ env.VERSION_CODE }} \
-            -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
-            2>&1 | tee checks_output.log
+          # Set outputs for subsequent jobs
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
       - name: Build APKs
-        id: build_apks
-        # Run only if checks passed
         run: |
           set -o pipefail
-
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
             TASKS="assembleStableRelease"
           else
-            # Build Dev Release (R8), Debug, and Benchmark Test APK
             TASKS="assembleDevRelease assembleDevDebug assembleDevBenchmarkAndroidTest"
           fi
-
-          echo "Building artifacts: $TASKS"
-
           ./gradlew $TASKS \
-            --parallel \
-            --max-workers=4 \
-            --build-cache \
-            --no-configuration-cache \
-            -PversionName=${{ env.VERSION_NAME }} \
-            -PversionCode=${{ env.VERSION_CODE }} \
-            -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g" \
+            --parallel --max-workers=4 --build-cache --no-configuration-cache \
+            -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} \
+            -Dorg.gradle.jvmargs="-Xmx10g -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
-      # Enable KVM group permissions (Required for Emulator)
-      - name: Prepare Test Environment
+      - name: Upload Build Logs
+        if: always()
+        run: zip -r build_logs.zip build_output.log || true
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: build-logs
+          path: build_logs.zip
+
+      # Upload the actual compiled APKs so the release job can grab them
+      - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
+        uses: actions/upload-artifact@v6
+        with:
+          name: compiled-apks
+          path: |
+            app/build/outputs/apk/dev/release/*.apk
+            app/build/outputs/apk/dev/debug/*.apk
+          compression-level: 0
+
+      - name: Upload APKs (Stable)
+        if: env.BUILD_TYPE == 'stable'
+        uses: actions/upload-artifact@v6
+        with:
+          name: compiled-apks
+          path: app/build/outputs/apk/stable/release/*.apk
+          compression-level: 0
+
+  # --------------------------------------------------------------------------------
+  # JOB 3: INSTRUMENTED TESTS (Dev Only)
+  # --------------------------------------------------------------------------------
+  instrumented_tests:
+    name: Run Emulator Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.3.1'
+
+      # We only run tests on 'dev' branch / PRs, so calculate version just for that
+      - name: Calculate Version
         run: |
-          # Install dependencies for the Android Emulator to suppress X11/Vulkan/Console warnings
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
+          fi
+
+      # Cache Android Emulator AVD to speed up startup
+      - name: AVD Cache
+        uses: actions/cache@v5
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ runner.os }}-api36-x86_64-${{ github.run_id }}
+          restore-keys: |
+            avd-${{ runner.os }}-api36-x86_64-
+
+      - name: Prepare Test Environment
+        run: |
           sudo apt-get update
           sudo apt-get install -y libx11-6 libx11-xcb1 libvulkan1 telnet netcat-openbsd
-
-          # Enable KVM
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
@@ -142,9 +236,8 @@ jobs:
           sudo chmod 666 /dev/kvm
           sudo chown $USER /dev/kvm
 
-      # Emulator Test Step - Runs only on Dev Builds
-      - name: Run Instrumented Tests (Dev Benchmark)
-        if: env.BUILD_TYPE == 'dev'
+      # Lower JVM args here because the Emulator needs to consume 6GB RAM (4G memory + 2G heap)
+      - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
@@ -155,105 +248,72 @@ jobs:
           disable-animations: true
           disable-linux-hw-accel: false
           emulator-boot-timeout: 300
-          ram-size: 4096M
+          ram-size: 6144M
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          # Use connectedDevBenchmarkAndroidTest to run the tests on the device
-          script: ./gradlew connectedDevBenchmarkAndroidTest --max-workers=4 -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=1g"
+          script: ./gradlew connectedDevBenchmarkAndroidTest --max-workers=4 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g"
 
-      - name: Log Processing & Report Collection
+      - name: Collect & Upload Reports
         if: always()
         run: |
-          # 1. Summary
-          echo "=== CHECKS LOG ===" > build_summary.txt
-          if [ -f checks_output.log ]; then
-            head -n 50 checks_output.log >> build_summary.txt
-            tail -n 50 checks_output.log >> build_summary.txt
-          fi
-
-          echo -e "\n=== BUILD LOG ===" >> build_summary.txt
-          if [ -f build_output.log ]; then
-            head -n 100 build_output.log >> build_summary.txt
-            tail -n 100 build_output.log >> build_summary.txt
-            echo -e "\n=== ERRORS/WARNINGS ===" >> build_summary.txt
-            grep -iE "error|warning|failed|exception" build_output.log | head -n 500 >> build_summary.txt || true
-          fi
-
-          # 2. Collect Reports
-          mkdir -p reports/lint
-          mkdir -p reports/tests
           mkdir -p reports/androidTests
-
-          # Find and copy Lint reports
-          find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
-          find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
-
-          # Find and copy Test reports directories
-          find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
           find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
-
-          # 3. Zip everything
-          FILES_TO_ZIP="build_summary.txt reports/"
-          if [ -f checks_output.log ]; then FILES_TO_ZIP="$FILES_TO_ZIP checks_output.log"; fi
-          if [ -f build_output.log ]; then FILES_TO_ZIP="$FILES_TO_ZIP build_output.log"; fi
-
-          zip -r build_logs.zip $FILES_TO_ZIP
-
-      - name: Upload Logs & Reports
+          zip -r emulator_logs.zip reports/ || true
+      - name: Upload Emulator Logs
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: build-logs-reports
-          path: build_logs.zip
+          name: emulator-logs
+          path: emulator_logs.zip
 
-      - name: Upload APKs (Dev)
-        if: env.BUILD_TYPE == 'dev'
-        uses: actions/upload-artifact@v6
+  # --------------------------------------------------------------------------------
+  # JOB 4: RELEASE
+  # --------------------------------------------------------------------------------
+  release:
+    name: Release APKs
+    runs-on: ubuntu-latest
+    needs: [checks, build_apks, instrumented_tests]
+    permissions:
+      contents: write
+    # The instrumented_tests job is completely skipped on non-dev branches.
+    # If a job is skipped, a strict `success()` requirement on it can fail the dependent job.
+    # By using always() but checking that no upstream job failed, we handle the skipped job safely.
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          name: gym-exe-dev-${{ env.VERSION_NAME }}
-          path: |
-            app/build/outputs/apk/dev/release/*.apk
-            app/build/outputs/apk/dev/debug/*.apk
-          compression-level: 0
+          fetch-depth: 0
 
-      - name: Upload APKs (Stable)
-        if: env.BUILD_TYPE == 'stable'
-        uses: actions/upload-artifact@v6
+      - name: Download Compiled APKs
+        uses: actions/download-artifact@v4
         with:
-          name: gym-exe-stable
-          path: |
-            app/build/outputs/apk/stable/release/*.apk
+          name: compiled-apks
+          path: apks/
 
       - name: Create Release (Stable)
-        if: env.BUILD_TYPE == 'stable'
+        if: needs.build_apks.outputs.BUILD_TYPE == 'stable'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_NAME: ${{ needs.build_apks.outputs.VERSION_NAME }}
         run: |
-           # Use wildcard to capture all splits (universal + per-ABI)
-           # They are all in the release folder
-           gh release create ${{ env.VERSION_NAME }} \
-             app/build/outputs/apk/stable/release/*.apk \
-             --title "Release ${{ env.VERSION_NAME }}" \
-             --notes "Stable release ${{ env.VERSION_NAME }}" \
+           gh release create $VERSION_NAME \
+             apks/**/*.apk \
+             --title "Release $VERSION_NAME" \
+             --notes "Stable release $VERSION_NAME" \
              --target ${{ github.sha }}
 
       - name: Create/Update Dev Release
-        if: env.BUILD_TYPE == 'dev'
+        if: needs.build_apks.outputs.BUILD_TYPE == 'dev'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION_NAME: ${{ env.VERSION_NAME }}
+          VERSION_NAME: ${{ needs.build_apks.outputs.VERSION_NAME }}
         run: |
           gh release delete dev --cleanup-tag -y || true
 
-          # Upload all Dev APKs (Release & Debug)
-          # Note: If splits are active, this might upload many files.
-          # Assuming Dev splits are renamed to GymExe-dev-release-abi.apk or similar if splits are on.
-          # Or if splits are off for Dev, just universal.
-
           gh release create dev \
-            app/build/outputs/apk/dev/release/*.apk \
-            app/build/outputs/apk/dev/debug/*.apk \
+            apks/**/*.apk \
             --title "Development Build $VERSION_NAME" \
             --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
             --prerelease \
