@@ -144,7 +144,7 @@ jobs:
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
             TASKS="assembleStableRelease"
           else
-            TASKS="assembleDevRelease assembleDevDebug assembleDevBenchmarkAndroidTest"
+            TASKS="assembleDevRelease assembleDevDebug"
           fi
           ./gradlew $TASKS \
             --parallel --max-workers=4 --build-cache --no-configuration-cache \
@@ -224,6 +224,14 @@ jobs:
           key: avd-${{ runner.os }}-api36-x86_64-${{ github.run_id }}
           restore-keys: |
             avd-${{ runner.os }}-api36-x86_64-
+
+      # Fail-fast: Compile the test APK before booting the 6GB emulator
+      # This saves 2-3 minutes of CI time if the test code simply has a syntax error.
+      - name: Compile Test APK
+        run: |
+          ./gradlew assembleDevBenchmarkAndroidTest \
+            --parallel --max-workers=4 --build-cache --no-configuration-cache \
+            -Dorg.gradle.jvmargs="-Xmx10g -XX:MaxMetaspaceSize=1g"
 
       - name: Prepare Test Environment
         run: |
