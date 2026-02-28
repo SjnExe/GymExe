@@ -15,7 +15,6 @@ class RoborazziConventionPlugin : Plugin<Project> {
 
             dependencies {
                 add("testImplementation", libs.findLibrary("roborazzi").get())
-                add("testImplementation", libs.findLibrary("roborazzi.core").get())
                 add("testImplementation", libs.findLibrary("roborazzi.compose").get())
                 add("testImplementation", libs.findLibrary("roborazzi.junit.rule").get())
                 add("testImplementation", libs.findLibrary("robolectric").get())
