@@ -165,7 +165,7 @@ dependencies {
     debugImplementation(libs.leakcanary.android)
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     // Modular dependencies
     implementation(project(":core:ui"))
