@@ -1,5 +1,6 @@
 plugins {
     `kotlin-dsl`
+    alias(libs.plugins.spotless)
 }
 
 group = "com.sjn.gym.buildlogic"
@@ -9,6 +10,7 @@ dependencies {
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
+    implementation(libs.roborazzi.gradlePlugin)
 }
 
 gradlePlugin {
@@ -41,5 +43,20 @@ gradlePlugin {
             id = "gymexe.detekt"
             implementationClass = "com.sjn.gym.convention.DetektConventionPlugin"
         }
+        register("roborazzi") {
+            id = "gymexe.roborazzi"
+            implementationClass = "com.sjn.gym.convention.RoborazziConventionPlugin"
+        }
+    }
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktlint()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint()
     }
 }

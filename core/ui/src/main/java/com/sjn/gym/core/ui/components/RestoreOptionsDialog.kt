@@ -43,10 +43,10 @@ fun RestoreOptionsDialog(
                     style = MaterialTheme.typography.bodyMedium,
                 )
 
-                OptionCheckbox("Exercises", restoreExercises) { restoreExercises = it }
-                OptionCheckbox("Workouts", restoreWorkouts) { restoreWorkouts = it }
-                OptionCheckbox("Profile", restoreProfile) { restoreProfile = it }
-                OptionCheckbox("Settings", restoreSettings) { restoreSettings = it }
+                OptionCheckbox("Exercises", restoreExercises, { restoreExercises = it })
+                OptionCheckbox("Workouts", restoreWorkouts, { restoreWorkouts = it })
+                OptionCheckbox("Profile", restoreProfile, { restoreProfile = it })
+                OptionCheckbox("Settings", restoreSettings, { restoreSettings = it })
             }
         },
         confirmButton = {
@@ -78,11 +78,12 @@ fun OptionCheckbox(
     label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .clickable { onCheckedChange(!checked) }
                 .padding(vertical = 4.dp),

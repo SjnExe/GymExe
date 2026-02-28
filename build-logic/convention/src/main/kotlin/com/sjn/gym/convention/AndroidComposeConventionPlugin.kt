@@ -13,9 +13,10 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
-            val extension = extensions.findByType(LibraryExtension::class.java)
-                ?: extensions.findByType(ApplicationExtension::class.java)
-                ?: return
+            val extension =
+                extensions.findByType(LibraryExtension::class.java)
+                    ?: extensions.findByType(ApplicationExtension::class.java)
+                    ?: return
 
             if (extension is ApplicationExtension) {
                 extension.buildFeatures {
@@ -33,6 +34,7 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
                 add("implementation", platform(libs.findLibrary("androidx.compose.bom").get()))
                 add("implementation", libs.findLibrary("androidx.ui.tooling.preview").get())
                 add("debugImplementation", libs.findLibrary("androidx.ui.tooling").get())
+                add("lintChecks", libs.findLibrary("slack.compose.lints").get())
             }
         }
     }

@@ -72,7 +72,10 @@ enum class TopLevelDestination(
 }
 
 @Composable
-fun GymExeNavHost(isOnboardingCompleted: Boolean) {
+fun GymExeNavHost(
+    isOnboardingCompleted: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val navController = rememberNavController()
     val startDestination: Any = if (isOnboardingCompleted) Home else Onboarding
 
@@ -85,6 +88,7 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean) {
         }
 
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {

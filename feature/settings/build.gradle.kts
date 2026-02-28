@@ -16,5 +16,5 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 }
