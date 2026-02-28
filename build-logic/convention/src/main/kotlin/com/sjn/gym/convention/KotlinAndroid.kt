@@ -13,9 +13,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension,
-) {
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     if (commonExtension is ApplicationExtension) {
         commonExtension.compileOptions {
             sourceCompatibility = JavaVersion.VERSION_25
@@ -36,9 +34,11 @@ internal fun Project.configureKotlinAndroid(
     // Ensure JavaCompile tasks use the same toolchain
     val javaToolchains = extensions.getByType(JavaToolchainService::class.java)
     tasks.withType<JavaCompile>().configureEach {
-        javaCompiler.set(javaToolchains.compilerFor {
-            languageVersion.set(JavaLanguageVersion.of(25))
-        })
+        javaCompiler.set(
+            javaToolchains.compilerFor {
+                languageVersion.set(JavaLanguageVersion.of(25))
+            },
+        )
     }
 
     tasks.withType<KotlinCompile>().configureEach {

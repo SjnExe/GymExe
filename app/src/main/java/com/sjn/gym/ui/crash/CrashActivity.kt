@@ -87,10 +87,11 @@ fun CrashScreen(
     errorDetails: String,
     onShareLogs: () -> Unit,
     onRestartApp: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),

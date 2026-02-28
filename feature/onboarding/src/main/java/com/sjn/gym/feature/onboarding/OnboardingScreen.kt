@@ -3,6 +3,8 @@ package com.sjn.gym.feature.onboarding
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
@@ -15,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -23,6 +26,7 @@ import com.sjn.gym.core.ui.components.RestoreOptionsDialog
 @Composable
 fun OnboardingScreen(
     onOnboardingComplete: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val currentStep by viewModel.currentStep.collectAsState()
@@ -90,24 +94,26 @@ fun OnboardingScreen(
         )
     }
 
-    when (currentStep) {
-        0 -> {
-            WelcomeScreen(
-                onNewUser = { viewModel.nextStep() },
-                onRestoreBackup = { openDocumentLauncher.launch(arrayOf("*/*")) },
-            )
-        }
+    Box(modifier = modifier.systemBarsPadding()) {
+        when (currentStep) {
+            0 -> {
+                WelcomeScreen(
+                    onNewUser = { viewModel.nextStep() },
+                    onRestoreBackup = { openDocumentLauncher.launch(arrayOf("*/*")) },
+                )
+            }
 
-        1 -> {
-            ProfileSetupScreen(onNext = { viewModel.nextStep() })
-        }
+            1 -> {
+                ProfileSetupScreen(onNext = { viewModel.nextStep() })
+            }
 
-        2 -> {
-            ExperienceLevelScreen(onNext = { viewModel.nextStep() })
-        }
+            2 -> {
+                ExperienceLevelScreen(onNext = { viewModel.nextStep() })
+            }
 
-        3 -> {
-            EquipmentSelectionScreen(onComplete = onOnboardingComplete)
+            3 -> {
+                EquipmentSelectionScreen(onComplete = onOnboardingComplete)
+            }
         }
     }
 }

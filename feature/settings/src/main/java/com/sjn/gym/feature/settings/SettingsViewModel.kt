@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.sjn.gym.core.data.repository.DownloadStatus
 import com.sjn.gym.core.data.repository.LogRepository
 import com.sjn.gym.core.data.repository.UpdateInfo
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -251,13 +251,13 @@ class SettingsViewModel
                 } else {
                     // Try to list directory for debugging
                     val list = logFile.parentFile?.list()?.joinToString() ?: "parent empty"
-                    Timber.e("Log file not found at ${logFile.absolutePath}. Parent contents: $list")
+                    Logger.e { "Log file not found at ${logFile.absolutePath}. Parent contents: $list" }
                     _backupStatus.value = BackupStatus.Error("No logs found at ${logFile.absolutePath}")
                 }
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
-                Timber.e(e, "Failed to copy logs")
+                Logger.e(e) { "Failed to copy logs" }
                 _backupStatus.value = BackupStatus.Error("Failed to copy logs: ${e.message}")
             }
         }
@@ -285,7 +285,7 @@ class SettingsViewModel
             } catch (
                 @Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception,
             ) {
-                Timber.e(e, "Failed to save logs")
+                Logger.e(e) { "Failed to save logs" }
                 _backupStatus.value = BackupStatus.Error("Failed to save logs: ${e.message}")
             }
         }

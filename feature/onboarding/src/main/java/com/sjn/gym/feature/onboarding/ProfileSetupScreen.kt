@@ -38,6 +38,7 @@ import com.sjn.gym.core.ui.components.SegmentedButton
 @Composable
 fun ProfileSetupScreen(
     onNext: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     var gender by remember { mutableStateOf<String?>(null) }
@@ -48,7 +49,7 @@ fun ProfileSetupScreen(
 
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .padding(24.dp),
         // Increased padding

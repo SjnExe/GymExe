@@ -3,11 +3,12 @@ package com.sjn.gym
 import android.app.Application
 import android.content.Intent
 import android.os.Process
+import co.touchlab.kermit.LogcatWriter
+import co.touchlab.kermit.Logger
 import com.sjn.gym.core.data.repository.LogRepository
 import com.sjn.gym.ui.crash.CrashActivity
-import com.sjn.gym.util.FileLoggingTree
+import com.sjn.gym.util.FileLogWriter
 import dagger.hilt.android.HiltAndroidApp
-import timber.log.Timber
 import java.io.PrintWriter
 import java.io.StringWriter
 import javax.inject.Inject
@@ -20,21 +21,24 @@ class GymExeApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        val writers = mutableListOf<co.touchlab.kermit.LogWriter>()
         if (BuildConfig.DEBUG || BuildConfig.FLAVOR == "dev") {
-            Timber.plant(Timber.DebugTree())
+            writers.add(LogcatWriter())
         }
 
         // Plant FileLoggingTree for all dev builds (debug and release)
         if (BuildConfig.FLAVOR == "dev") {
-            Timber.plant(FileLoggingTree(logRepository))
-            Timber.i("App started") // Ensure log file is created
+            writers.add(FileLogWriter(logRepository))
+            Logger.setLogWriters(writers)
+            Logger.i { "App started" } // Ensure log file is created
 
             // Capture uncaught exceptions
             val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
             Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
                 try {
                     // Log to file
-                    Timber.e(throwable, "Uncaught Exception on thread ${thread.name}")
+                    Logger.e(throwable) { "Uncaught Exception on thread ${thread.name}" }
 
                     // Convert stack trace to string
                     val sw = StringWriter()

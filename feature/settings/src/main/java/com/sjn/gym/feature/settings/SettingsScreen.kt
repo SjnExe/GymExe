@@ -81,6 +81,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
     isDevMode: Boolean = false,
     onNavigateUp: () -> Unit = {},
@@ -121,7 +122,14 @@ fun SettingsScreen(
             }
         }
 
-    HandleEffects(state.backupStatus, state.updateStatus, state.downloadStatus, snackbarHostState, viewModel)
+    HandleEffects(
+        backupStatus = state.backupStatus,
+        updateStatus = state.updateStatus,
+        downloadStatus = state.downloadStatus,
+        snackbarHostState = snackbarHostState,
+        onClearBackupStatus = viewModel::clearStatus,
+        onClearUpdateStatus = viewModel::clearUpdateStatus,
+    )
 
     if (showRestoreDialog && restoreUri != null) {
         RestoreOptionsDialog(
@@ -159,6 +167,7 @@ fun SettingsScreen(
     LoadingOverlay(state.backupStatus, state.updateStatus)
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },
@@ -300,6 +309,7 @@ fun UpdateDialog(
     downloadStatus: DownloadStatus,
     onDismissRequest: () -> Unit,
     onUpdate: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Dialog(onDismissRequest = { if (downloadStatus !is DownloadStatus.Downloading) onDismissRequest() }) {
         Surface(
@@ -428,10 +438,11 @@ fun <T : Enum<T>> SettingsUnitRow(
     options: List<T>,
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
@@ -456,12 +467,15 @@ fun <T : Enum<T>> SettingsUnitRow(
 }
 
 @Composable
-fun SettingsSectionHeader(text: String) {
+fun SettingsSectionHeader(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        modifier = modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
     )
 }
 
@@ -470,6 +484,7 @@ fun SettingsSectionHeader(text: String) {
 fun ThemeSelectionRow(
     themeConfig: ThemeConfig,
     onThemeSelected: (ThemeConfig) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val options = listOf(ThemeConfig.SYSTEM, ThemeConfig.LIGHT, ThemeConfig.DARK)
     val labels = listOf("System", "Light", "Dark")
@@ -477,7 +492,7 @@ fun ThemeSelectionRow(
 
     SingleChoiceSegmentedButtonRow(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
@@ -497,10 +512,11 @@ fun SettingsSwitchRow(
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .clickable { onCheckedChange(!checked) }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -523,10 +539,11 @@ fun SettingsDetailRow(
     title: String,
     value: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -548,12 +565,13 @@ fun SettingsDetailRow(
 @Composable
 fun SettingsActionRow(
     title: String,
-    subtitle: String? = null,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -579,18 +597,19 @@ fun HandleEffects(
     updateStatus: UpdateStatus,
     downloadStatus: DownloadStatus,
     snackbarHostState: SnackbarHostState,
-    viewModel: SettingsViewModel,
+    onClearBackupStatus: () -> Unit,
+    onClearUpdateStatus: () -> Unit,
 ) {
     LaunchedEffect(backupStatus) {
         when (backupStatus) {
             is BackupStatus.Success -> {
                 snackbarHostState.showSnackbar(backupStatus.message)
-                viewModel.clearStatus()
+                onClearBackupStatus()
             }
 
             is BackupStatus.Error -> {
                 snackbarHostState.showSnackbar(backupStatus.message)
-                viewModel.clearStatus()
+                onClearBackupStatus()
             }
 
             else -> {}
@@ -601,12 +620,12 @@ fun HandleEffects(
         when (updateStatus) {
             is UpdateStatus.NoUpdate -> {
                 snackbarHostState.showSnackbar("No update available")
-                viewModel.clearUpdateStatus()
+                onClearUpdateStatus()
             }
 
             is UpdateStatus.Error -> {
                 snackbarHostState.showSnackbar(updateStatus.message)
-                viewModel.clearUpdateStatus()
+                onClearUpdateStatus()
             }
 
             else -> {}
@@ -626,6 +645,7 @@ fun HandleEffects(
 fun LoadingOverlay(
     backupStatus: BackupStatus,
     updateStatus: UpdateStatus,
+    modifier: Modifier = Modifier,
 ) {
     if (backupStatus is BackupStatus.Loading || updateStatus is UpdateStatus.Checking) {
         Dialog(onDismissRequest = {}) {
@@ -655,29 +675,32 @@ fun LoadingOverlay(
 fun AboutSection(
     appVersion: String,
     onCheckForUpdates: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    SettingsSectionTitle("About")
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column {
-            Text(
-                text = "Version",
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Text(
-                text = appVersion,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        FilledTonalButton(onClick = onCheckForUpdates) {
-            Text("Check for Updates")
+    Column(modifier = modifier) {
+        SettingsSectionTitle("About")
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column {
+                Text(
+                    text = "Version",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = appVersion,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            FilledTonalButton(onClick = onCheckForUpdates) {
+                Text("Check for Updates")
+            }
         }
     }
 }
@@ -732,12 +755,15 @@ fun rememberSettingsState(viewModel: SettingsViewModel): SettingsState {
 }
 
 @Composable
-fun SettingsSectionTitle(title: String) {
+fun SettingsSectionTitle(
+    title: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp),
+        modifier = modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp),
     )
 }
 
@@ -748,6 +774,7 @@ fun <T : Enum<T>> SelectionDialog(
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
     onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -821,12 +848,13 @@ object ThemeColors {
 fun ColorPicker(
     selectedColor: Int,
     onColorSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val colors = ThemeColors.PALETTE
 
     FlowRow(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

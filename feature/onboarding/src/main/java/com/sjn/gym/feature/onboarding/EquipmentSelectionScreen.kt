@@ -30,6 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun EquipmentSelectionScreen(
     onComplete: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val equipmentList =
@@ -51,7 +52,7 @@ fun EquipmentSelectionScreen(
 
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .padding(24.dp),
     ) {
@@ -131,13 +132,14 @@ fun EquipmentItem(
     name: String,
     isSelected: Boolean,
     onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = onToggle,
         shape = MaterialTheme.shapes.small,
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface,
         tonalElevation = if (isSelected) 2.dp else 0.dp,
-        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small),
+        modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.small),
     ) {
         Row(
             modifier =

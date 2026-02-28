@@ -1,6 +1,7 @@
 plugins {
     id("gymexe.android.library")
     id("gymexe.android.compose")
+    id("gymexe.roborazzi")
 }
 
 android {

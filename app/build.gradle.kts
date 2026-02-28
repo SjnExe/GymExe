@@ -1,3 +1,5 @@
+import com.android.build.api.variant.FilterConfiguration
+
 plugins {
     id("gymexe.android.application")
     id("gymexe.android.compose")
@@ -73,44 +75,11 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
-    }
-}
-
-// Rename APKs using Legacy API (applicationVariants) via explicit cast
-// This allows access to the legacy API even if AppExtension isn't the primary extension type
-val androidExtension = extensions.getByName("android")
-if (androidExtension is com.android.build.gradle.AppExtension) {
-    androidExtension.applicationVariants.all {
-        val variant = this
-        variant.outputs
-            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
-            .forEach { output ->
-                val flavorName = variant.flavorName
-                val buildType = variant.buildType.name
-
-                val abiName = output.getFilter(com.android.build.OutputFile.ABI)
-
-                val newName =
-                    if (flavorName == "stable") {
-                        // Stable Format: GymExe-{architecture}.apk
-                        // Example: GymExe-arm64-v8a.apk, GymExe-universal.apk
-                        if (abiName != null) {
-                            "GymExe-$abiName.apk"
-                        } else {
-                            "GymExe-universal.apk"
-                        }
-                    } else {
-                        // Dev/Default Format: GymExe-{flavor}-{buildType}-{architecture}.apk
-                        // Example: GymExe-dev-release-universal.apk, GymExe-dev-debug-arm64-v8a.apk
-                        val base = if (flavorName.isNullOrEmpty()) "GymExe-$buildType" else "GymExe-$flavorName-$buildType"
-                        if (abiName != null) {
-                            "$base-$abiName.apk"
-                        } else {
-                            "$base-universal.apk"
-                        }
-                    }
-                output.outputFileName = newName
-            }
+        jniLibs {
+            // Keep debug symbols for libraries that fail to strip, preventing warnings
+            keepDebugSymbols += "**/libandroidx.graphics.path.so"
+            keepDebugSymbols += "**/libdatastore_shared_counter.so"
+        }
     }
 }
 
@@ -122,6 +91,47 @@ androidComponents {
     }
     beforeVariants(selector().withBuildType("release")) { variantBuilder ->
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
+    }
+
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            val buildType = variant.buildType
+            val flavorName = variant.flavorName
+
+            val abiName = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+
+            val newName =
+                if (flavorName == "stable") {
+                    // Stable Format: GymExe-{architecture}.apk
+                    // Example: GymExe-arm64-v8a.apk, GymExe-universal.apk
+                    if (abiName != null) {
+                        "GymExe-$abiName.apk"
+                    } else {
+                        "GymExe-universal.apk"
+                    }
+                } else {
+                    // Dev/Default Format: GymExe-{flavor}-{buildType}-{architecture}.apk
+                    // Example: GymExe-dev-release-universal.apk, GymExe-dev-debug-arm64-v8a.apk
+                    val base = if (flavorName.isNullOrEmpty()) "GymExe-$buildType" else "GymExe-$flavorName-$buildType"
+                    if (abiName != null) {
+                        "$base-$abiName.apk"
+                    } else {
+                        "$base-universal.apk"
+                    }
+                }
+
+            // Use reflection to set outputFileName as it is not exposed in the VariantOutput interface
+            // but is available on the implementation (VariantOutputImpl).
+            try {
+                val outputFileNameMethod = output::class.java.getMethod("getOutputFileName")
+
+                @Suppress("UNCHECKED_CAST")
+                val outputFileNameProperty = outputFileNameMethod.invoke(output) as? org.gradle.api.provider.Property<String>
+                outputFileNameProperty?.set(newName)
+            } catch (e: Exception) {
+                println("Failed to rename APK: ${e.message}")
+            }
+        }
     }
 }
 
@@ -155,7 +165,7 @@ dependencies {
     debugImplementation(libs.leakcanary.android)
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     // Modular dependencies
     implementation(project(":core:ui"))
