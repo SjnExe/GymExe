@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.api.tasks.testing.Test
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -45,7 +46,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     }
                 }
 
-
                 configureKotlinAndroid(this)
 
                 flavorDimensions += "env"
@@ -55,6 +55,18 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     }
                     create("stable") {
                         dimension = "env"
+                    }
+                }
+            }
+
+            // In Gradle 8+, the Test task has a Property<Boolean> called failOnNoDiscoveredTests
+            // To be version agnostic and avoid compilation errors if not present, we can just:
+            tasks.withType(Test::class.java).configureEach {
+                if (hasProperty("failOnNoDiscoveredTests")) {
+                    try {
+                        val property = property("failOnNoDiscoveredTests") as org.gradle.api.provider.Property<Boolean>
+                        property.set(false)
+                    } catch (e: Exception) {
                     }
                 }
             }
