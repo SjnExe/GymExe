@@ -58,11 +58,12 @@ The following script is already ran on Jules environment. This ensures all syste
 
 ```bash
 sudo apt-get update
+sudo apt-get clean
+sudo apt-get full-upgrade -y
 sudo apt-get install -y openjdk-25-jdk
 sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
 echo y | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0"
 sudo apt-get autoremove -y
-sudo apt-get clean
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest assembleDevDebug --no-daemon --parallel --build-cache --stacktrace --warning-mode all --configuration-cache --continue
