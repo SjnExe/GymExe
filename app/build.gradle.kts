@@ -4,6 +4,7 @@ plugins {
     id("gymexe.android.application")
     id("gymexe.android.compose")
     id("gymexe.android.hilt")
+    id("gymexe.roborazzi")
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -30,6 +31,7 @@ android {
     }
 
     testOptions {
+        unitTests.isIncludeAndroidResources = true
         unitTests.all {
             it.useJUnitPlatform()
         }
@@ -164,7 +166,12 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.11.4")
     testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.tracing)

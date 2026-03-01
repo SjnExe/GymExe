@@ -43,12 +43,6 @@ android {
         buildConfigField("long", "BUILD_TIME", "${System.currentTimeMillis()}L")
     }
 
-    testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
-    }
-
     signingConfigs {
         create("release") {
             storeFile = file("${project.rootDir}/Dev/release.keystore")
@@ -152,9 +146,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
-    testImplementation(libs.junit.jupiter)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

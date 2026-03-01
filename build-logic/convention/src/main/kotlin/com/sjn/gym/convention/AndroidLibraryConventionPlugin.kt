@@ -24,6 +24,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add("testImplementation", libs.findLibrary("junit.jupiter").get())
                 add("testRuntimeOnly", libs.findLibrary("junit.jupiter.engine").get())
                 add("testRuntimeOnly", "org.junit.platform:junit-platform-launcher:1.11.4")
+                add("testRuntimeOnly", "org.junit.vintage:junit-vintage-engine:5.11.4")
                 add("testImplementation", libs.findLibrary("turbine").get())
                 add("testImplementation", libs.findLibrary("kotlinx.coroutines.test").get())
                 add("testImplementation", libs.findLibrary("mockk.agent").get())
@@ -38,6 +39,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 defaultConfig.consumerProguardFiles("consumer-rules.pro")
 
                 testOptions {
+                    unitTests.isIncludeAndroidResources = true
                     unitTests.all {
                         it.useJUnitPlatform()
                     }

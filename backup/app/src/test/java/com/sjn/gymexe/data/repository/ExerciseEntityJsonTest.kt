@@ -2,8 +2,8 @@ package com.sjn.gymexe.data.repository
 
 import com.sjn.gymexe.data.local.entity.ExerciseEntity
 import kotlinx.serialization.json.Json
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class ExerciseEntityJsonTest {
 
