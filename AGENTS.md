@@ -57,12 +57,13 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 The following script is already ran on Jules environment. This ensures all system dependencies are updated.
 
 ```bash
-sudo apt update
-sudo apt install -y openjdk-25-jdk
+sudo apt-get update
+sudo apt-get clean
+sudo apt-get full-upgrade -y
+sudo apt-get install -y openjdk-25-jdk
 sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
 echo y | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0"
-sudo apt autoremove -y
-sudo apt clean
+sudo apt-get autoremove -y
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest assembleDevDebug --no-daemon --parallel --build-cache --stacktrace --warning-mode all --configuration-cache --continue
@@ -73,18 +74,18 @@ export PATH=$JAVA_HOME/bin:$PATH
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew versionCatalogUpdate spotlessApply lintDevDebug testDevDebugUnitTest assembleDevDebug
+./gradlew versionCatalogUpdate spotlessApply lintDevDebug testDevDebugUnitTest assembleDevDebug --stacktrace --continue --parallel --build-cache
 ```
 
 ### Building
-*   **Build Debug APK (Dev):** `./gradlew assembleDevDebug`
-*   **Build Release APK (Dev):** `./gradlew assembleDevRelease`
-*   **Build Release APK (Stable):** `./gradlew assembleStableRelease`
+*   **Build Debug APK (Dev):** `./gradlew assembleDevDebug --stacktrace --continue --parallel --build-cache`
+*   **Build Release APK (Dev):** `./gradlew assembleDevRelease --stacktrace --continue --parallel --build-cache`
+*   **Build Release APK (Stable):** `./gradlew assembleStableRelease --stacktrace --continue --parallel --build-cache`
 
 ### Quality & Testing
-*   **Run Lint:** `./gradlew lintDevDebug`
-*   **Run Unit Tests:** `./gradlew testDevDebugUnitTest`
-*   **Format Code:** `./gradlew spotlessApply`
+*   **Run Lint:** `./gradlew lintDevDebug --stacktrace --continue --parallel --build-cache`
+*   **Run Unit Tests:** `./gradlew testDevDebugUnitTest --stacktrace --continue --parallel --build-cache`
+*   **Format Code:** `./gradlew spotlessApply --stacktrace --continue --parallel --build-cache`
 
 ### Modularization
 *   **Sync Project:** `./gradlew --refresh-dependencies`

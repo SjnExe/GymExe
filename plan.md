@@ -135,7 +135,11 @@ The app follows a modular architecture:
         *   **CI Testing:** The CI runs `connectedDevBenchmarkAndroidTest`. This uses the `benchmark` build type which includes the necessary keep rules for the test harness.
     *   **Constraint:** Instrumented tests currently require a CI environment with KVM (hardware acceleration) support. The local agent environment does NOT support KVM, so tests must be verified via GitHub Actions logs.
 
-2.  **Routines & Scheduling Logic**:
+2.  **Fix AGP/KSP + JUnit 5 `failOnNoDiscoveredTests` Issue**:
+    *   **Problem:** Currently, we rely on empty `DummyTest.kt` files in feature and data modules to bypass the `failOnNoDiscoveredTests` crash. This occurs because in Gradle 8+ with the JUnit Platform (`useJUnitPlatform()`), the platform launcher strictly enforces this check. KSP/Hilt generates background test artifacts in the `build/` directory, causing Gradle to assume tests exist. Since these generated artifacts contain no actual `@Test` methods, JUnit Platform throws an error that cannot be easily bypassed with typical `testOptions` without risking ignoring *actual* failing tests globally.
+    *   **Goal:** For the next session, investigate a native and robust build configuration fix (e.g., excluding KSP test tasks from discovery, modifying JUnit Jupiter's discovery settings, or correctly hooking into the AndroidUnitTest task properties) to solve this without relying on `DummyTest` workarounds.
+
+3.  **Routines & Scheduling Logic**:
     *   Implement CRUD operations for `Routine` and `WorkoutPlan`.
     *   Connect UI to `RoutineRepository` (needs creation).
     *   Implement logic to "Activate" a routine and reflect it on Home Screen.

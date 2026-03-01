@@ -44,6 +44,9 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 
+# Testing & Roborazzi
+**/src/test/snapshots/images/
+
 # Miscellaneous
 .DS_Store
 Thumbs.db
