@@ -36,6 +36,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.3.1'
+          cache-cleanup: on-success
           cache-read-only: false
 
       - name: Calculate Version
@@ -105,6 +106,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.3.1'
+          cache-cleanup: on-success
           cache-read-only: false
 
       - name: Calculate Version
@@ -205,6 +207,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.3.1'
+          cache-cleanup: on-success
           cache-read-only: false
 
       # We only run tests on 'dev' branch / PRs, so calculate version just for that
@@ -225,9 +228,10 @@ jobs:
             ~/.android/avd/*
             ~/.android/adb*
             /usr/local/lib/android/sdk/system-images/android-36/google_apis/x86_64/
-          key: avd-${{ runner.os }}-api36-x86_64-${{ github.run_id }}
+          # Remove github.run_id to allow cache to be hit on subsequent runs on the same branch
+          key: avd-${{ runner.os }}-api36-x86_64
           restore-keys: |
-            avd-${{ runner.os }}-api36-x86_64-
+            avd-${{ runner.os }}-api36-x86_64
 
       # Fail-fast: Compile the app and test APK before booting the 6GB emulator
       # This prevents compilation from happening while the emulator is using resources.

@@ -42,6 +42,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     unitTests.isIncludeAndroidResources = true
                     unitTests.all { test ->
                         test.useJUnitPlatform()
+                        (test as? org.gradle.api.tasks.testing.Test)?.systemProperty("junit.jupiter.execution.failIfNoTests", "false")
                     }
                 }
 
@@ -55,6 +56,16 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     }
                     create("stable") {
                         dimension = "env"
+                    }
+                }
+            }
+            afterEvaluate {
+                val hasTests = project.fileTree(project.projectDir.resolve("src/test")).any {
+                    it.isFile && (it.extension == "kt" || it.extension == "java")
+                }
+                if (!hasTests) {
+                    tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach {
+                        this.enabled = false
                     }
                 }
             }
