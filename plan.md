@@ -151,13 +151,13 @@ The app follows a modular architecture:
 
 ### Build Logic & Infrastructure
 - [x] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
-- [ ] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
+- [x] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
 - [x] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
 - [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.
 
 ### Developer Experience (DX)
 - [x] **Setup Script**: Integrated into `AGENTS.md` for centralized environment initialization.
-- [ ] **Dependency Bundling**: Group related dependencies in `libs.versions.toml` (e.g., `compose-ui`, `unit-test`) for cleaner build files.
+- [x] **Dependency Bundling**: Group related dependencies in `libs.versions.toml` (e.g., `compose-ui`, `unit-test`) for cleaner build files.
 
 ### Code Quality & Architecture
 - [ ] **Konsist Tests**: Integrate `Konsist` to enforce architectural rules (e.g., "Repositories must reside in `data` package").
