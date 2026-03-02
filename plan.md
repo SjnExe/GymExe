@@ -152,7 +152,7 @@ The app follows a modular architecture:
 ### Build Logic & Infrastructure
 - [x] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
 - [ ] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
-- [ ] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
+- [x] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
 - [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.
 
 ### Developer Experience (DX)

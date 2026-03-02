@@ -32,6 +32,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -88,6 +94,54 @@ fun SettingsScreen(
     onLaunchNetworkInspector: () -> Unit = {},
 ) {
     val state = rememberSettingsState(viewModel)
+    SettingsScreenContent(
+        state = state,
+        appVersion = viewModel.appVersion,
+        modifier = modifier,
+        isDevMode = isDevMode,
+        onNavigateUp = onNavigateUp,
+        onLaunchNetworkInspector = onLaunchNetworkInspector,
+        onThemeSelected = { viewModel.setThemeConfig(it) },
+        onThemeStyleChanged = { viewModel.setThemeStyle(it) },
+        onCustomThemeColorSelected = { viewModel.setCustomThemeColor(it) },
+        onWeightUnitSelected = { viewModel.setWeightUnit(it) },
+        onHeightUnitSelected = { viewModel.setHeightUnit(it) },
+        onDistanceUnitSelected = { viewModel.setDistanceUnit(it) },
+        onBackupRequested = { viewModel.performBackup(it) },
+        onRestoreRequested = { inputStream, options -> viewModel.restoreBackup(inputStream, options) },
+        onCheckForUpdates = { viewModel.checkForUpdates() },
+        onDownloadUpdate = { viewModel.downloadUpdate(it) },
+        onClearBackupStatus = { viewModel.clearStatus() },
+        onClearUpdateStatus = { viewModel.clearUpdateStatus() },
+        onCopyLogs = { viewModel.copyLogs() },
+        onSaveLogs = { viewModel.saveLogs(it) },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreenContent(
+    state: SettingsState,
+    appVersion: String,
+    modifier: Modifier = Modifier,
+    isDevMode: Boolean = false,
+    onNavigateUp: () -> Unit = {},
+    onLaunchNetworkInspector: () -> Unit = {},
+    onThemeSelected: (ThemeConfig) -> Unit = {},
+    onThemeStyleChanged: (ThemeStyle) -> Unit = {},
+    onCustomThemeColorSelected: (Int) -> Unit = {},
+    onWeightUnitSelected: (WeightUnit) -> Unit = {},
+    onHeightUnitSelected: (HeightUnit) -> Unit = {},
+    onDistanceUnitSelected: (DistanceUnit) -> Unit = {},
+    onBackupRequested: (java.io.OutputStream) -> Unit = {},
+    onRestoreRequested: (java.io.InputStream, com.sjn.gym.core.model.backup.RestoreOptions) -> Unit = { _, _ -> },
+    onCheckForUpdates: () -> Unit = {},
+    onDownloadUpdate: (String) -> Unit = {},
+    onClearBackupStatus: () -> Unit = {},
+    onClearUpdateStatus: () -> Unit = {},
+    onCopyLogs: () -> Unit = {},
+    onSaveLogs: (android.content.Context) -> Unit = {},
+) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -102,7 +156,7 @@ fun SettingsScreen(
             uri?.let {
                 try {
                     context.contentResolver.openOutputStream(it)?.let { outputStream ->
-                        viewModel.performBackup(outputStream)
+                        onBackupRequested(outputStream)
                     }
                 } catch (
                     e: Exception,
@@ -127,8 +181,8 @@ fun SettingsScreen(
         updateStatus = state.updateStatus,
         downloadStatus = state.downloadStatus,
         snackbarHostState = snackbarHostState,
-        onClearBackupStatus = viewModel::clearStatus,
-        onClearUpdateStatus = viewModel::clearUpdateStatus,
+        onClearBackupStatus = onClearBackupStatus,
+        onClearUpdateStatus = onClearUpdateStatus,
     )
 
     if (showRestoreDialog && restoreUri != null) {
@@ -140,7 +194,7 @@ fun SettingsScreen(
             onConfirm = { options ->
                 try {
                     context.contentResolver.openInputStream(restoreUri!!)?.let { inputStream ->
-                        viewModel.restoreBackup(inputStream, options)
+                        onRestoreRequested(inputStream, options)
                     }
                 } catch (
                     e: Exception,
@@ -156,11 +210,11 @@ fun SettingsScreen(
     if (state.updateStatus is UpdateStatus.UpdateAvailable) {
         val updateInfo = state.updateStatus.updateInfo
         UpdateDialog(
-            currentVersion = viewModel.appVersion,
+            currentVersion = appVersion,
             updateInfo = updateInfo,
             downloadStatus = state.downloadStatus,
-            onDismissRequest = { viewModel.clearUpdateStatus() },
-            onUpdate = { viewModel.downloadUpdate(updateInfo.downloadUrl) },
+            onDismissRequest = onClearUpdateStatus,
+            onUpdate = { onDownloadUpdate(updateInfo.downloadUrl) },
         )
     }
 
@@ -195,15 +249,16 @@ fun SettingsScreen(
 
             ThemeSelectionRow(
                 themeConfig = state.themeConfig,
-                onThemeSelected = { viewModel.setThemeConfig(it) },
+                onThemeSelected = onThemeSelected,
             )
 
             SettingsSwitchRow(
                 title = "Dynamic Colors (Material You)",
                 checked = state.themeStyle == ThemeStyle.DYNAMIC,
                 onCheckedChange = { checked ->
-                    viewModel.setThemeStyle(if (checked) ThemeStyle.DYNAMIC else ThemeStyle.CUSTOM)
+                    onThemeStyleChanged(if (checked) ThemeStyle.DYNAMIC else ThemeStyle.CUSTOM)
                 },
+                icon = Icons.Default.ColorLens,
             )
 
             AnimatedVisibility(
@@ -213,7 +268,7 @@ fun SettingsScreen(
             ) {
                 ColorPicker(
                     selectedColor = state.customThemeColor ?: android.graphics.Color.BLUE,
-                    onColorSelected = { viewModel.setCustomThemeColor(it) },
+                    onColorSelected = onCustomThemeColorSelected,
                 )
             }
 
@@ -226,21 +281,21 @@ fun SettingsScreen(
                 title = "Weight Unit",
                 options = WeightUnit.entries,
                 selectedOption = state.weightUnit,
-                onOptionSelected = { viewModel.setWeightUnit(it) },
+                onOptionSelected = onWeightUnitSelected,
             )
 
             SettingsUnitRow(
                 title = "Height Unit",
                 options = HeightUnit.entries,
                 selectedOption = state.heightUnit,
-                onOptionSelected = { viewModel.setHeightUnit(it) },
+                onOptionSelected = onHeightUnitSelected,
             )
 
             SettingsUnitRow(
                 title = "Distance Unit",
                 options = DistanceUnit.entries,
                 selectedOption = state.distanceUnit,
-                onOptionSelected = { viewModel.setDistanceUnit(it) },
+                onOptionSelected = onDistanceUnitSelected,
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -250,11 +305,13 @@ fun SettingsScreen(
             SettingsActionRow(
                 title = "Backup Data",
                 subtitle = "Save your data to a file",
+                icon = Icons.Default.Backup,
                 onClick = { createDocumentLauncher.launch("backup.gym") },
             )
             SettingsActionRow(
                 title = "Restore Data",
                 subtitle = "Import data from a file",
+                icon = Icons.Default.Restore,
                 onClick = { openDocumentLauncher.launch(arrayOf("*/*")) },
             )
 
@@ -265,6 +322,7 @@ fun SettingsScreen(
                 SettingsSectionHeader("Developer Options")
                 SettingsActionRow(
                     title = "Open Network Inspector",
+                    icon = Icons.Default.BugReport,
                     onClick = onLaunchNetworkInspector,
                 )
 
@@ -277,13 +335,13 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     FilledTonalButton(
-                        onClick = { viewModel.copyLogs() },
+                        onClick = onCopyLogs,
                         modifier = Modifier.weight(1f),
                     ) {
                         Text("Copy Logs")
                     }
                     FilledTonalButton(
-                        onClick = { viewModel.saveLogs(context) },
+                        onClick = { onSaveLogs(context) },
                         modifier = Modifier.weight(1f),
                     ) {
                         Text("Save Logs")
@@ -294,8 +352,8 @@ fun SettingsScreen(
 
             // About Section (Always visible)
             AboutSection(
-                appVersion = viewModel.appVersion,
-                onCheckForUpdates = { viewModel.checkForUpdates() },
+                appVersion = appVersion,
+                onCheckForUpdates = onCheckForUpdates,
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -513,6 +571,7 @@ fun SettingsSwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
     Row(
         modifier =
@@ -521,11 +580,19 @@ fun SettingsSwitchRow(
                 .clickable { onCheckedChange(!checked) }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(end = 16.dp),
+            )
+        }
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
         )
         Switch(
             checked = checked,
@@ -568,25 +635,37 @@ fun SettingsActionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
-    Column(
+    Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        if (subtitle != null) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(end = 16.dp),
             )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (subtitle != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
