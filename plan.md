@@ -157,7 +157,6 @@ The app follows a modular architecture:
 
 ### Developer Experience (DX)
 - [x] **Setup Script**: Integrated into `AGENTS.md` for centralized environment initialization.
-- [ ] **Pre-Push Hook**: Create `scripts/pre-push.sh` to run critical checks locally before pushing.
 - [ ] **Dependency Bundling**: Group related dependencies in `libs.versions.toml` (e.g., `compose-ui`, `unit-test`) for cleaner build files.
 
 ### Code Quality & Architecture
