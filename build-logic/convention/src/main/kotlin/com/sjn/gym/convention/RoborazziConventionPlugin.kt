@@ -14,9 +14,7 @@ class RoborazziConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("testImplementation", libs.findLibrary("roborazzi").get())
-                add("testImplementation", libs.findLibrary("roborazzi.compose").get())
-                add("testImplementation", libs.findLibrary("roborazzi.junit.rule").get())
+                add("testImplementation", libs.findBundle("roborazzi").get())
                 add("testImplementation", libs.findLibrary("robolectric").get())
             }
 

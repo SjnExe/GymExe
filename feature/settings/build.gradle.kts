@@ -1,5 +1,6 @@
 plugins {
     id("gymexe.android.feature")
+    id("gymexe.roborazzi")
 }
 
 android {
@@ -15,6 +16,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.kermit)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.ui.test.junit4)
 }

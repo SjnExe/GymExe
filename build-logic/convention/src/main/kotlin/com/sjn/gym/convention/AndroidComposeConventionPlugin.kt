@@ -32,8 +32,8 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
 
             dependencies {
                 add("implementation", platform(libs.findLibrary("androidx.compose.bom").get()))
-                add("implementation", libs.findLibrary("androidx.ui.tooling.preview").get())
-                add("debugImplementation", libs.findLibrary("androidx.ui.tooling").get())
+                add("implementation", libs.findBundle("compose").get())
+                add("debugImplementation", libs.findBundle("compose.debug").get())
                 add("lintChecks", libs.findLibrary("slack.compose.lints").get())
             }
         }

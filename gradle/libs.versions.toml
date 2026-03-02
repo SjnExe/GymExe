@@ -97,6 +97,36 @@ slack-compose-lints = { module = "com.slack.lint.compose:compose-lint-checks", v
 spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
+[bundles]
+compose = [
+    "androidx-activity-compose",
+    "androidx-compose-foundation",
+    "androidx-material-icons-extended",
+    "androidx-material3",
+    "androidx-ui",
+    "androidx-ui-graphics",
+    "androidx-ui-tooling-preview"
+]
+compose-debug = [
+    "androidx-ui-test-manifest",
+    "androidx-ui-tooling"
+]
+junit-jupiter = [
+    "junit-jupiter",
+    "junit-jupiter-engine",
+    "junit-platform-launcher",
+    "junit-vintage-engine"
+]
+roborazzi = [
+    "roborazzi",
+    "roborazzi-compose",
+    "roborazzi-junit-rule"
+]
+room = [
+    "androidx-room-ktx",
+    "androidx-room-runtime"
+]
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
