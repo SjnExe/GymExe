@@ -58,15 +58,15 @@ The following script is already ran on Jules environment. This ensures all syste
 
 ```bash
 sudo apt-get update
-sudo apt-get clean
-sudo apt-get full-upgrade -y
 sudo apt-get install -y openjdk-25-jdk
 sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
 echo y | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0"
-sudo apt-get autoremove -y
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew spotlessCheck lintDevDebug testDevDebugUnitTest assembleDevDebug --no-daemon --parallel --build-cache --stacktrace --warning-mode all --configuration-cache --continue
+sudo apt-get autoremove -y
+sudo apt-get full-upgrade -y
+sudo apt-get clean
+./gradlew sC lDD tDDUT aDD -s -Wall --continue
 ```
 
 ## Useful Commands
@@ -74,22 +74,22 @@ export PATH=$JAVA_HOME/bin:$PATH
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew versionCatalogUpdate spotlessApply lintDevDebug testDevDebugUnitTest assembleDevDebug --stacktrace --continue --parallel --build-cache
+./gradlew vCU sA lDD tDDUT aDD -s --continue
 ```
 
 ### Building
-*   **Build Debug APK (Dev):** `./gradlew assembleDevDebug --stacktrace --continue --parallel --build-cache`
-*   **Build Release APK (Dev):** `./gradlew assembleDevRelease --stacktrace --continue --parallel --build-cache`
-*   **Build Release APK (Stable):** `./gradlew assembleStableRelease --stacktrace --continue --parallel --build-cache`
+*   **Build Debug APK (Dev):** `./gradlew aDD -s --continue`
+*   **Build Release APK (Dev):** `./gradlew aDR -s --continue`
+*   **Build Release APK (Stable):** `./gradlew aSR -s --continue`
 
 ### Quality & Testing
-*   **Run Lint:** `./gradlew lintDevDebug --stacktrace --continue --parallel --build-cache`
-*   **Run Unit Tests:** `./gradlew testDevDebugUnitTest --stacktrace --continue --parallel --build-cache`
-*   **Format Code:** `./gradlew spotlessApply --stacktrace --continue --parallel --build-cache`
+*   **Run Lint:** `./gradlew lDD -s --continue`
+*   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
+*   **Format Code:** `./gradlew sA -s --continue`
 
 ### Modularization
 *   **Sync Project:** `./gradlew --refresh-dependencies`
 *   **Clean Build:** `./gradlew clean build`
 
 ### Maintenance
-*   **Update Dependencies:** `./gradlew versionCatalogUpdate`
+*   **Update Dependencies:** `./gradlew vCU`
