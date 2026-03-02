@@ -16,10 +16,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.kermit)
 
-    debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(libs.junit)
     testImplementation(libs.androidx.ui.test.junit4)
 }

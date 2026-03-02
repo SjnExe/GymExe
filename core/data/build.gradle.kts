@@ -15,8 +15,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
+    implementation(libs.bundles.room)
     ksp(libs.androidx.room.compiler)
 
     // DataStore
