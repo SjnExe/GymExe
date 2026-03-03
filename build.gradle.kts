@@ -11,3 +11,7 @@ plugins {
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.versionCatalogUpdate)
 }
+
+tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {
+    notCompatibleWithConfigurationCache("The VersionCatalogUpdateTask is not compatible with the configuration cache")
+}
