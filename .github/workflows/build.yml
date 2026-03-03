@@ -63,7 +63,7 @@ jobs:
             TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
           fi
           ./gradlew $TASKS \
-            --parallel --build-cache --no-configuration-cache \
+            --parallel --warning-mode all -s --build-cache --configuration-cache \
             -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee checks_output.log
 
@@ -153,7 +153,7 @@ jobs:
             TASKS="assembleDevRelease assembleDevDebug"
           fi
           ./gradlew $TASKS \
-            --parallel --build-cache --no-configuration-cache \
+            --parallel --warning-mode all -s --build-cache --configuration-cache \
             -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} \
             -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
@@ -241,7 +241,7 @@ jobs:
       - name: Compile Test APKs
         run: |
           ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest \
-            --parallel --build-cache --no-configuration-cache \
+            --parallel --warning-mode all -s --build-cache --configuration-cache \
             -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g"
 
       - name: Prepare Test Environment
