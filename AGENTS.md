@@ -64,7 +64,6 @@ echo y | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 sudo apt-get autoremove -y
-sudo apt-get full-upgrade -y
 sudo apt-get clean
 ./gradlew sC lDD tDDUT aDD -s --warning-mode all --continue
 ```
