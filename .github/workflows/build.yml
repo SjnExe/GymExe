@@ -64,7 +64,7 @@ jobs:
           fi
           ./gradlew $TASKS \
             --parallel --build-cache --no-configuration-cache \
-            -Dorg.gradle.jvmargs="-Xmx10g -XX:MaxMetaspaceSize=1g" \
+            -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee checks_output.log
 
       - name: Collect & Upload Reports
@@ -155,7 +155,7 @@ jobs:
           ./gradlew $TASKS \
             --parallel --build-cache --no-configuration-cache \
             -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} \
-            -Dorg.gradle.jvmargs="-Xmx10g -XX:MaxMetaspaceSize=1g" \
+            -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
       - name: Upload Build Logs
@@ -242,7 +242,7 @@ jobs:
         run: |
           ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest \
             --parallel --build-cache --no-configuration-cache \
-            -Dorg.gradle.jvmargs="-Xmx10g -XX:MaxMetaspaceSize=1g"
+            -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g"
 
       - name: Prepare Test Environment
         run: |
@@ -289,7 +289,7 @@ jobs:
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          script: ./gradlew connectedDevBenchmarkAndroidTest --max-workers=4 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1g"
+          script: ./gradlew connectedDevBenchmarkAndroidTest --max-workers=4 -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=35.0 -XX:MaxMetaspaceSize=1g"
 
       - name: Collect & Upload Reports
         if: always()
