@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.spotless.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
     implementation(libs.roborazzi.gradlePlugin)
+    implementation("org.jetbrains.kotlinx:kover-gradle-plugin:0.9.7")
 }
 
 gradlePlugin {
@@ -46,6 +47,10 @@ gradlePlugin {
         register("roborazzi") {
             id = "gymexe.roborazzi"
             implementationClass = "com.sjn.gym.convention.RoborazziConventionPlugin"
+        }
+        register("kover") {
+            id = "gymexe.kover"
+            implementationClass = "com.sjn.gym.convention.KoverConventionPlugin"
         }
     }
 }
