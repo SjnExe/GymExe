@@ -84,6 +84,11 @@ Run this before submitting any change:
 *   **Run Lint:** `./gradlew lDD -s --continue`
 *   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
 *   **Format Code:** `./gradlew sA -s --continue`
+*   **Record Roborazzi Baseline:** `./gradlew rRDD -s --continue`
+*   **Verify Roborazzi Baseline:** `./gradlew vRDD -s --continue`
+*   **Compare Roborazzi Baseline:** `./gradlew cRDD -s --continue`
+*   **Generate HTML Test Coverage:** `./gradlew kHR -s --continue`
+*   **Generate XML Test Coverage:** `./gradlew kXR -s --continue`
 
 ### Modularization
 *   **Sync Project:** `./gradlew --refresh-dependencies`

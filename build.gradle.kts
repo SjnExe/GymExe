@@ -10,6 +10,18 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.versionCatalogUpdate)
+    alias(libs.plugins.kover)
+}
+
+dependencies {
+    kover(project(":app"))
+    kover(project(":core:ui"))
+    kover(project(":core:data"))
+    kover(project(":core:model"))
+    kover(project(":feature:settings"))
+    kover(project(":feature:workout"))
+    kover(project(":feature:profile"))
+    kover(project(":feature:onboarding"))
 }
 
 tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {

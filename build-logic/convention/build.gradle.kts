@@ -5,12 +5,30 @@ plugins {
 
 group = "com.sjn.gym.buildlogic"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = "24"
+    targetCompatibility = "24"
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
+    }
+}
+
 dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
     implementation(libs.detekt.gradlePlugin)
     implementation(libs.roborazzi.gradlePlugin)
+    implementation("org.jetbrains.kotlinx:kover-gradle-plugin:0.9.7")
 }
 
 gradlePlugin {
@@ -46,6 +64,10 @@ gradlePlugin {
         register("roborazzi") {
             id = "gymexe.roborazzi"
             implementationClass = "com.sjn.gym.convention.RoborazziConventionPlugin"
+        }
+        register("kover") {
+            id = "gymexe.kover"
+            implementationClass = "com.sjn.gym.convention.KoverConventionPlugin"
         }
     }
 }
