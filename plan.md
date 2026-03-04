@@ -153,7 +153,7 @@ The app follows a modular architecture:
 - [x] **Feature Convention Plugin**: Create a plugin to aggregate `android-library`, `android-compose`, and `android-hilt` for feature modules to reduce `build.gradle.kts` boilerplate.
 - [x] **JVM Library Convention Plugin**: Create a plugin for pure Kotlin modules (e.g., `:core:model`) to avoid Android overhead where unnecessary.
 - [x] **Roborazzi Integration**: Create a convention plugin to standardize screenshot testing configuration across UI modules.
-- [ ] **Kover Integration**: Set up code coverage aggregation for the entire project.
+- [x] **Kover Integration**: Set up code coverage aggregation for the entire project.
 
 ### Developer Experience (DX)
 - [x] **Setup Script**: Integrated into `AGENTS.md` for centralized environment initialization.
@@ -165,6 +165,6 @@ The app follows a modular architecture:
 - [ ] **Module Graph**: Automate generation of Mermaid diagrams for `README.md` using the `moduleGraph` plugin.
 
 ### CI/CD Enhancements
-- [ ] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
+- [x] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
 - [ ] **Release Drafter**: Consider automating release notes generation further.
 - [x] **Instrumented Tests**: Add Emulator-based tests (`managed devices`) to catch runtime crashes on CI.
