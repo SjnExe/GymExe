@@ -12,6 +12,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("com.android.application")
                 apply("gymexe.spotless")
                 apply("gymexe.detekt")
+                apply("gymexe.kover")
             }
 
             extensions.configure<ApplicationExtension> {
