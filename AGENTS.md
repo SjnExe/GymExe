@@ -95,4 +95,4 @@ Run this before submitting any change:
 *   **Clean Build:** `./gradlew clean build`
 
 ### Maintenance
-*   **Update Dependencies:** `./gradlew vCU`
+*   **Update Dependencies:** `./gradlew vCU -no-configuration-cache`
