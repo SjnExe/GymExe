@@ -25,11 +25,12 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 testOptions {
                     unitTests.all {
                         (this as? org.gradle.api.tasks.testing.Test)?.apply {
-                            // Using reflection to set failOnNoDiscoveredTests to avoid compilation issues in build-logic
                             try {
                                 javaClass.getMethod("setFailOnNoDiscoveredTests", Boolean::class.javaPrimitiveType)
                                     .invoke(this, false)
-                            } catch (_: Exception) {}
+                            } catch (_: Exception) {
+                                setProperty("failOnNoDiscoveredTests", false)
+                            }
                         }
                     }
                 }

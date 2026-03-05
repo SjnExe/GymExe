@@ -95,7 +95,7 @@ coroutines:
   SuspendFunWithFlowReturnType:
     active: true
 
-emptyblocks:
+empty-blocks:
   active: true
   EmptyCatchBlock:
     active: true
@@ -227,7 +227,7 @@ performance:
   UnnecessaryTypeCasting:
     active: false
 
-potentialbugs:
+potential-bugs:
   active: true
   AvoidReferentialEquality:
     active: true

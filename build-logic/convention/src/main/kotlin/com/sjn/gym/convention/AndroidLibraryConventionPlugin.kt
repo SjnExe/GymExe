@@ -26,6 +26,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 add("testRuntimeOnly", libs.findLibrary("junit.jupiter.engine").get())
                 add("testRuntimeOnly", libs.findLibrary("junit.platform.launcher").get())
                 add("testRuntimeOnly", libs.findLibrary("junit.vintage.engine").get())
+                add("testImplementation", "org.junit.vintage:junit-vintage-engine")
                 add("testImplementation", libs.findLibrary("turbine").get())
                 add("testImplementation", libs.findLibrary("kotlinx.coroutines.test").get())
                 add("testImplementation", libs.findLibrary("mockk.agent").get())
@@ -42,15 +43,17 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 testOptions {
                     unitTests.isIncludeAndroidResources = true
                     unitTests.all { test ->
-                        test.useJUnitPlatform()
-                        (test as? org.gradle.api.tasks.testing.Test)?.apply {
-                            // Using reflection to set failOnNoDiscoveredTests to avoid compilation issues in build-logic
+                        val testTask = test as? org.gradle.api.tasks.testing.Test
+                        testTask?.useJUnitPlatform()
+                        testTask?.apply {
                             try {
                                 javaClass.getMethod("setFailOnNoDiscoveredTests", Boolean::class.javaPrimitiveType)
                                     .invoke(this, false)
-                            } catch (_: Exception) {}
-                            systemProperty("junit.jupiter.execution.failIfNoTests", "false")
+                            } catch (_: Exception) {
+                                setProperty("failOnNoDiscoveredTests", false)
+                            }
                         }
+                        testTask?.systemProperty("junit.jupiter.execution.failIfNoTests", "false")
                     }
                 }
 
