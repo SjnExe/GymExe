@@ -57,10 +57,10 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 The following script is already ran on Jules environment. This ensures all system dependencies are updated.
 
 ```bash
-sudo apt update
-sudo apt install -y openjdk-25-jdk
+sudo apt-get update -qq
+sudo apt-get install -y -qq --no-install-recommends openjdk-25-jdk
 sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
-echo y | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0"
+yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" > /dev/null
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ./gradlew aDD --continue --no-daemon --build-cache --configuration-cache  --parallel -q
