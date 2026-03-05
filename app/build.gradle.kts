@@ -51,7 +51,6 @@ android {
             matchingFallbacks += listOf("release")
             // Apply test-specific rules ONLY to this build type
             proguardFile("proguard-test-rules.pro")
-            testProguardFile("proguard-test-rules.pro")
         }
     }
 
