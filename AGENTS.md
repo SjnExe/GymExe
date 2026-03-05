@@ -63,8 +63,8 @@ sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
 yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" > /dev/null
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew assembleDevDebug --continue --no-daemon --build-cache --configuration-cache  --parallel -q
-./gradlew spotlessCheck testDevDebugUnitTest detekt --continue --no-daemon --build-cache --configuration-cache  --parallel -q
+./gradlew aDD --continue --no-daemon --build-cache --configuration-cache  --parallel -q
+./gradlew sA tDDUT d --continue --no-daemon --build-cache --configuration-cache  --parallel -q
 ```
 
 ## Useful Commands
@@ -72,7 +72,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew vCU spotlessApply detekt testDevDebugUnitTest assembleDevDebug -s --continue
+./gradlew vCU sA detekt tDDUT aDD -s --continue
 ```
 
 ### Building
@@ -81,8 +81,8 @@ Run this before submitting any change:
 *   **Build Release APK (Stable):** `./gradlew assembleStableRelease -s --continue`
 
 ### Quality & Testing
-*   **Run Lint:** `./gradlew detekt -s --continue`
-*   **Run Unit Tests:** `./gradlew testDevDebugUnitTest -s --continue`
+*   **Run Lint:** `./gradlew d -s --continue`
+*   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
 *   **Format Code:** `./gradlew spotlessApply -s --continue`
 *   **Record Roborazzi Baseline:** `./gradlew rRDD -s --continue`
 *   **Verify Roborazzi Baseline:** `./gradlew vRDD -s --continue`
