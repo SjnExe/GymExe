@@ -64,7 +64,7 @@ yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" 
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ./gradlew aDD --continue --no-daemon --build-cache --configuration-cache  --parallel -q
-./gradlew sA tDDUT d --continue --no-daemon --build-cache --configuration-cache  --parallel -q
+./gradlew sA tDDUT det --continue --no-daemon --build-cache --configuration-cache  --parallel -q
 ```
 
 ## Useful Commands
@@ -76,14 +76,14 @@ Run this before submitting any change:
 ```
 
 ### Building
-*   **Build Debug APK (Dev):** `./gradlew assembleDevDebug -s --continue`
-*   **Build Release APK (Dev):** `./gradlew assembleDevRelease -s --continue`
-*   **Build Release APK (Stable):** `./gradlew assembleStableRelease -s --continue`
+*   **Build Debug APK (Dev):** `./gradlew aDD -s --continue`
+*   **Build Release APK (Dev):** `./gradlew aDR -s --continue`
+*   **Build Release APK (Stable):** `./gradlew aSR -s --continue`
 
 ### Quality & Testing
-*   **Run Lint:** `./gradlew d -s --continue`
+*   **Run Lint:** `./gradlew det -s --continue`
 *   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
-*   **Format Code:** `./gradlew spotlessApply -s --continue`
+*   **Format Code:** `./gradlew sA -s --continue`
 *   **Record Roborazzi Baseline:** `./gradlew rRDD -s --continue`
 *   **Verify Roborazzi Baseline:** `./gradlew vRDD -s --continue`
 *   **Compare Roborazzi Baseline:** `./gradlew cRDD -s --continue`
