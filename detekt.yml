@@ -99,7 +99,7 @@ emptyblocks:
   active: true
   EmptyCatchBlock:
     active: true
-    allowedExceptionNameRegex: '_|(ignore|expected).*'
+    allowedExceptionNameRegex: '_|(ignore|expected).* '
   EmptyClassBlock:
     active: true
   EmptyDefaultConstructor:
@@ -114,6 +114,7 @@ emptyblocks:
     active: true
   EmptyFunctionBlock:
     active: true
+    ignoreOverridden: false
   EmptyIfBlock:
     active: true
   EmptyInitBlock:

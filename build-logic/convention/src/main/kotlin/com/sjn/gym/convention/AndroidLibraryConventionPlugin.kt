@@ -43,7 +43,14 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     unitTests.isIncludeAndroidResources = true
                     unitTests.all { test ->
                         test.useJUnitPlatform()
-                        (test as? org.gradle.api.tasks.testing.Test)?.systemProperty("junit.jupiter.execution.failIfNoTests", "false")
+                        (test as? org.gradle.api.tasks.testing.Test)?.apply {
+                            // Using reflection to set failOnNoDiscoveredTests to avoid compilation issues in build-logic
+                            try {
+                                javaClass.getMethod("setFailOnNoDiscoveredTests", Boolean::class.javaPrimitiveType)
+                                    .invoke(this, false)
+                            } catch (_: Exception) {}
+                            systemProperty("junit.jupiter.execution.failIfNoTests", "false")
+                        }
                     }
                 }
 

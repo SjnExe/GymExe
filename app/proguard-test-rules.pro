@@ -57,6 +57,10 @@
 # Used by ComposeRootRegistry dispatchOnRegistrationChanged
 -keep class kotlin.collections.** { *; }
 
+# Fix for ClassNotFoundException: com.sjn.gym.GymExeApp in benchmark tests
+-keep class com.sjn.gym.** { *; }
+-keep class dagger.hilt.** { *; }
+
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes
 # when running against minified builds (R8 full mode).
