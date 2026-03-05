@@ -1,5 +1,5 @@
 config:
-  validation: false
+  validation: true
   warningsAsErrors: true
   checkExhaustiveness: false
   excludes: []
@@ -45,34 +45,48 @@ complexity:
   active: true
   CognitiveComplexMethod:
     active: false
+    allowedComplexity: 15
   ComplexCondition:
     active: false
+    allowedConditions: 3
   ComplexInterface:
     active: false
+    allowedDefinitions: 10
   CyclomaticComplexMethod:
     active: false
+    allowedComplexity: 15
   LabeledExpression:
     active: false
   LargeClass:
     active: false
+    allowedLines: 600
   LongMethod:
     active: false
+    allowedLines: 150
   LongParameterList:
     active: false
+    allowedFunctionParameters: 10
+    allowedConstructorParameters: 10
   MethodOverloading:
     active: false
+    allowedOverloads: 6
   NamedArguments:
     active: false
+    allowedArguments: 3
   NestedBlockDepth:
     active: false
+    allowedDepth: 4
   NestedScopeFunctions:
     active: false
+    allowedDepth: 1
   ReplaceSafeCallChainWithRun:
     active: false
   StringLiteralDuplication:
     active: false
+    allowedDuplications: 2
   TooManyFunctions:
     active: false
+    allowedFunctionsPerFile: 15
 
 coroutines:
   active: true
@@ -334,6 +348,7 @@ style:
     active: false
   DestructuringDeclarationWithTooManyEntries:
     active: true
+    maxDestructuringEntries: 3
   DoubleNegativeExpression:
     active: false
   DoubleNegativeLambda:
@@ -370,6 +385,7 @@ style:
     active: true
   LoopWithTooManyJumpStatements:
     active: false
+    maxJumpCount: 1
   MagicNumber:
     active: false
   MandatoryBracesLoops:
@@ -378,6 +394,7 @@ style:
     active: false
   MaxLineLength:
     active: false
+    maxLineLength: 120
   MayBeConstant:
     active: true
   ModifierOrder:
@@ -414,6 +431,7 @@ style:
     active: false
   ReturnCount:
     active: false
+    max: 2
   SafeCast:
     active: true
   SerialVersionUIDInSerializableClass:
@@ -424,6 +442,7 @@ style:
     active: false
   ThrowsCount:
     active: false
+    max: 2
   TrailingWhitespace:
     active: false
   TrimMultilineRawString:

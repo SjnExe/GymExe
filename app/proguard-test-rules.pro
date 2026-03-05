@@ -60,6 +60,9 @@
 # Fix for ClassNotFoundException: com.sjn.gym.GymExeApp in benchmark tests
 -keep class com.sjn.gym.** { *; }
 -keep class dagger.hilt.** { *; }
+-keep class com.google.dagger.** { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class *
+-keep @dagger.hilt.EntryPoint class *
 
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes
