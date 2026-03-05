@@ -23,10 +23,7 @@ fun WelcomeScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(24.dp),
+        modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -43,13 +40,7 @@ fun WelcomeScreen(
         )
         Spacer(modifier = Modifier.height(48.dp))
 
-        Button(
-            onClick = onNewUser,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-        ) {
+        Button(onClick = onNewUser, modifier = Modifier.fillMaxWidth().height(56.dp)) {
             Text("Get Started")
         }
 
@@ -57,10 +48,7 @@ fun WelcomeScreen(
 
         OutlinedButton(
             onClick = onRestoreBackup,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
             Text("Restore from Backup")
         }

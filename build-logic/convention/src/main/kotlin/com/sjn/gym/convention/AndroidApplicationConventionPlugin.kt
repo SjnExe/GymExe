@@ -22,6 +22,15 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+                testOptions {
+                    unitTests.isIncludeAndroidResources = true
+                    unitTests.all {
+                        val testTask = this as? org.gradle.api.tasks.testing.Test
+                        testTask?.useJUnitPlatform()
+                        testTask?.setProperty("failOnNoDiscoveredTests", false)
+                    }
+                }
+
                 // Common configuration function
                 configureKotlinAndroid(this)
 

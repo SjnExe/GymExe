@@ -5,9 +5,7 @@ plugins {
 
 android {
     namespace = "com.sjn.gym.feature.settings"
-    buildFeatures {
-        buildConfig = true
-    }
+    buildFeatures { buildConfig = true }
     defaultConfig {
         val nameProp = project.findProperty("versionName") as? String
         buildConfigField("String", "VERSION_NAME", "\"${nameProp ?: "0.0.1"}\"")

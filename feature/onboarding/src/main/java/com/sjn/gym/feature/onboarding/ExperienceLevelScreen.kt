@@ -1,6 +1,5 @@
 package com.sjn.gym.feature.onboarding
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,15 +34,13 @@ fun ExperienceLevelScreen(
     val options =
         listOf(
             "Freestyle" to "I decide what to do when I get to the gym.",
-            "Split Routine" to "I train specific muscle groups on different days (e.g., Push/Pull/Legs).",
+            "Split Routine" to
+                "I train specific muscle groups on different days (e.g., Push/Pull/Legs).",
             "Full Body" to "I train my whole body in every session.",
         )
 
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(24.dp),
+        modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.Start,
     ) {
         Text(
@@ -59,9 +56,7 @@ fun ExperienceLevelScreen(
             modifier = Modifier.padding(bottom = 32.dp),
         )
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             options.forEach { (title, description) ->
                 ExperienceCard(
                     title = title,
@@ -82,10 +77,7 @@ fun ExperienceLevelScreen(
                 }
             },
             enabled = selectedLevel != null,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
             Text("Next", style = MaterialTheme.typography.titleMedium)
         }
@@ -105,8 +97,12 @@ fun ExperienceCard(
         modifier = modifier.fillMaxWidth(),
         colors =
             CardDefaults.cardColors(
-                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor =
+                    if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor =
+                    if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         shape = MaterialTheme.shapes.medium,
     ) {
@@ -114,13 +110,17 @@ fun ExperienceCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                color =
+                    if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                color =
+                    if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

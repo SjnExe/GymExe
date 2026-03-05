@@ -35,9 +35,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -108,7 +106,9 @@ fun SettingsScreen(
         onHeightUnitSelected = { viewModel.setHeightUnit(it) },
         onDistanceUnitSelected = { viewModel.setDistanceUnit(it) },
         onBackupRequested = { viewModel.performBackup(it) },
-        onRestoreRequested = { inputStream, options -> viewModel.restoreBackup(inputStream, options) },
+        onRestoreRequested = { inputStream, options ->
+            viewModel.restoreBackup(inputStream, options)
+        },
         onCheckForUpdates = { viewModel.checkForUpdates() },
         onDownloadUpdate = { viewModel.downloadUpdate(it) },
         onClearBackupStatus = { viewModel.clearStatus() },
@@ -134,7 +134,10 @@ fun SettingsScreenContent(
     onHeightUnitSelected: (HeightUnit) -> Unit = {},
     onDistanceUnitSelected: (DistanceUnit) -> Unit = {},
     onBackupRequested: (java.io.OutputStream) -> Unit = {},
-    onRestoreRequested: (java.io.InputStream, com.sjn.gym.core.model.backup.RestoreOptions) -> Unit = { _, _ -> },
+    onRestoreRequested:
+        (java.io.InputStream, com.sjn.gym.core.model.backup.RestoreOptions) -> Unit =
+        { _, _ ->
+        },
     onCheckForUpdates: () -> Unit = {},
     onDownloadUpdate: (String) -> Unit = {},
     onClearBackupStatus: () -> Unit = {},
@@ -151,25 +154,22 @@ fun SettingsScreenContent(
 
     val createDocumentLauncher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+            contract = ActivityResultContracts.CreateDocument("application/octet-stream")
         ) { uri ->
             uri?.let {
                 try {
                     context.contentResolver.openOutputStream(it)?.let { outputStream ->
                         onBackupRequested(outputStream)
                     }
-                } catch (
-                    e: Exception,
-                ) {
+                } catch (e: Exception) {
                     // Handle error
                 }
             }
         }
 
     val openDocumentLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri ->
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) { uri
+            ->
             uri?.let {
                 restoreUri = it
                 showRestoreDialog = true
@@ -196,9 +196,7 @@ fun SettingsScreenContent(
                     context.contentResolver.openInputStream(restoreUri!!)?.let { inputStream ->
                         onRestoreRequested(inputStream, options)
                     }
-                } catch (
-                    e: Exception,
-                ) {
+                } catch (e: Exception) {
                     // Handle error
                 }
                 showRestoreDialog = false
@@ -238,19 +236,12 @@ fun SettingsScreenContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())
         ) {
             // Theme Section
             SettingsSectionHeader("Theme")
 
-            ThemeSelectionRow(
-                themeConfig = state.themeConfig,
-                onThemeSelected = onThemeSelected,
-            )
+            ThemeSelectionRow(themeConfig = state.themeConfig, onThemeSelected = onThemeSelected)
 
             SettingsSwitchRow(
                 title = "Dynamic Colors (Material You)",
@@ -328,16 +319,10 @@ fun SettingsScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    FilledTonalButton(
-                        onClick = onCopyLogs,
-                        modifier = Modifier.weight(1f),
-                    ) {
+                    FilledTonalButton(onClick = onCopyLogs, modifier = Modifier.weight(1f)) {
                         Text("Copy Logs")
                     }
                     FilledTonalButton(
@@ -351,10 +336,7 @@ fun SettingsScreenContent(
             }
 
             // About Section (Always visible)
-            AboutSection(
-                appVersion = appVersion,
-                onCheckForUpdates = onCheckForUpdates,
-            )
+            AboutSection(appVersion = appVersion, onCheckForUpdates = onCheckForUpdates)
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
@@ -369,7 +351,9 @@ fun UpdateDialog(
     onUpdate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Dialog(onDismissRequest = { if (downloadStatus !is DownloadStatus.Downloading) onDismissRequest() }) {
+    Dialog(
+        onDismissRequest = { if (downloadStatus !is DownloadStatus.Downloading) onDismissRequest() }
+    ) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,
@@ -393,7 +377,10 @@ fun UpdateDialog(
                     }
                 }
 
-                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
                     Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = "To")
                 }
 
@@ -467,9 +454,7 @@ fun UpdateDialog(
                             Text("Cancel")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        FilledTonalButton(onClick = onUpdate) {
-                            Text("Download & Install")
-                        }
+                        FilledTonalButton(onClick = onUpdate) { Text("Download & Install") }
                     }
                 }
             }
@@ -498,20 +483,13 @@ fun <T : Enum<T>> SettingsUnitRow(
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(bottom = 8.dp),
         )
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             options.forEachIndexed { index, option ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
@@ -525,10 +503,7 @@ fun <T : Enum<T>> SettingsUnitRow(
 }
 
 @Composable
-fun SettingsSectionHeader(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
+fun SettingsSectionHeader(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium,
@@ -549,10 +524,7 @@ fun ThemeSelectionRow(
     val selectedIndex = options.indexOf(themeConfig)
 
     SingleChoiceSegmentedButtonRow(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         options.forEachIndexed { index, option ->
             SegmentedButton(
@@ -594,10 +566,7 @@ fun SettingsSwitchRow(
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f),
         )
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-        )
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -617,10 +586,7 @@ fun SettingsDetailRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        Text(text = title, style = MaterialTheme.typography.bodyLarge)
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
@@ -654,10 +620,7 @@ fun SettingsActionRow(
             )
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -741,7 +704,9 @@ fun LoadingOverlay(
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = if (updateStatus is UpdateStatus.Checking) "Checking for updates..." else "Processing...",
+                        text =
+                            if (updateStatus is UpdateStatus.Checking) "Checking for updates..."
+                            else "Processing...",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -751,35 +716,23 @@ fun LoadingOverlay(
 }
 
 @Composable
-fun AboutSection(
-    appVersion: String,
-    onCheckForUpdates: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun AboutSection(appVersion: String, onCheckForUpdates: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         SettingsSectionTitle("About")
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
-                Text(
-                    text = "Version",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                Text(text = "Version", style = MaterialTheme.typography.bodyLarge)
                 Text(
                     text = appVersion,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            FilledTonalButton(onClick = onCheckForUpdates) {
-                Text("Check for Updates")
-            }
+            FilledTonalButton(onClick = onCheckForUpdates) { Text("Check for Updates") }
         }
     }
 }
@@ -834,10 +787,7 @@ fun rememberSettingsState(viewModel: SettingsViewModel): SettingsState {
 }
 
 @Composable
-fun SettingsSectionTitle(
-    title: String,
-    modifier: Modifier = Modifier,
-) {
+fun SettingsSectionTitle(title: String, modifier: Modifier = Modifier) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
@@ -871,12 +821,12 @@ fun <T : Enum<T>> SelectionDialog(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
+                            Modifier.fillMaxWidth()
                                 .clickable {
                                     onOptionSelected(option)
                                     onDismissRequest()
-                                }.padding(vertical = 12.dp),
+                                }
+                                .padding(vertical = 12.dp),
                     ) {
                         RadioButton(
                             selected = (option == selectedOption),
@@ -900,57 +850,53 @@ fun <T : Enum<T>> SelectionDialog(
 object ThemeColors {
     val PALETTE =
         listOf(
-            0xFFF44336, // Red
-            0xFFE91E63, // Pink
-            0xFF9C27B0, // Purple
-            0xFF673AB7, // Deep Purple
-            0xFF3F51B5, // Indigo
-            0xFF2196F3, // Blue
-            0xFF03A9F4, // Light Blue
-            0xFF00BCD4, // Cyan
-            0xFF009688, // Teal
-            0xFF4CAF50, // Green
-            0xFF8BC34A, // Light Green
-            0xFFCDDC39, // Lime
-            0xFFFFEB3B, // Yellow
-            0xFFFFC107, // Amber
-            0xFFFF9800, // Orange
-            0xFFFF5722, // Deep Orange
-            0xFF795548, // Brown
-            0xFF9E9E9E, // Grey
-            0xFF607D8B, // Blue Grey
-        ).map { it.toInt() }
+                0xFFF44336, // Red
+                0xFFE91E63, // Pink
+                0xFF9C27B0, // Purple
+                0xFF673AB7, // Deep Purple
+                0xFF3F51B5, // Indigo
+                0xFF2196F3, // Blue
+                0xFF03A9F4, // Light Blue
+                0xFF00BCD4, // Cyan
+                0xFF009688, // Teal
+                0xFF4CAF50, // Green
+                0xFF8BC34A, // Light Green
+                0xFFCDDC39, // Lime
+                0xFFFFEB3B, // Yellow
+                0xFFFFC107, // Amber
+                0xFFFF9800, // Orange
+                0xFFFF5722, // Deep Orange
+                0xFF795548, // Brown
+                0xFF9E9E9E, // Grey
+                0xFF607D8B, // Blue Grey
+            )
+            .map { it.toInt() }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ColorPicker(
-    selectedColor: Int,
-    onColorSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun ColorPicker(selectedColor: Int, onColorSelected: (Int) -> Unit, modifier: Modifier = Modifier) {
     val colors = ThemeColors.PALETTE
 
     FlowRow(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         colors.forEach { colorInt ->
             Box(
                 modifier =
-                    Modifier
-                        .size(40.dp)
+                    Modifier.size(40.dp)
                         .clip(CircleShape)
                         .background(Color(colorInt))
                         .border(
                             width = if (selectedColor == colorInt) 3.dp else 0.dp,
-                            color = if (selectedColor == colorInt) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            color =
+                                if (selectedColor == colorInt) MaterialTheme.colorScheme.primary
+                                else Color.Transparent,
                             shape = CircleShape,
-                        ).clickable { onColorSelected(colorInt) },
+                        )
+                        .clickable { onColorSelected(colorInt) }
             )
         }
     }

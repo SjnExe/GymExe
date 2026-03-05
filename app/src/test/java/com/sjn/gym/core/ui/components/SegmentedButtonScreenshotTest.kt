@@ -16,20 +16,14 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [33], manifest = Config.NONE)
 class SegmentedButtonScreenshotTest {
-    @get:Rule(order = 1)
-    val composeRule =
-        androidx.compose.ui.test.junit4
-            .createComposeRule()
+    @get:Rule(order = 1) val composeRule = androidx.compose.ui.test.junit4.createComposeRule()
 
     @get:Rule(order = 2)
     val roborazziRule =
         RoborazziRule(
             composeRule,
             captureRoot = composeRule.onRoot(),
-            options =
-                RoborazziRule.Options(
-                    outputDirectoryPath = "src/test/snapshots/images",
-                ),
+            options = RoborazziRule.Options(outputDirectoryPath = "src/test/snapshots/images"),
         )
 
     @Test

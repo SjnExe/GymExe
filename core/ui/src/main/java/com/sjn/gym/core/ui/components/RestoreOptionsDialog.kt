@@ -20,10 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.sjn.gym.core.model.backup.RestoreOptions
 
 @Composable
-fun RestoreOptionsDialog(
-    onDismissRequest: () -> Unit,
-    onConfirm: (RestoreOptions) -> Unit,
-) {
+fun RestoreOptionsDialog(onDismissRequest: () -> Unit, onConfirm: (RestoreOptions) -> Unit) {
     var restoreExercises by remember { mutableStateOf(true) }
     var restoreWorkouts by remember { mutableStateOf(true) }
     var restoreProfile by remember { mutableStateOf(true) }
@@ -34,14 +31,9 @@ fun RestoreOptionsDialog(
         title = { Text("Restore Options") },
         text = {
             androidx.compose.foundation.layout.Column(
-                verticalArrangement =
-                    androidx.compose.foundation.layout.Arrangement
-                        .spacedBy(8.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    "Select data to restore.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Text("Select data to restore.", style = MaterialTheme.typography.bodyMedium)
 
                 OptionCheckbox("Exercises", restoreExercises, { restoreExercises = it })
                 OptionCheckbox("Workouts", restoreWorkouts, { restoreWorkouts = it })
@@ -58,18 +50,14 @@ fun RestoreOptionsDialog(
                             restoreWorkouts = restoreWorkouts,
                             restoreProfile = restoreProfile,
                             restoreSettings = restoreSettings,
-                        ),
+                        )
                     )
-                },
+                }
             ) {
                 Text("Restore")
             }
         },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancel")
-            }
-        },
+        dismissButton = { TextButton(onClick = onDismissRequest) { Text("Cancel") } },
     )
 }
 
@@ -83,15 +71,9 @@ fun OptionCheckbox(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            modifier
-                .fillMaxWidth()
-                .clickable { onCheckedChange(!checked) }
-                .padding(vertical = 4.dp),
+            modifier.fillMaxWidth().clickable { onCheckedChange(!checked) }.padding(vertical = 4.dp),
     ) {
         Checkbox(checked = checked, onCheckedChange = null)
-        Text(
-            text = label,
-            modifier = Modifier.padding(start = 8.dp),
-        )
+        Text(text = label, modifier = Modifier.padding(start = 8.dp))
     }
 }

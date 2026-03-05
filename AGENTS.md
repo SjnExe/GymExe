@@ -29,8 +29,8 @@ This file contains instructions for AI agents working on the **GymExe** reposito
   - Unit Tests for ViewModels and Domain logic.
   - UI Tests using Compose Test Rule.
 - **Linting:** Strict mode enabled.
-  - **Detekt:** `warningsAsErrors` is ON.
-  - **Spotless:** Enforces Ktlint formatting.
+  - **Detekt:** `warningsAsErrors` is ON. Version 2.0.0-alpha.2 is used for Java 25 compatibility.
+  - **Spotless:** Enforces ktfmt (kotlinlang style) formatting.
 
 ## Security
 - **Signing:** Uses `app/debug.keystore` (tracked in git) with default credentials for simplicity.
@@ -63,8 +63,8 @@ sudo update-java-alternatives --set java-1.25.0-openjdk-amd64
 yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" > /dev/null
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-./gradlew aDD --continue --no-daemon --build-cache --configuration-cache  --parallel -q
-./gradlew sC tDDUT lDD --continue --no-daemon --build-cache --configuration-cache  --parallel -q
+./gradlew assembleDevDebug --continue --no-daemon --build-cache --configuration-cache  --parallel -q
+./gradlew spotlessCheck testDevDebugUnitTest detekt --continue --no-daemon --build-cache --configuration-cache  --parallel -q
 ```
 
 ## Useful Commands
@@ -72,18 +72,18 @@ export PATH=$JAVA_HOME/bin:$PATH
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew vCU sA lDD tDDUT aDD -s --continue
+./gradlew vCU spotlessApply detekt testDevDebugUnitTest assembleDevDebug -s --continue
 ```
 
 ### Building
-*   **Build Debug APK (Dev):** `./gradlew aDD -s --continue`
-*   **Build Release APK (Dev):** `./gradlew aDR -s --continue`
-*   **Build Release APK (Stable):** `./gradlew aSR -s --continue`
+*   **Build Debug APK (Dev):** `./gradlew assembleDevDebug -s --continue`
+*   **Build Release APK (Dev):** `./gradlew assembleDevRelease -s --continue`
+*   **Build Release APK (Stable):** `./gradlew assembleStableRelease -s --continue`
 
 ### Quality & Testing
-*   **Run Lint:** `./gradlew lDD -s --continue`
-*   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
-*   **Format Code:** `./gradlew sA -s --continue`
+*   **Run Lint:** `./gradlew detekt -s --continue`
+*   **Run Unit Tests:** `./gradlew testDevDebugUnitTest -s --continue`
+*   **Format Code:** `./gradlew spotlessApply -s --continue`
 *   **Record Roborazzi Baseline:** `./gradlew rRDD -s --continue`
 *   **Verify Roborazzi Baseline:** `./gradlew vRDD -s --continue`
 *   **Compare Roborazzi Baseline:** `./gradlew cRDD -s --continue`

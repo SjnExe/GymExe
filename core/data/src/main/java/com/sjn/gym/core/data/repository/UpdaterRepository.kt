@@ -2,16 +2,16 @@ package com.sjn.gym.core.data.repository
 
 import android.os.Build
 import com.sjn.gym.core.data.network.GitHubService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 data class UpdateInfo(
     val version: String,
@@ -24,140 +24,123 @@ data class UpdateInfo(
 sealed class DownloadStatus {
     object Idle : DownloadStatus()
 
-    data class Downloading(
-        val progress: Int,
-        val downloadedBytes: Long,
-        val totalBytes: Long,
-    ) : DownloadStatus()
+    data class Downloading(val progress: Int, val downloadedBytes: Long, val totalBytes: Long) :
+        DownloadStatus()
 
-    data class Success(
-        val file: File,
-    ) : DownloadStatus()
+    data class Success(val file: File) : DownloadStatus()
 
-    data class Error(
-        val message: String,
-    ) : DownloadStatus()
+    data class Error(val message: String) : DownloadStatus()
 }
 
 @Singleton
-class UpdaterRepository
-    @Inject
-    constructor(
-        private val gitHubService: GitHubService,
-    ) {
-        suspend fun checkForUpdates(
-            currentVersion: String,
-            isDevBuild: Boolean,
-        ): UpdateInfo? {
-            return try {
-                val releases = gitHubService.getReleases()
-                if (releases.isEmpty()) return null
+class UpdaterRepository @Inject constructor(private val gitHubService: GitHubService) {
+    suspend fun checkForUpdates(currentVersion: String, isDevBuild: Boolean): UpdateInfo? {
+        return try {
+            val releases = gitHubService.getReleases()
+            if (releases.isEmpty()) return null
 
-                if (isDevBuild) {
-                    // Dev Build Logic: Check 'dev' tag
-                    val devRelease = releases.find { it.tagName == "dev" } ?: return null
+            if (isDevBuild) {
+                // Dev Build Logic: Check 'dev' tag
+                val devRelease = releases.find { it.tagName == "dev" } ?: return null
 
-                    // Parse version from body
-                    // Expected format: "Version: 1.2.3-dev-..."
-                    val versionRegex = "Version: (.*)".toRegex()
-                    val matchResult = versionRegex.find(devRelease.body)
-                    val remoteVersion = matchResult?.groupValues?.get(1)?.trim() ?: return null
+                // Parse version from body
+                // Expected format: "Version: 1.2.3-dev-..."
+                val versionRegex = "Version: (.*)".toRegex()
+                val matchResult = versionRegex.find(devRelease.body)
+                val remoteVersion = matchResult?.groupValues?.get(1)?.trim() ?: return null
 
-                    if (remoteVersion == currentVersion) return null
+                if (remoteVersion == currentVersion) return null
 
-                    // Find APK: Architecture specific > Universal
-                    // Format: GymExe-dev-release-{abi}.apk
-                    // We target 'release' build type for updates even if running debug
-                    val supportedAbis = Build.SUPPORTED_ABIS
-                    var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
-                    var arch: String? = null
+                // Find APK: Architecture specific > Universal
+                // Format: GymExe-dev-release-{abi}.apk
+                // We target 'release' build type for updates even if running debug
+                val supportedAbis = Build.SUPPORTED_ABIS
+                var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
+                var arch: String? = null
 
-                    // 1. Check for GymExe-dev-release-{abi}.apk
-                    for (abi in supportedAbis) {
-                        selectedAsset =
-                            devRelease.assets.find {
-                                it.name.equals("GymExe-dev-release-$abi.apk", ignoreCase = true)
-                            }
-                        if (selectedAsset != null) {
-                            arch = abi
-                            break
+                // 1. Check for GymExe-dev-release-{abi}.apk
+                for (abi in supportedAbis) {
+                    selectedAsset =
+                        devRelease.assets.find {
+                            it.name.equals("GymExe-dev-release-$abi.apk", ignoreCase = true)
                         }
+                    if (selectedAsset != null) {
+                        arch = abi
+                        break
                     }
-
-                    // 2. Fallback to GymExe-dev-release-universal.apk
-                    if (selectedAsset == null) {
-                        selectedAsset =
-                            devRelease.assets.find {
-                                it.name.equals("GymExe-dev-release-universal.apk", ignoreCase = true)
-                            }
-                        if (selectedAsset != null) arch = "universal"
-                    }
-
-                    if (selectedAsset == null) return null
-
-                    UpdateInfo(
-                        version = remoteVersion,
-                        releaseNotes = devRelease.body,
-                        downloadUrl = selectedAsset.downloadUrl,
-                        isStable = false,
-                        architecture = arch ?: "universal",
-                    )
-                } else {
-                    // Stable Build Logic: Check latest stable release
-                    val stableRelease = releases.firstOrNull { !it.prerelease } ?: return null
-
-                    // Compare versions
-                    val remoteVersion = stableRelease.tagName
-                    if (remoteVersion == currentVersion) return null
-
-                    // Find APK: Architecture specific > Universal > Any
-                    val supportedAbis = Build.SUPPORTED_ABIS
-                    var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
-                    var arch: String? = null
-
-                    // 1. Check for GymExe-{abi}.apk
-                    // Example: GymExe-arm64-v8a.apk
-                    for (abi in supportedAbis) {
-                        selectedAsset =
-                            stableRelease.assets.find {
-                                it.name.equals("GymExe-$abi.apk", ignoreCase = true)
-                            }
-                        if (selectedAsset != null) {
-                            arch = abi
-                            break
-                        }
-                    }
-
-                    // 2. Fallback to GymExe-universal.apk
-                    if (selectedAsset == null) {
-                        selectedAsset =
-                            stableRelease.assets.find {
-                                it.name.equals("GymExe-universal.apk", ignoreCase = true)
-                            }
-                        if (selectedAsset != null) arch = "universal"
-                    }
-
-                    if (selectedAsset == null) return null
-
-                    UpdateInfo(
-                        version = stableRelease.tagName,
-                        releaseNotes = stableRelease.body,
-                        downloadUrl = selectedAsset.downloadUrl,
-                        isStable = true,
-                        architecture = arch ?: "universal",
-                    )
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
 
-        fun downloadApk(
-            url: String,
-            destinationFile: File,
-        ): Flow<DownloadStatus> =
-            flow {
+                // 2. Fallback to GymExe-dev-release-universal.apk
+                if (selectedAsset == null) {
+                    selectedAsset =
+                        devRelease.assets.find {
+                            it.name.equals("GymExe-dev-release-universal.apk", ignoreCase = true)
+                        }
+                    if (selectedAsset != null) arch = "universal"
+                }
+
+                if (selectedAsset == null) return null
+
+                UpdateInfo(
+                    version = remoteVersion,
+                    releaseNotes = devRelease.body,
+                    downloadUrl = selectedAsset.downloadUrl,
+                    isStable = false,
+                    architecture = arch ?: "universal",
+                )
+            } else {
+                // Stable Build Logic: Check latest stable release
+                val stableRelease = releases.firstOrNull { !it.prerelease } ?: return null
+
+                // Compare versions
+                val remoteVersion = stableRelease.tagName
+                if (remoteVersion == currentVersion) return null
+
+                // Find APK: Architecture specific > Universal > Any
+                val supportedAbis = Build.SUPPORTED_ABIS
+                var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
+                var arch: String? = null
+
+                // 1. Check for GymExe-{abi}.apk
+                // Example: GymExe-arm64-v8a.apk
+                for (abi in supportedAbis) {
+                    selectedAsset =
+                        stableRelease.assets.find {
+                            it.name.equals("GymExe-$abi.apk", ignoreCase = true)
+                        }
+                    if (selectedAsset != null) {
+                        arch = abi
+                        break
+                    }
+                }
+
+                // 2. Fallback to GymExe-universal.apk
+                if (selectedAsset == null) {
+                    selectedAsset =
+                        stableRelease.assets.find {
+                            it.name.equals("GymExe-universal.apk", ignoreCase = true)
+                        }
+                    if (selectedAsset != null) arch = "universal"
+                }
+
+                if (selectedAsset == null) return null
+
+                UpdateInfo(
+                    version = stableRelease.tagName,
+                    releaseNotes = stableRelease.body,
+                    downloadUrl = selectedAsset.downloadUrl,
+                    isStable = true,
+                    architecture = arch ?: "universal",
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun downloadApk(url: String, destinationFile: File): Flow<DownloadStatus> =
+        flow {
                 emit(DownloadStatus.Downloading(0, 0, 0))
                 try {
                     val connection = URL(url).openConnection() as HttpURLConnection
@@ -182,7 +165,8 @@ class UpdaterRepository
                             val progress = (total * 100 / fileLength).toInt()
                             emit(DownloadStatus.Downloading(progress, total, fileLength))
                         } else {
-                            // If content-length is unknown, progress is indeterminate (-1 or just total bytes)
+                            // If content-length is unknown, progress is indeterminate (-1 or just
+                            // total bytes)
                             emit(DownloadStatus.Downloading(-1, total, -1))
                         }
                         output.write(data, 0, count)
@@ -195,5 +179,6 @@ class UpdaterRepository
                 } catch (e: Exception) {
                     emit(DownloadStatus.Error(e.message ?: "Download failed"))
                 }
-            }.flowOn(Dispatchers.IO)
-    }
+            }
+            .flowOn(Dispatchers.IO)
+}

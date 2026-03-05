@@ -75,10 +75,10 @@ gradlePlugin {
 spotless {
     kotlin {
         target("**/*.kt")
-        ktlint()
+        ktfmt().kotlinlangStyle()
     }
     kotlinGradle {
         target("*.gradle.kts")
-        ktlint()
+        ktfmt().kotlinlangStyle()
     }
 }

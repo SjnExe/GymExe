@@ -18,15 +18,9 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabase(
-        @ApplicationContext context: Context,
-    ): GymDatabase =
-        Room
-            .databaseBuilder(
-                context,
-                GymDatabase::class.java,
-                "gym_database.db",
-            ).fallbackToDestructiveMigration(false) // Data persistence required.
+    fun provideDatabase(@ApplicationContext context: Context): GymDatabase =
+        Room.databaseBuilder(context, GymDatabase::class.java, "gym_database.db")
+            .fallbackToDestructiveMigration(false) // Data persistence required.
             .addCallback(
                 object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
@@ -45,13 +39,13 @@ object DatabaseModule {
 
                         exercises.forEach { values ->
                             db.execSQL(
-                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom) VALUES $values",
+                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom) VALUES $values"
                             )
                         }
                     }
-                },
-            ).build()
+                }
+            )
+            .build()
 
-    @Provides
-    fun provideExerciseDao(db: GymDatabase): ExerciseDao = db.exerciseDao()
+    @Provides fun provideExerciseDao(db: GymDatabase): ExerciseDao = db.exerciseDao()
 }

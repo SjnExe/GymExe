@@ -16,8 +16,7 @@ import kotlin.system.exitProcess
 
 @HiltAndroidApp
 class GymExeApp : Application() {
-    @Inject
-    lateinit var logRepository: LogRepository
+    @Inject lateinit var logRepository: LogRepository
 
     override fun onCreate() {
         super.onCreate()
@@ -49,7 +48,9 @@ class GymExeApp : Application() {
                     val intent =
                         Intent(this, CrashActivity::class.java).apply {
                             putExtra("error_details", stackTrace)
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            )
                         }
                     startActivity(intent)
 

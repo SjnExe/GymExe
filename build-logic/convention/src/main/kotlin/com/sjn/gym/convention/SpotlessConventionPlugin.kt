@@ -14,13 +14,13 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 kotlin {
                     target("**/*.kt")
                     targetExclude("**/build/**/*.kt")
-                    ktlint()
+                    ktfmt().kotlinlangStyle()
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 kotlinGradle {
                     target("*.gradle.kts")
-                    ktlint()
+                    ktfmt().kotlinlangStyle()
                     trimTrailingWhitespace()
                     endWithNewline()
                 }

@@ -3,9 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-android {
-    namespace = "com.sjn.gym.core.model"
-}
+android { namespace = "com.sjn.gym.core.model" }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
