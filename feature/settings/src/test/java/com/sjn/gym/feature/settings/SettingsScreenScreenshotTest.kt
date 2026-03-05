@@ -22,18 +22,14 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [33], manifest = Config.NONE)
 class SettingsScreenScreenshotTest {
-    @get:Rule(order = 1)
-    val composeRule = createComposeRule()
+    @get:Rule(order = 1) val composeRule = createComposeRule()
 
     @get:Rule(order = 2)
     val roborazziRule =
         RoborazziRule(
             composeRule,
             captureRoot = composeRule.onRoot(),
-            options =
-                RoborazziRule.Options(
-                    outputDirectoryPath = "src/test/snapshots/images",
-                ),
+            options = RoborazziRule.Options(outputDirectoryPath = "src/test/snapshots/images"),
         )
 
     @Test

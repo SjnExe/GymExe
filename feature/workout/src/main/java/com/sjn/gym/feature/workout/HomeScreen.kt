@@ -23,30 +23,16 @@ fun HomeScreen(
     onNavigateToWorkout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("GymExe") },
-            )
-        },
-    ) { padding ->
+    Scaffold(modifier = modifier, topBar = { TopAppBar(title = { Text("GymExe") }) }) { padding ->
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Today's Workout", style = MaterialTheme.typography.titleMedium)
                     Text("Push Day (Placeholder)", style = MaterialTheme.typography.headlineSmall)
-                    Button(
-                        onClick = onNavigateToWorkout,
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
+                    Button(onClick = onNavigateToWorkout, modifier = Modifier.padding(top = 8.dp)) {
                         Text("Start Workout")
                     }
                 }
@@ -54,10 +40,7 @@ fun HomeScreen(
 
             Text("Quick Actions", style = MaterialTheme.typography.titleMedium)
 
-            Button(
-                onClick = onNavigateToExerciseList,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Button(onClick = onNavigateToExerciseList, modifier = Modifier.fillMaxWidth()) {
                 Text("Browse Exercises")
             }
         }

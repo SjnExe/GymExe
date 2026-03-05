@@ -19,25 +19,12 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(
-    onNavigateToWorkout: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun LibraryScreen(onNavigateToWorkout: (String) -> Unit, modifier: Modifier = Modifier) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Exercises", "Routines")
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(title = { Text("Library") })
-        },
-    ) { padding ->
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-        ) {
+    Scaffold(modifier = modifier, topBar = { TopAppBar(title = { Text("Library") }) }) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             PrimaryTabRow(selectedTabIndex = selectedTab) {
                 tabs.forEachIndexed { index, title ->
                     Tab(

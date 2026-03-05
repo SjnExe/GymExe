@@ -20,19 +20,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.sjn.gym.core.data.repository.LogRepository
 import com.sjn.gym.core.ui.theme.GymExeTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class CrashActivity : ComponentActivity() {
-    @Inject
-    lateinit var logRepository: LogRepository
+    @Inject lateinit var logRepository: LogRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,11 +56,7 @@ class CrashActivity : ComponentActivity() {
         val logFile = logRepository.getLogFile()
         if (logFile.exists()) {
             val uri: Uri =
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    logFile,
-                )
+                FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", logFile)
             val intent =
                 Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
@@ -89,13 +82,7 @@ fun CrashScreen(
     onRestartApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-    ) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(
             text = "App Crashed",
             style = MaterialTheme.typography.headlineMedium,
@@ -107,24 +94,11 @@ fun CrashScreen(
             style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onShareLogs,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Share Logs")
-        }
+        Button(onClick = onShareLogs, modifier = Modifier.fillMaxWidth()) { Text("Share Logs") }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = onRestartApp,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Restart App")
-        }
+        Button(onClick = onRestartApp, modifier = Modifier.fillMaxWidth()) { Text("Restart App") }
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Error Details:",
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Text(text = "Error Details:", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = errorDetails,

@@ -37,9 +37,8 @@ fun OnboardingScreen(
     var restoreUri by remember { mutableStateOf<Uri?>(null) }
 
     val openDocumentLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri ->
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) { uri
+            ->
             uri?.let {
                 restoreUri = it
                 showRestoreDialog = true
@@ -74,11 +73,7 @@ fun OnboardingScreen(
     }
 
     if (restoreState is RestoreUiState.Loading) {
-        Dialog(onDismissRequest = {}) {
-            Surface {
-                CircularProgressIndicator()
-            }
-        }
+        Dialog(onDismissRequest = {}) { Surface { CircularProgressIndicator() } }
     }
 
     if (restoreState is RestoreUiState.Error) {
@@ -87,9 +82,7 @@ fun OnboardingScreen(
             title = { Text("Error") },
             text = { Text((restoreState as RestoreUiState.Error).message) },
             confirmButton = {
-                TextButton(onClick = { viewModel.resetRestoreStatus() }) {
-                    Text("OK")
-                }
+                TextButton(onClick = { viewModel.resetRestoreStatus() }) { Text("OK") }
             },
         )
     }

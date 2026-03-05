@@ -54,10 +54,7 @@ fun ExerciseListScreen(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             placeholder = { Text("Search Exercises") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             singleLine = true,
@@ -69,10 +66,7 @@ fun ExerciseListScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(exercises, key = { it.id }) { exercise ->
-                ExerciseCard(
-                    exercise = exercise,
-                    onClick = { onExerciseClick(exercise.id) },
-                )
+                ExerciseCard(exercise = exercise, onClick = { onExerciseClick(exercise.id) })
             }
         }
     }
@@ -80,17 +74,8 @@ fun ExerciseListScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ExerciseCard(
-    exercise: Exercise,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    ElevatedCard(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick),
-    ) {
+fun ExerciseCard(exercise: Exercise, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    ElevatedCard(modifier = modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -115,7 +100,7 @@ fun ExerciseCard(
             ) {
                 if (exercise.targetMuscle.isNotEmpty()) {
                     AssistChip(
-                        onClick = { },
+                        onClick = {},
                         label = { Text(exercise.targetMuscle) },
                         colors =
                             AssistChipDefaults.assistChipColors(
@@ -128,7 +113,7 @@ fun ExerciseCard(
 
                 exercise.secondaryMuscles.forEach { muscle ->
                     AssistChip(
-                        onClick = { },
+                        onClick = {},
                         label = { Text(muscle) },
                         colors =
                             AssistChipDefaults.assistChipColors(

@@ -62,7 +62,11 @@ class WeightInputParserTest {
     fun `parse Dumbbell multiple returns failure`() {
         val result = parser.parse("20 20", "Dumbbell")
         assertTrue(result is WeightParsingResult.Failure)
-        assertTrue((result as WeightParsingResult.Failure).message.contains("Stacking weights is not allowed"))
+        assertTrue(
+            (result as WeightParsingResult.Failure)
+                .message
+                .contains("Stacking weights is not allowed")
+        )
     }
 
     @Test

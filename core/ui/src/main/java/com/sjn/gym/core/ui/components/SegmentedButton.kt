@@ -17,19 +17,20 @@ fun SegmentedButton(
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.padding(8.dp),
-    ) {
+    Row(modifier = modifier.padding(8.dp)) {
         options.forEachIndexed { index, option ->
             val isSelected = option == selectedOption
             Text(
                 text = option,
                 modifier =
-                    Modifier
-                        .clickable { onOptionSelected(option) }
+                    Modifier.clickable { onOptionSelected(option) }
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                style = if (isSelected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
+                color =
+                    if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface,
+                style =
+                    if (isSelected) MaterialTheme.typography.titleMedium
+                    else MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
         }

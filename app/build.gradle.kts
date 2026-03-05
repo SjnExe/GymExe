@@ -9,9 +9,7 @@ plugins {
 }
 
 android {
-    buildFeatures {
-        buildConfig = true
-    }
+    buildFeatures { buildConfig = true }
     namespace = "com.sjn.gym"
 
     defaultConfig {
@@ -25,16 +23,12 @@ android {
         versionName = nameProp ?: "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        vectorDrawables { useSupportLibrary = true }
     }
 
     testOptions {
         unitTests.isIncludeAndroidResources = true
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
+        unitTests.all { it.useJUnitPlatform() }
     }
 
     // Configure APK Splits for Architecture-specific builds
@@ -56,9 +50,7 @@ android {
                 "proguard-rules.pro",
             )
         }
-        debug {
-            applicationIdSuffix = ".debug"
-        }
+        debug { applicationIdSuffix = ".debug" }
         create("benchmark") {
             initWith(getByName("release"))
             matchingFallbacks += listOf("release")
@@ -80,9 +72,7 @@ android {
     buildTypes.getByName("benchmark").signingConfig = signingConfigs.getByName("release")
 
     packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+        resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
         jniLibs {
             // Keep debug symbols for libraries that fail to strip, preventing warnings
             keepDebugSymbols += "**/libandroidx.graphics.path.so"
@@ -95,10 +85,12 @@ android {
 // We disable it for standard Release to save build time and keep it pure.
 androidComponents {
     beforeVariants(selector().withBuildType("benchmark")) { variantBuilder ->
-        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = true
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)
+            ?.enableAndroidTest = true
     }
     beforeVariants(selector().withBuildType("release")) { variantBuilder ->
-        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)?.enableAndroidTest = false
+        (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)
+            ?.enableAndroidTest = false
     }
 
     onVariants { variant ->
@@ -106,7 +98,10 @@ androidComponents {
             val buildType = variant.buildType
             val flavorName = variant.flavorName
 
-            val abiName = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+            val abiName =
+                output.filters
+                    .find { it.filterType == FilterConfiguration.FilterType.ABI }
+                    ?.identifier
 
             val newName =
                 if (flavorName == "stable") {
@@ -120,7 +115,9 @@ androidComponents {
                 } else {
                     // Dev/Default Format: GymExe-{flavor}-{buildType}-{architecture}.apk
                     // Example: GymExe-dev-release-universal.apk, GymExe-dev-debug-arm64-v8a.apk
-                    val base = if (flavorName.isNullOrEmpty()) "GymExe-$buildType" else "GymExe-$flavorName-$buildType"
+                    val base =
+                        if (flavorName.isNullOrEmpty()) "GymExe-$buildType"
+                        else "GymExe-$flavorName-$buildType"
                     if (abiName != null) {
                         "$base-$abiName.apk"
                     } else {
@@ -128,13 +125,15 @@ androidComponents {
                     }
                 }
 
-            // Use reflection to set outputFileName as it is not exposed in the VariantOutput interface
+            // Use reflection to set outputFileName as it is not exposed in the VariantOutput
+            // interface
             // but is available on the implementation (VariantOutputImpl).
             try {
                 val outputFileNameMethod = output::class.java.getMethod("getOutputFileName")
 
                 @Suppress("UNCHECKED_CAST")
-                val outputFileNameProperty = outputFileNameMethod.invoke(output) as? org.gradle.api.provider.Property<String>
+                val outputFileNameProperty =
+                    outputFileNameMethod.invoke(output) as? org.gradle.api.provider.Property<String>
                 outputFileNameProperty?.set(newName)
             } catch (e: Exception) {
                 println("Failed to rename APK: ${e.message}")
