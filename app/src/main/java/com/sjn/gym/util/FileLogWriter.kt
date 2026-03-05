@@ -4,15 +4,8 @@ import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Severity
 import com.sjn.gym.core.data.repository.LogRepository
 
-class FileLogWriter(
-    private val logRepository: LogRepository,
-) : LogWriter() {
-    override fun log(
-        severity: Severity,
-        message: String,
-        tag: String,
-        throwable: Throwable?,
-    ) {
+class FileLogWriter(private val logRepository: LogRepository) : LogWriter() {
+    override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
         val priority =
             when (severity) {
                 Severity.Verbose -> android.util.Log.VERBOSE

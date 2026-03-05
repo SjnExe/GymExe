@@ -4,9 +4,7 @@ plugins {
     // ksp plugin is added by hilt convention
 }
 
-android {
-    namespace = "com.sjn.gym.core.data"
-}
+android { namespace = "com.sjn.gym.core.data" }
 
 dependencies {
     implementation(project(":core:model"))

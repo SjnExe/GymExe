@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -30,9 +29,11 @@ class MainActivity : ComponentActivity() {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             // Handle intent (e.g., opening a .gym file)
-            // Ideally, this should be passed to the ViewModel or NavHost to trigger a dialog or navigation
+            // Ideally, this should be passed to the ViewModel or NavHost to trigger a dialog or
+            // navigation
             // For now, we'll just log or prepare it.
-            // In a real implementation, you might want to use a SideEffect or a specific Intent Handler
+            // In a real implementation, you might want to use a SideEffect or a specific Intent
+            // Handler
 
             // val intentUri = intent?.data
 
@@ -60,13 +61,15 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Surface(modifier = Modifier.fillMaxSize()) {
                             GymExeNavHost(
-                                isOnboardingCompleted = state.userData.isOnboardingCompleted,
+                                isOnboardingCompleted = state.userData.isOnboardingCompleted
                             )
                         }
                     }
 
-                    // TODO: If intentUri is present, trigger restore dialog in Settings or a global restore dialog.
-                    // This requires moving the Restore Dialog to a higher level or navigating to Settings with an argument.
+                    // TODO: If intentUri is present, trigger restore dialog in Settings or a global
+                    // restore dialog.
+                    // This requires moving the Restore Dialog to a higher level or navigating to
+                    // Settings with an argument.
                 }
             }
         }

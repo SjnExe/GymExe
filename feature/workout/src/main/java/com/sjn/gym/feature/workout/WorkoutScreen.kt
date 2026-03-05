@@ -29,16 +29,8 @@ import com.sjn.gym.feature.workout.logic.PlateCount
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WorkoutScreen(
-    modifier: Modifier = Modifier,
-    viewModel: WorkoutViewModel = hiltViewModel(),
-) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(16.dp),
-    ) {
+fun WorkoutScreen(modifier: Modifier = Modifier, viewModel: WorkoutViewModel = hiltViewModel()) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         // Exercise Header
         if (viewModel.exercise != null) {
             Text(
@@ -73,57 +65,56 @@ fun WorkoutScreen(
         val defaultColor = MaterialTheme.colorScheme.onSurface
 
         // Annotated String for Syntax Highlighting
-        val annotatedString =
-            buildAnnotatedString {
-                val text = viewModel.input
-                var i = 0
-                while (i < text.length) {
-                    val char = text[i]
+        val annotatedString = buildAnnotatedString {
+            val text = viewModel.input
+            var i = 0
+            while (i < text.length) {
+                val char = text[i]
 
-                    if (char.isDigit() || char == '.') {
-                        // Scan the full number
-                        val start = i
-                        while (i < text.length && (text[i].isDigit() || text[i] == '.')) {
-                            i++
-                        }
-                        val numberStr = text.substring(start, i)
-
-                        // Look ahead for separator
-                        var isQuantity = false
-                        var lookAheadIndex = i
-                        // Skip whitespace
-                        while (lookAheadIndex < text.length && text[lookAheadIndex].isWhitespace()) {
-                            lookAheadIndex++
-                        }
-                        if (lookAheadIndex < text.length) {
-                            val nextChar = text[lookAheadIndex]
-                            if (nextChar == 'x' || nextChar == 'X' || nextChar == '*') {
-                                isQuantity = true
-                            }
-                        }
-
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = if (isQuantity) quantityColor else weightColor,
-                                    fontWeight = FontWeight.Bold,
-                                ),
-                        ) {
-                            append(numberStr)
-                        }
-                    } else if (char == 'x' || char == 'X' || char == '*' || char == '+') {
-                        withStyle(style = SpanStyle(color = separatorColor, fontWeight = FontWeight.Bold)) {
-                            append(char)
-                        }
-                        i++
-                    } else {
-                        withStyle(style = SpanStyle(color = defaultColor)) {
-                            append(char)
-                        }
+                if (char.isDigit() || char == '.') {
+                    // Scan the full number
+                    val start = i
+                    while (i < text.length && (text[i].isDigit() || text[i] == '.')) {
                         i++
                     }
+                    val numberStr = text.substring(start, i)
+
+                    // Look ahead for separator
+                    var isQuantity = false
+                    var lookAheadIndex = i
+                    // Skip whitespace
+                    while (lookAheadIndex < text.length && text[lookAheadIndex].isWhitespace()) {
+                        lookAheadIndex++
+                    }
+                    if (lookAheadIndex < text.length) {
+                        val nextChar = text[lookAheadIndex]
+                        if (nextChar == 'x' || nextChar == 'X' || nextChar == '*') {
+                            isQuantity = true
+                        }
+                    }
+
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = if (isQuantity) quantityColor else weightColor,
+                                fontWeight = FontWeight.Bold,
+                            )
+                    ) {
+                        append(numberStr)
+                    }
+                } else if (char == 'x' || char == 'X' || char == '*' || char == '+') {
+                    withStyle(
+                        style = SpanStyle(color = separatorColor, fontWeight = FontWeight.Bold)
+                    ) {
+                        append(char)
+                    }
+                    i++
+                } else {
+                    withStyle(style = SpanStyle(color = defaultColor)) { append(char) }
+                    i++
                 }
             }
+        }
 
         Surface(
             shape = MaterialTheme.shapes.medium,
@@ -133,10 +124,7 @@ fun WorkoutScreen(
                 } else {
                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
             Box(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -144,7 +132,10 @@ fun WorkoutScreen(
             ) {
                 if (viewModel.input.isEmpty()) {
                     Text(
-                        text = if (viewModel.exercise?.equipment == "Dumbbell") "Enter Weight (e.g. 20)" else "Enter Plates (e.g. 2x20)",
+                        text =
+                            if (viewModel.exercise?.equipment == "Dumbbell")
+                                "Enter Weight (e.g. 20)"
+                            else "Enter Plates (e.g. 2x20)",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -152,7 +143,10 @@ fun WorkoutScreen(
                 BasicTextField(
                     value = viewModel.input,
                     onValueChange = { viewModel.onInputChange(it) },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                    textStyle =
+                        MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = {
                         TransformedText(annotatedString, OffsetMapping.Identity)
@@ -186,19 +180,14 @@ fun WorkoutScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                viewModel.plateResult.forEach { plate ->
-                    PlateChip(plate)
-                }
+                viewModel.plateResult.forEach { plate -> PlateChip(plate) }
             }
         }
     }
 }
 
 @Composable
-fun PlateChip(
-    plate: PlateCount,
-    modifier: Modifier = Modifier,
-) {
+fun PlateChip(plate: PlateCount, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.small,

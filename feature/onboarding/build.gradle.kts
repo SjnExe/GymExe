@@ -1,11 +1,5 @@
-plugins {
-    id("gymexe.android.feature")
-}
+plugins { id("gymexe.android.feature") }
 
-android {
-    namespace = "com.sjn.gym.feature.onboarding"
-}
+android { namespace = "com.sjn.gym.feature.onboarding" }
 
-dependencies {
-    implementation(libs.androidx.core.ktx)
-}
+dependencies { implementation(libs.androidx.core.ktx) }

@@ -17,18 +17,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme =
-    darkColorScheme(
-        primary = Primary80,
-        secondary = Secondary80,
-        tertiary = Tertiary80,
-    )
+    darkColorScheme(primary = Primary80, secondary = Secondary80, tertiary = Tertiary80)
 
 private val LightColorScheme =
-    lightColorScheme(
-        primary = Primary40,
-        secondary = Secondary40,
-        tertiary = Tertiary40,
-    )
+    lightColorScheme(primary = Primary40, secondary = Secondary40, tertiary = Tertiary40)
 
 @Composable
 fun GymExeTheme(
@@ -72,9 +64,5 @@ fun GymExeTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content,
-    )
+    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }

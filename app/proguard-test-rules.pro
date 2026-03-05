@@ -57,6 +57,23 @@
 # Used by ComposeRootRegistry dispatchOnRegistrationChanged
 -keep class kotlin.collections.** { *; }
 
+# Fix for ClassNotFoundException: com.sjn.gym.GymExeApp in benchmark tests
+# Explicitly preserve the Application class and its Hilt base class
+-keep class com.sjn.gym.GymExeApp { *; }
+-keep class com.sjn.gym.Hilt_GymExeApp { *; }
+
+# Keep Hilt entry points and generated classes required for dependency injection
+-keep @dagger.hilt.android.HiltAndroidApp class *
+-keep @dagger.hilt.EntryPoint class *
+-keep class com.sjn.gym.**_GeneratedInjector { *; }
+-keep class com.sjn.gym.GymExeApp_HiltComponents** { *; }
+
+# Preserve anything required for Dagger/Hilt to work in full mode
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes
 # when running against minified builds (R8 full mode).

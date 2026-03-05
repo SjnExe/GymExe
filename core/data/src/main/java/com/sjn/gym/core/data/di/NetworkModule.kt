@@ -10,51 +10,40 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     @Provides
     @Singleton
-    fun provideJson(): Json =
-        Json {
-            ignoreUnknownKeys = true
-            coerceInputValues = true
-        }
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(
-        @ApplicationContext context: Context,
-    ): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val chuckerInterceptor =
-            ChuckerInterceptor
-                .Builder(context)
+            ChuckerInterceptor.Builder(context)
                 .collector(ChuckerCollector(context))
                 .maxContentLength(250000L)
                 .redactHeaders(emptySet())
                 .alwaysReadResponseBody(false)
                 .build()
 
-        return OkHttpClient
-            .Builder()
-            .addInterceptor(chuckerInterceptor)
-            .build()
+        return OkHttpClient.Builder().addInterceptor(chuckerInterceptor).build()
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(
-        okHttpClient: OkHttpClient,
-        json: Json,
-    ): Retrofit =
-        Retrofit
-            .Builder()
+    fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit =
+        Retrofit.Builder()
             .baseUrl("https://api.github.com/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
@@ -62,5 +51,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideGitHubService(retrofit: Retrofit): GitHubService = retrofit.create(GitHubService::class.java)
+    fun provideGitHubService(retrofit: Retrofit): GitHubService =
+        retrofit.create(GitHubService::class.java)
 }

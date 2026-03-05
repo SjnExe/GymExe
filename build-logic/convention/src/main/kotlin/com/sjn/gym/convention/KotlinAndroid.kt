@@ -27,8 +27,10 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     }
 
     // Configure Kotlin toolchain
-    extensions.configure<KotlinAndroidProjectExtension> {
-        jvmToolchain(25)
+    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+        extensions.configure<KotlinAndroidProjectExtension> {
+            jvmToolchain(25)
+        }
     }
 
     // Ensure JavaCompile tasks use the same toolchain
@@ -43,7 +45,7 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
         }
     }
 }

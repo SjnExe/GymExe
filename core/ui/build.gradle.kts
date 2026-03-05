@@ -4,9 +4,7 @@ plugins {
     id("gymexe.roborazzi")
 }
 
-android {
-    namespace = "com.sjn.gym.core.ui"
-}
+android { namespace = "com.sjn.gym.core.ui" }
 
 dependencies {
     implementation(libs.androidx.core.ktx)

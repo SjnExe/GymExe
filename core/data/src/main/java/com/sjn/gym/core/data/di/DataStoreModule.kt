@@ -1,10 +1,7 @@
 package com.sjn.gym.core.data.di
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import com.sjn.gym.core.data.repository.UserProfileRepository
-import com.sjn.gym.core.data.repository.userProfileDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,7 +14,6 @@ import javax.inject.Singleton
 object DataStoreModule {
     @Provides
     @Singleton
-    fun provideUserProfileRepository(
-        @ApplicationContext context: Context,
-    ): UserProfileRepository = UserProfileRepository(context)
+    fun provideUserProfileRepository(@ApplicationContext context: Context): UserProfileRepository =
+        UserProfileRepository(context)
 }

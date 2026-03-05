@@ -1,6 +1,5 @@
 package com.sjn.gym.feature.onboarding
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,12 +49,7 @@ fun EquipmentSelectionScreen(
 
     var selectedEquipment by remember { mutableStateOf(setOf<String>()) }
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(24.dp),
-    ) {
+    Column(modifier = modifier.fillMaxSize().padding(24.dp)) {
         Text(
             text = "Equipment",
             style = MaterialTheme.typography.headlineMedium,
@@ -70,10 +64,7 @@ fun EquipmentSelectionScreen(
         )
 
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             OutlinedButton(
@@ -116,11 +107,7 @@ fun EquipmentSelectionScreen(
                 viewModel.completeOnboarding()
                 onComplete()
             },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .height(56.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp).height(56.dp),
         ) {
             Text("Finish Setup", style = MaterialTheme.typography.titleMedium)
         }
@@ -137,22 +124,18 @@ fun EquipmentItem(
     Surface(
         onClick = onToggle,
         shape = MaterialTheme.shapes.small,
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface,
+        color =
+            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+            else MaterialTheme.colorScheme.surface,
         tonalElevation = if (isSelected) 2.dp else 0.dp,
         modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.small),
     ) {
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
             // Checkbox has internal padding
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onToggle() },
-            )
+            Checkbox(checked = isSelected, onCheckedChange = { onToggle() })
             Text(
                 text = name,
                 style = MaterialTheme.typography.bodyLarge,

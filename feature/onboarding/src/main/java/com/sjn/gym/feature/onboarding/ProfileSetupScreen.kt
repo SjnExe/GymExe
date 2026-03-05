@@ -1,6 +1,5 @@
 package com.sjn.gym.feature.onboarding
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,12 +47,10 @@ fun ProfileSetupScreen(
     var heightUnit by remember { mutableStateOf("CM") }
 
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(24.dp),
+        modifier = modifier.fillMaxSize().padding(24.dp),
         // Increased padding
-        horizontalAlignment = Alignment.Start, // Align content to start usually looks better for forms
+        horizontalAlignment =
+            Alignment.Start, // Align content to start usually looks better for forms
         verticalArrangement = Arrangement.Top,
     ) {
         Text(
@@ -71,10 +68,7 @@ fun ProfileSetupScreen(
             modifier = Modifier.padding(bottom = 8.dp),
         )
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             GenderCard(
@@ -101,18 +95,16 @@ fun ProfileSetupScreen(
             modifier = Modifier.padding(bottom = 8.dp),
         )
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             OutlinedTextField(
                 value = weightValue,
                 onValueChange = { newValue ->
-                    if (newValue.all { char -> char.isDigit() || char == '.' } &&
-                        newValue.count { it == '.' } <= 1
+                    if (
+                        newValue.all { char -> char.isDigit() || char == '.' } &&
+                            newValue.count { it == '.' } <= 1
                     ) {
                         val decimalIndex = newValue.indexOf('.')
                         if (decimalIndex == -1 || newValue.length - decimalIndex <= 3) {
@@ -143,9 +135,7 @@ fun ProfileSetupScreen(
             modifier = Modifier.padding(bottom = 8.dp),
         )
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -153,8 +143,9 @@ fun ProfileSetupScreen(
                 value = heightValue,
                 onValueChange = { newValue ->
                     if (heightUnit == "CM") {
-                        if (newValue.all { char -> char.isDigit() || char == '.' } &&
-                            newValue.count { it == '.' } <= 1
+                        if (
+                            newValue.all { char -> char.isDigit() || char == '.' } &&
+                                newValue.count { it == '.' } <= 1
                         ) {
                             val decimalIndex = newValue.indexOf('.')
                             if (decimalIndex == -1 || newValue.length - decimalIndex <= 2) {
@@ -163,14 +154,22 @@ fun ProfileSetupScreen(
                         }
                     } else {
                         // For Feet, allow digits, ', ", and .
-                        if (newValue.all { char -> char.isDigit() || char == '.' || char == '\'' || char == '"' }) {
+                        if (
+                            newValue.all { char ->
+                                char.isDigit() || char == '.' || char == '\'' || char == '"'
+                            }
+                        ) {
                             heightValue = newValue
                         }
                     }
                 },
                 label = { Text(if (heightUnit == "CM") "Height (cm)" else "Height (ft'in\")") },
                 // Use Text keyboard to allow special chars for Feet/Inches if needed
-                keyboardOptions = KeyboardOptions(keyboardType = if (heightUnit == "FT") KeyboardType.Text else KeyboardType.Number),
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType =
+                            if (heightUnit == "FT") KeyboardType.Text else KeyboardType.Number
+                    ),
                 modifier = Modifier.weight(1f),
                 singleLine = true,
             )
@@ -205,9 +204,13 @@ fun ProfileSetupScreen(
                             val feet = heightValue.substring(0, feetIndex).trim().toDouble()
                             val inches =
                                 if (inchIndex != -1 && inchIndex > feetIndex) {
-                                    heightValue.substring(feetIndex + 1, inchIndex).trim().toDouble()
+                                    heightValue
+                                        .substring(feetIndex + 1, inchIndex)
+                                        .trim()
+                                        .toDouble()
                                 } else if (feetIndex < heightValue.length - 1) {
-                                    heightValue.substring(feetIndex + 1).trim().toDoubleOrNull() ?: 0.0
+                                    heightValue.substring(feetIndex + 1).trim().toDoubleOrNull()
+                                        ?: 0.0
                                 } else {
                                     0.0
                                 }
@@ -236,14 +239,9 @@ fun ProfileSetupScreen(
                     weightValue.isNotEmpty() &&
                     weightValue.toDoubleOrNull()?.let { it > 0 } == true &&
                     heightValue.isNotEmpty() &&
-                    (
-                        (heightUnit == "CM" && heightValue.toDoubleOrNull()?.let { it > 0 } == true) ||
-                            (heightUnit == "FT" && heightValue.any { it.isDigit() })
-                    ),
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp), // Taller button
+                    ((heightUnit == "CM" && heightValue.toDoubleOrNull()?.let { it > 0 } == true) ||
+                        (heightUnit == "FT" && heightValue.any { it.isDigit() })),
+            modifier = Modifier.fillMaxWidth().height(56.dp), // Taller button
         ) {
             Text("Next", style = MaterialTheme.typography.titleMedium)
         }
@@ -263,8 +261,12 @@ fun GenderCard(
         modifier = modifier.height(120.dp),
         colors =
             CardDefaults.cardColors(
-                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor =
+                    if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor =
+                    if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         shape = MaterialTheme.shapes.medium,
     ) {
@@ -273,16 +275,9 @@ fun GenderCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = gender,
-                modifier = Modifier.size(48.dp),
-            )
+            Icon(imageVector = icon, contentDescription = gender, modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = gender,
-                style = MaterialTheme.typography.headlineSmall,
-            )
+            Text(text = gender, style = MaterialTheme.typography.headlineSmall)
         }
     }
 }

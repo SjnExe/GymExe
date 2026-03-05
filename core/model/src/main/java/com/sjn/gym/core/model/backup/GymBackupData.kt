@@ -2,10 +2,7 @@ package com.sjn.gym.core.model.backup
 
 import kotlinx.serialization.Serializable
 
-/**
- * Data structure for backup/restore.
- * This represents the entire contents of a .gym backup file.
- */
+/** Data structure for backup/restore. This represents the entire contents of a .gym backup file. */
 @Serializable
 data class GymBackupData(
     val version: Int = 1,
@@ -35,10 +32,7 @@ data class BackupWorkout(
 )
 
 @Serializable
-data class BackupWorkoutExercise(
-    val exerciseId: String,
-    val sets: List<BackupSet> = emptyList(),
-)
+data class BackupWorkoutExercise(val exerciseId: String, val sets: List<BackupSet> = emptyList())
 
 @Serializable
 data class BackupSet(
