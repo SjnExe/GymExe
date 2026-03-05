@@ -59,10 +59,8 @@ complexity:
     active: false
   LargeClass:
     active: false
-    allowedLines: 600
   LongMethod:
     active: false
-    allowedLines: 150
   LongParameterList:
     active: false
     allowedFunctionParameters: 10
@@ -113,7 +111,7 @@ empty-blocks:
   active: true
   EmptyCatchBlock:
     active: true
-    allowedExceptionNameRegex: '_|(ignore|expected).* '
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
   EmptyClassBlock:
     active: true
   EmptyDefaultConstructor:

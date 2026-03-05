@@ -26,11 +26,6 @@ android {
         vectorDrawables { useSupportLibrary = true }
     }
 
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-        unitTests.all { it.useJUnitPlatform() }
-    }
-
     // Configure APK Splits for Architecture-specific builds
     splits {
         abi {

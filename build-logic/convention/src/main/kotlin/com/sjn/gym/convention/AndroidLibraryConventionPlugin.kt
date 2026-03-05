@@ -45,14 +45,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     unitTests.all { test ->
                         val testTask = test as? org.gradle.api.tasks.testing.Test
                         testTask?.useJUnitPlatform()
-                        testTask?.apply {
-                            try {
-                                javaClass.getMethod("setFailOnNoDiscoveredTests", Boolean::class.javaPrimitiveType)
-                                    .invoke(this, false)
-                            } catch (_: Exception) {
-                                setProperty("failOnNoDiscoveredTests", false)
-                            }
-                        }
+                        testTask?.setProperty("failOnNoDiscoveredTests", false)
                         testTask?.systemProperty("junit.jupiter.execution.failIfNoTests", "false")
                     }
                 }

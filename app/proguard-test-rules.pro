@@ -63,6 +63,7 @@
 -keep class com.google.dagger.** { *; }
 -keep @dagger.hilt.android.HiltAndroidApp class *
 -keep @dagger.hilt.EntryPoint class *
+-keep class com.sjn.gym.GymExeApp { *; }
 
 # NOTE: This file contains ProGuard rules SPECIFIC to instrumented tests.
 # These rules are only applied to the 'dev' flavor to prevent test crashes

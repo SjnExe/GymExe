@@ -23,15 +23,11 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
                 testOptions {
+                    unitTests.isIncludeAndroidResources = true
                     unitTests.all {
-                        (this as? org.gradle.api.tasks.testing.Test)?.apply {
-                            try {
-                                javaClass.getMethod("setFailOnNoDiscoveredTests", Boolean::class.javaPrimitiveType)
-                                    .invoke(this, false)
-                            } catch (_: Exception) {
-                                setProperty("failOnNoDiscoveredTests", false)
-                            }
-                        }
+                        val testTask = this as? org.gradle.api.tasks.testing.Test
+                        testTask?.useJUnitPlatform()
+                        testTask?.setProperty("failOnNoDiscoveredTests", false)
                     }
                 }
 
