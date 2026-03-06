@@ -11,7 +11,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("com.android.application")
                 apply("gymexe.spotless")
-                apply("gymexe.detekt")
                 apply("gymexe.kover")
             }
 

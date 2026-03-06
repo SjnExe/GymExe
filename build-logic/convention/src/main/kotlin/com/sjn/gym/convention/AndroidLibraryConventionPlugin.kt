@@ -14,7 +14,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("com.android.library")
                 apply("gymexe.spotless")
-                apply("gymexe.detekt")
                 apply("gymexe.kover")
             }
 

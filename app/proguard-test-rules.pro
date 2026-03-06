@@ -62,11 +62,28 @@
 -keep class com.sjn.gym.GymExeApp { *; }
 -keep class com.sjn.gym.Hilt_GymExeApp { *; }
 
+# Keep any classes that extend Android Application
+-keep class * extends android.app.Application {
+    <init>();
+    void attachBaseContext(android.content.Context);
+}
+
 # Keep Hilt entry points and generated classes required for dependency injection
 -keep @dagger.hilt.android.HiltAndroidApp class *
 -keep @dagger.hilt.EntryPoint class *
 -keep class com.sjn.gym.**_GeneratedInjector { *; }
 -keep class com.sjn.gym.GymExeApp_HiltComponents** { *; }
+
+# Also keep the Hilt classes in the .dev sub-package if they end up there due to R8/Flavor interactions
+-keep class com.sjn.gym.dev.GymExeApp { *; }
+-keep class com.sjn.gym.dev.Hilt_GymExeApp { *; }
+-keep class com.sjn.gym.dev.**_GeneratedInjector { *; }
+-keep class com.sjn.gym.dev.GymExeApp_HiltComponents** { *; }
+
+# Preserve test runners and test components inside the minified test apk
+-keep class androidx.test.** { *; }
+-keep class org.junit.** { *; }
+-keep class junit.** { *; }
 
 # Preserve anything required for Dagger/Hilt to work in full mode
 -keepattributes *Annotation*

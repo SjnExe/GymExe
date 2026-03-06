@@ -12,13 +12,13 @@ java {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = "24"
-    targetCompatibility = "24"
+    sourceCompatibility = "25"
+    targetCompatibility = "25"
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
     }
 }
 
@@ -26,7 +26,6 @@ dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
-    implementation(libs.detekt.gradlePlugin)
     implementation(libs.roborazzi.gradlePlugin)
     implementation("org.jetbrains.kotlinx:kover-gradle-plugin:0.9.7")
 }
@@ -56,10 +55,6 @@ gradlePlugin {
         register("spotless") {
             id = "gymexe.spotless"
             implementationClass = "com.sjn.gym.convention.SpotlessConventionPlugin"
-        }
-        register("detekt") {
-            id = "gymexe.detekt"
-            implementationClass = "com.sjn.gym.convention.DetektConventionPlugin"
         }
         register("roborazzi") {
             id = "gymexe.roborazzi"
