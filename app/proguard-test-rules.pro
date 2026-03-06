@@ -68,6 +68,12 @@
 -keep class com.sjn.gym.**_GeneratedInjector { *; }
 -keep class com.sjn.gym.GymExeApp_HiltComponents** { *; }
 
+# Also keep the Hilt classes in the .dev sub-package if they end up there due to R8/Flavor interactions
+-keep class com.sjn.gym.dev.GymExeApp { *; }
+-keep class com.sjn.gym.dev.Hilt_GymExeApp { *; }
+-keep class com.sjn.gym.dev.**_GeneratedInjector { *; }
+-keep class com.sjn.gym.dev.GymExeApp_HiltComponents** { *; }
+
 # Preserve anything required for Dagger/Hilt to work in full mode
 -keepattributes *Annotation*
 -keepattributes Signature
