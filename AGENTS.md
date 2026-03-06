@@ -11,7 +11,7 @@ This file contains instructions for AI agents working on the **GymExe** reposito
 - **Package:** `com.sjn.gym`
 - **Purpose:** A modular, offline-first workout tracker for gym goers.
 - **Tech Stack:**
-  - Android (Kotlin 2.3.10)
+  - Android (Kotlin 2.3.10 using Java 25)
   - Jetpack Compose (UI)
   - Hilt (Dependency Injection)
   - Room (Local Database)
@@ -29,7 +29,6 @@ This file contains instructions for AI agents working on the **GymExe** reposito
   - Unit Tests for ViewModels and Domain logic.
   - UI Tests using Compose Test Rule.
 - **Linting:** Strict mode enabled.
-  - **Detekt:** `warningsAsErrors` is ON. Version 2.0.0-alpha.2 is used for Java 25 compatibility.
   - **Spotless:** Enforces ktfmt (kotlinlang style) formatting.
 
 ## Security
@@ -64,7 +63,7 @@ yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" 
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ./gradlew aDD --continue --no-daemon --build-cache --configuration-cache  --parallel -q
-./gradlew sA tDDUT det --continue --no-daemon --build-cache --configuration-cache  --parallel -q
+./gradlew sA tDDUT --continue --no-daemon --build-cache --configuration-cache  --parallel -q
 ```
 
 ## Useful Commands
@@ -72,7 +71,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew vCU sA detekt tDDUT aDD -s --continue
+./gradlew vCU sA tDDUT aDD -s --continue
 ```
 
 ### Building
@@ -81,7 +80,6 @@ Run this before submitting any change:
 *   **Build Release APK (Stable):** `./gradlew aSR -s --continue`
 
 ### Quality & Testing
-*   **Run Lint:** `./gradlew det -s --continue`
 *   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
 *   **Format Code:** `./gradlew sA -s --continue`
 *   **Record Roborazzi Baseline:** `./gradlew rRDD -s --continue`
