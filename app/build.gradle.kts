@@ -51,6 +51,11 @@ android {
             matchingFallbacks += listOf("release")
             // Apply test-specific rules ONLY to this build type
             proguardFile("proguard-test-rules.pro")
+            // Also apply to the androidTest APK so the test runner and references survive
+            testProguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-test-rules.pro",
+            )
         }
     }
 
