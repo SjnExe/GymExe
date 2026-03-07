@@ -13,6 +13,7 @@ build/
 gradle/
 !gradle/wrapper/gradle-wrapper.jar
 !gradle/libs.versions.toml
+!gradle/gradle-daemon-jvm.properties
 
 # Android
 local.properties
