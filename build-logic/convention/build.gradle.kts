@@ -25,9 +25,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
-    implementation(libs.spotless.gradlePlugin)
+    implementation(libs.kover.gradlePlugin)
     implementation(libs.roborazzi.gradlePlugin)
-    implementation("org.jetbrains.kotlinx:kover-gradle-plugin:0.9.7")
+    implementation(libs.spotless.gradlePlugin)
 }
 
 gradlePlugin {
