@@ -3,7 +3,6 @@ package com.sjn.gym.core.data.di
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.sjn.gym.core.data.network.GitHubService
 import dagger.Module
 import dagger.Provides
@@ -15,6 +14,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
