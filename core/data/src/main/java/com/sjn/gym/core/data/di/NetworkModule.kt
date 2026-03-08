@@ -3,7 +3,7 @@ package com.sjn.gym.core.data.di
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.sjn.gym.core.data.network.GitHubService
 import dagger.Module
 import dagger.Provides
