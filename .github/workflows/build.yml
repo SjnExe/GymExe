@@ -209,17 +209,18 @@ jobs:
 
       # Cache Android Emulator AVD to speed up startup
       - name: AVD Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         id: avd-cache
         with:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
             /usr/local/lib/android/sdk/system-images/android-36/google_apis/x86_64/
-          # Remove github.run_id to allow cache to be hit on subsequent runs on the same branch
-          key: avd-${{ runner.os }}-api36-x86_64
+          # Include github.run_id to create a new, updated cache on success,
+          # but fallback to the latest available cache for this OS/API via restore-keys
+          key: avd-${{ runner.os }}-api36-x86_64-${{ github.run_id }}
           restore-keys: |
-            avd-${{ runner.os }}-api36-x86_64
+            avd-${{ runner.os }}-api36-x86_64-
 
       # Fail-fast: Compile the app and test APK before booting the 6GB emulator
       # This prevents compilation from happening while the emulator is using resources.

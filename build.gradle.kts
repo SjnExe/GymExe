@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.versionCatalogUpdate)
     alias(libs.plugins.kover)
+    alias(libs.plugins.dependencyAnalysis)
 }
 
 dependencies {

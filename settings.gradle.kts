@@ -1,16 +1,26 @@
 pluginManagement {
     includeBuild("build-logic")
-    plugins {
-        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    }
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
+
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
+    id("com.gradle.develocity") version "4.3"
+}
+
+develocity {
+    buildScan {
+        termsOfUseUrl.set("https://gradle.com/terms-of-service")
+        termsOfUseAgree.set("yes")
+
+        publishing.onlyIf {
+            System.getenv("CI") == "true"
+        }
+    }
 }
 
 dependencyResolutionManagement {
