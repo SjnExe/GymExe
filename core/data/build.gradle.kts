@@ -21,7 +21,7 @@ dependencies {
 
     // Retrofit
     implementation(libs.retrofit)
-    implementation(libs.retrofit.kotlinx.serialization.converter)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp)
 
     // Chucker
