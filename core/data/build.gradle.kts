@@ -1,10 +1,12 @@
 plugins {
     id("gymexe.android.library")
     id("gymexe.android.hilt")
-    // ksp plugin is added by hilt convention
+    // Note: KSP and Kotlin Serialization are typically applied via your convention plugins
 }
 
-android { namespace = "com.sjn.gym.core.data" }
+android {
+    namespace = "com.sjn.gym.core.data"
+}
 
 dependencies {
     implementation(project(":core:model"))
@@ -19,16 +21,15 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Retrofit
+    // Retrofit & Networking
     implementation(libs.retrofit)
+    // Key Fix: The accessor order must match your TOML key 'retrofit-converter-kotlinx-serialization'
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp)
 
-    // Chucker
+    // Chucker - Use strings for flavor-based implementations to avoid configuration issues
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
-
-    // Hilt handled by convention plugin (hilt-android, hilt-compiler)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
