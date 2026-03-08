@@ -224,8 +224,7 @@ jobs:
       - name: Compile Test APKs
         run: |
           ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest \
-            --parallel --warning-mode all -s --build-cache --configuration-cache \
-            -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g"
+            --parallel --warning-mode all -s --build-cache --configuration-cache
 
       - name: Prepare Test Environment
         run: |
