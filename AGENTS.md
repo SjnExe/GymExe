@@ -57,7 +57,7 @@ The project uses the **Foojay Toolchains Resolver**, which automatically downloa
 
 To initialize the environment and run initial checks:
 ```bash
-./gradlew aDD sC tDDUT --continue --no-daemon -q
+./gradlew aDD sC tDDUT --continue -q
 ```
 
 ## Useful Commands
