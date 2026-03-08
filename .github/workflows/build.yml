@@ -271,7 +271,7 @@ jobs:
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          script: ./gradlew connectedDevBenchmarkAndroidTest -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=35.0 -XX:MaxMetaspaceSize=1g --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED"
+          script: ./gradlew connectedDevBenchmarkAndroidTest -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=35.0 -XX:MaxMetaspaceSize=1g --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
       - name: Collect & Upload Reports
         if: always()
