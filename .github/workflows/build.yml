@@ -59,7 +59,6 @@ jobs:
           fi
           ./gradlew $TASKS \
             --parallel --warning-mode all -s --build-cache --configuration-cache \
-            -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee checks_output.log
 
       - name: Collect & Upload Reports
@@ -145,7 +144,6 @@ jobs:
           ./gradlew $TASKS \
             --parallel --warning-mode all -s --build-cache --configuration-cache \
             -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} \
-            -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=85.0 -XX:MaxMetaspaceSize=1g" \
             2>&1 | tee build_output.log
 
       - name: Upload Build Logs
