@@ -7,14 +7,7 @@ on:
   push:
     tags: [ "v*" ]
 
-  # Base Gradle args to maximize performance.
-  # Total runner memory is 16GB (14GB usable).
-  # For non-emulator jobs, give Gradle 10GB. Emulator needs its own RAM, so we'll adjust for the test job.
-
 jobs:
-  # --------------------------------------------------------------------------------
-  # JOB 1: CHECKS (Spotless, Lint, Unit Tests)
-  # --------------------------------------------------------------------------------
   checks:
     name: Run Checks
     runs-on: ubuntu-latest
@@ -35,7 +28,6 @@ jobs:
       - name: Calculate Version
         id: version
         run: |
-          # Same logic to determine version context
           git fetch --tags --force
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           VERSION_BASE=${LATEST_TAG#v}
@@ -71,9 +63,6 @@ jobs:
           name: checks-logs
           path: checks_logs.zip
 
-  # --------------------------------------------------------------------------------
-  # JOB 2: BUILD APKs
-  # --------------------------------------------------------------------------------
   build_apks:
     name: Build APKs
     runs-on: ubuntu-latest
@@ -162,13 +151,13 @@ jobs:
           path: app/build/outputs/apk/stable/release/*.apk
           compression-level: 0
 
-  # --------------------------------------------------------------------------------
-  # JOB 3: INSTRUMENTED TESTS (Dev Only)
-  # --------------------------------------------------------------------------------
   instrumented_tests:
     name: Run Emulator Tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    permissions:
+      actions: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -183,7 +172,6 @@ jobs:
           cache-read-only: false
           cache-overwrite-existing: true
 
-      # We only run tests on 'dev' branch / PRs, so calculate version just for that
       - name: Calculate Version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -192,7 +180,6 @@ jobs:
             echo "BUILD_TYPE=dev" >> $GITHUB_ENV
           fi
 
-      # Cache Android Emulator AVD to speed up startup
       - name: AVD Cache
         uses: actions/cache@v5
         id: avd-cache
@@ -205,11 +192,9 @@ jobs:
           restore-keys: |
             avd-${{ runner.os }}-api36-x86_64
 
-      # Fail-fast: Compile the app and test APK before booting the emulator
-      # This prevents compilation from happening while the emulator is using resources.
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
-          
+
       - name: Free Memory
         run: ./gradlew --stop
 
@@ -242,7 +227,6 @@ jobs:
           cores: 4
           script: echo "Generated AVD snapshot for caching."
 
-      # Lower JVM args here (Micro-Daemon) because the Emulator needs to consume 8GB RAM
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -258,7 +242,7 @@ jobs:
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          script: ./gradlew connectedDevBenchmarkAndroidTest --offline --no-watch-fs -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx1g -XX:MaxMetaspaceSize=512m --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+          script: ./gradlew connectedDevBenchmarkAndroidTest --no-watch-fs -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx1g -XX:MaxMetaspaceSize=512m --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
       - name: Collect & Upload Reports
         if: always()
@@ -273,18 +257,12 @@ jobs:
           name: emulator-logs
           path: emulator_logs.zip
 
-  # --------------------------------------------------------------------------------
-  # JOB 4: RELEASE
-  # --------------------------------------------------------------------------------
   release:
     name: Release APKs
     runs-on: ubuntu-latest
     needs: [checks, build_apks, instrumented_tests]
     permissions:
       contents: write
-    # The instrumented_tests job is completely skipped on non-dev branches.
-    # If a job is skipped, a strict `success()` requirement on it can fail the dependent job.
-    # By using always() but checking that no upstream job failed, we handle the skipped job safely.
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
       - name: Checkout code
