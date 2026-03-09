@@ -11,7 +11,6 @@ env:
   # Base Gradle args to maximize performance.
   # Total runner memory is 16GB (14GB usable).
   # For non-emulator jobs, give Gradle 10GB. Emulator needs its own RAM, so we'll adjust for the test job.
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 jobs:
   # --------------------------------------------------------------------------------
@@ -25,7 +24,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -57,7 +55,7 @@ jobs:
           else
             TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
           fi
-          ./gradlew $TASKS -s 2>&1 | tee checks_output.log
+          ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee checks_output.log
 
       - name: Collect & Upload Reports
         if: always()
@@ -66,7 +64,7 @@ jobs:
           find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
           find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
           find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
-          zip -r checks_logs.zip checks_output.log reports/ || true
+          zip -r -0 checks_logs.zip checks_output.log reports/ || true
       - name: Upload Checks Logs
         if: always()
         uses: actions/upload-artifact@v6
@@ -88,7 +86,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -126,8 +123,6 @@ jobs:
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-
-          # Set outputs for subsequent jobs
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
@@ -139,18 +134,17 @@ jobs:
           else
             TASKS="assembleDevRelease assembleDevDebug"
           fi
-          ./gradlew $TASKS -s -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} 2>&1 | tee build_output.log
+          ./gradlew $TASKS -s --no-watch-fs -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} 2>&1 | tee build_output.log
 
       - name: Upload Build Logs
         if: always()
-        run: zip -r build_logs.zip build_output.log || true
+        run: zip -r -0 build_logs.zip build_output.log || true
       - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: build-logs
           path: build_logs.zip
 
-      # Upload the actual compiled APKs so the release job can grab them
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
         uses: actions/upload-artifact@v6
@@ -182,7 +176,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
@@ -209,16 +202,17 @@ jobs:
             ~/.android/avd/*
             ~/.android/adb*
             /usr/local/lib/android/sdk/system-images/android-36/google_apis/x86_64/
-          # Remove github.run_id to allow cache to be hit on subsequent runs on the same branch
           key: avd-${{ runner.os }}-api36-x86_64
           restore-keys: |
             avd-${{ runner.os }}-api36-x86_64
 
-      # Fail-fast: Compile the app and test APK before booting the 6GB emulator
+      # Fail-fast: Compile the app and test APK before booting the emulator
       # This prevents compilation from happening while the emulator is using resources.
       - name: Compile Test APKs
-        run: |
-          ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+          
+      - name: Free Memory
+        run: ./gradlew --stop
 
       - name: Prepare Test Environment
         run: |
@@ -243,13 +237,13 @@ jobs:
           disable-animations: false
           disable-linux-hw-accel: false
           emulator-boot-timeout: 300
-          ram-size: 6144M
+          ram-size: 8192M
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
           script: echo "Generated AVD snapshot for caching."
 
-      # Lower JVM args here because the Emulator needs to consume 6GB RAM (4G memory + 2G heap)
+      # Lower JVM args here (Micro-Daemon) because the Emulator needs to consume 8GB RAM
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -261,18 +255,18 @@ jobs:
           disable-animations: true
           disable-linux-hw-accel: false
           emulator-boot-timeout: 300
-          ram-size: 6144M
+          ram-size: 8192M
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          script: ./gradlew connectedDevBenchmarkAndroidTest -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-XX:MaxRAMPercentage=35.0 -XX:MaxMetaspaceSize=1g --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+          script: ./gradlew connectedDevBenchmarkAndroidTest --offline --no-watch-fs -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx1g -XX:MaxMetaspaceSize=512m --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
       - name: Collect & Upload Reports
         if: always()
         run: |
           mkdir -p reports/androidTests
           find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
-          zip -r emulator_logs.zip reports/ || true
+          zip -r -0 emulator_logs.zip reports/ || true
       - name: Upload Emulator Logs
         if: always()
         uses: actions/upload-artifact@v6
