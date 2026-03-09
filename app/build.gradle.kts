@@ -5,7 +5,6 @@ plugins {
     id("gymexe.android.compose")
     id("gymexe.android.hilt")
     id("gymexe.roborazzi")
-    alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.dependency.analysis)
 }
