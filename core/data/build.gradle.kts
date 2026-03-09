@@ -1,7 +1,6 @@
 plugins {
     id("gymexe.android.library")
     id("gymexe.android.hilt")
-    alias(libs.plugins.dependency.analysis)
 }
 
 android { namespace = "com.sjn.gym.core.data" }
