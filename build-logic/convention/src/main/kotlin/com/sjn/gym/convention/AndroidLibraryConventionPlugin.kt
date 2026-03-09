@@ -15,6 +15,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 apply("com.android.library")
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
+                apply("com.autonomousapps.dependency-analysis")
             }
 
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
