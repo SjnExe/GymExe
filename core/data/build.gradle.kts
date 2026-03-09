@@ -1,7 +1,6 @@
 plugins {
     id("gymexe.android.library")
     id("gymexe.android.hilt")
-    // ksp plugin is added by hilt convention
     alias(libs.plugins.dependency.analysis)
 }
 
