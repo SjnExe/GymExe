@@ -103,10 +103,6 @@ Run this before submitting any change:
 ```bash
 ./gradlew cRDD -s --continue
 ```
-*   **Check Dependency Health:**
-```bash
-./gradlew buildHealth -s --continue
-```
 *   **Generate HTML Test Coverage:** 
 ```bash
 ./gradlew kHR -s --continue
@@ -125,8 +121,6 @@ Run this before submitting any change:
 ```bash
 ./gradlew clean build
 ```
-
-
 ### Maintenance
 *   **Update Dependencies:**
 ```bash
