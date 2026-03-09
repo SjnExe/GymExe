@@ -38,7 +38,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     create("dev") {
                         dimension = "env"
                         applicationIdSuffix = ".dev"
-                        if (!project.hasProperty("versionName")) {
+                        if (!project.providers.gradleProperty("versionName").isPresent) {
                             versionNameSuffix = "-dev"
                         }
                     }
