@@ -16,8 +16,8 @@ android {
         applicationId = "com.sjn.gym"
         // minSdk, targetSdk handled by convention plugin
 
-        val codeProp = project.findProperty("versionCode") as? String
-        val nameProp = project.findProperty("versionName") as? String
+        val codeProp = project.providers.gradleProperty("versionCode").orNull
+        val nameProp = project.providers.gradleProperty("versionName").orNull
 
         versionCode = codeProp?.toIntOrNull() ?: 1
         versionName = nameProp ?: "0.0.1"
