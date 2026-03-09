@@ -1,4 +1,4 @@
-plugins {id("gymexe.android.feature")}
+plugins { id("gymexe.android.feature") }
 
 android {
     namespace = "com.sjn.gym.feature.settings"
