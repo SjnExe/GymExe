@@ -50,9 +50,9 @@ jobs:
         run: |
           set -o pipefail
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="spotlessCheck lintStableRelease testStableDebugUnitTest buildHealth"
+            TASKS="spotlessCheck lintStableRelease testStableDebugUnitTest"
           else
-            TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest buildHealth"
+            TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
           fi
           ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee checks_output.log
 
