@@ -7,7 +7,7 @@ android {
     namespace = "com.sjn.gym.feature.settings"
     buildFeatures { buildConfig = true }
     defaultConfig {
-        val nameProp = project.findProperty("versionName") as? String
+        val nameProp = project.providers.gradleProperty("versionName").orNull
         buildConfigField("String", "VERSION_NAME", "\"${nameProp ?: "0.0.1"}\"")
     }
 }
