@@ -1,6 +1,7 @@
 plugins {
     id("gymexe.android.library")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dependency.analysis)
 }
 
 android { namespace = "com.sjn.gym.core.model" }
