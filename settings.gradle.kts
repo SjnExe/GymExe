@@ -1,11 +1,4 @@
 
-val requestedTasks = gradle.startParameter.taskNames
-if (requestedTasks.any { it.contains("vCU") || it.contains("versionCatalogUpdate") || it.contains("buildHealth") || it.contains("generateBuildHealth") }) {
-    gradle.startParameter.systemPropertiesArgs["org.gradle.unsafe.isolated-projects"] = "false"
-    // For configuration cache, setting the system property before project evaluation often disables it:
-    gradle.startParameter.systemPropertiesArgs["org.gradle.configuration-cache"] = "false"
-}
-
 pluginManagement {
     includeBuild("build-logic")
     plugins {
