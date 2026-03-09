@@ -69,18 +69,48 @@ Run this before submitting any change:
 ```
 
 ### Building
-*   **Build Debug APK (Dev):** `./gradlew aDD -s --continue`
-*   **Build Release APK (Dev):** `./gradlew aDR -s --continue`
-*   **Build Release APK (Stable):** `./gradlew aSR -s --continue`
+*   **Build Debug APK (Dev):** 
+```bash
+./gradlew aDD -s --continue
+```
+*   **Build Release APK (Dev):** 
+```bash
+./gradlew aDR -s --continue
+```
+*   **Build Release APK (Stable):** 
+```bash
+./gradlew aSR -s --continue
+```
 
 ### Quality & Testing
-*   **Run Unit Tests:** `./gradlew tDDUT -s --continue`
-*   **Format Code:** `./gradlew sA -s --continue`
-*   **Record Roborazzi Baseline:** `./gradlew rRDD -s --continue`
-*   **Verify Roborazzi Baseline:** `./gradlew vRDD -s --continue`
-*   **Compare Roborazzi Baseline:** `./gradlew cRDD -s --continue`
-*   **Generate HTML Test Coverage:** `./gradlew kHR -s --continue`
-*   **Generate XML Test Coverage:** `./gradlew kXR -s --continue`
+*   **Run Unit Tests:** 
+```bash
+./gradlew tDDUT -s --continue
+```
+*   **Format Code:** 
+```bash
+./gradlew sA -s --continue
+```
+*   **Record Roborazzi Baseline:** 
+```bash
+./gradlew rRDD -s --continue
+```
+*   **Verify Roborazzi Baseline:** 
+```bash
+./gradlew vRDD -s --continue
+```
+*   **Compare Roborazzi Baseline:** 
+```bash
+./gradlew cRDD -s --continue
+```
+*   **Generate HTML Test Coverage:** 
+```bash
+./gradlew kHR -s --continue
+```
+*   **Generate XML Test Coverage:** 
+```bash
+./gradlew kXR -s --continue
+```
 
 ### Modularization
 *   **Sync Project:**
