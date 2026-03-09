@@ -83,8 +83,17 @@ Run this before submitting any change:
 *   **Generate XML Test Coverage:** `./gradlew kXR -s --continue`
 
 ### Modularization
-*   **Sync Project:** `./gradlew --refresh-dependencies`
-*   **Clean Build:** `./gradlew clean build`
+*   **Sync Project:**
+```bash
+./gradlew --refresh-dependencies
+```
+*   **Clean Build:**
+```bash
+./gradlew clean build
+```
 
 ### Maintenance
-*   **Update Dependencies:** `./gradlew vCU --no-configuration-cache`
+*   **Update Dependencies:**
+```bash
+./gradlew vCU --no-configuration-cache
+```
