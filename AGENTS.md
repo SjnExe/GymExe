@@ -105,7 +105,7 @@ Run this before submitting any change:
 ```
 *   **Check Dependency Health:**
 ```bash
-./gradlew buildHealth -Dorg.gradle.unsafe.isolated-projects=false -s --continue
+./gradlew buildHealth -s --continue
 ```
 *   **Generate HTML Test Coverage:** 
 ```bash
@@ -130,7 +130,7 @@ Run this before submitting any change:
 ### Maintenance
 *   **Update Dependencies:**
 ```bash
-./gradlew vCU -Dorg.gradle.unsafe.isolated-projects=false -Dorg.gradle.configuration-cache=false
+./gradlew vCU
 ```
 *   **Develocity Build Scans & Cache:**
 Build scans and local caching are automatically enabled via `settings.gradle.kts`. Use `--no-scan` if you wish to bypass build scan generation for a particular run.
