@@ -15,5 +15,6 @@ dependencies {
     // debugImplementation(libs.androidx.ui.tooling) // added by plugin
 
     testImplementation(libs.junit)
-    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation(libs.robolectric)
+    testImplementation(libs.bundles.roborazzi)
 }

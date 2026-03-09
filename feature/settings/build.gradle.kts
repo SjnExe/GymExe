@@ -1,6 +1,5 @@
 plugins {
     id("gymexe.android.feature")
-    id("gymexe.roborazzi")
 }
 
 android {
