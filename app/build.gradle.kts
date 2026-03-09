@@ -79,19 +79,6 @@ android {
             keepDebugSymbols += "**/libdatastore_shared_counter.so"
         }
     }
-
-    testOptions {
-        unitTests.all {
-            it.jvmArgs(
-                "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                "--add-opens=java.base/java.util=ALL-UNNAMED",
-                "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
-                "--add-opens=java.base/java.io=ALL-UNNAMED",
-                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-                "--enable-native-access=ALL-UNNAMED"
-            )
-        }
-    }
 }
 
 // Enable AndroidTest ONLY for devBenchmark to allow testing R8 builds
