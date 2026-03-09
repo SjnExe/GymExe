@@ -12,6 +12,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("com.android.application")
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
+                apply("com.autonomousapps.dependency-analysis")
             }
 
             extensions.configure<ApplicationExtension> {
