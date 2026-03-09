@@ -1,6 +1,7 @@
 plugins {
     id("gymexe.android.feature")
     id("gymexe.roborazzi")
+    alias(libs.plugins.dependency.analysis)
 }
 
 android {
