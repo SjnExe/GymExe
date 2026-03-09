@@ -2,7 +2,6 @@ plugins {
     id("gymexe.android.library")
     id("gymexe.android.compose")
     id("gymexe.roborazzi")
-    alias(libs.plugins.dependency.analysis)
 }
 
 android { namespace = "com.sjn.gym.core.ui" }
