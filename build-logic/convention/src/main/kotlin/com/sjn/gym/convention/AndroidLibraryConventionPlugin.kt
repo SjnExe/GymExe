@@ -62,16 +62,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     }
                 }
             }
-            afterEvaluate {
-                val hasTests = project.fileTree(project.projectDir.resolve("src/test")).any {
-                    it.isFile && (it.extension == "kt" || it.extension == "java")
-                }
-                if (!hasTests) {
-                    tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach {
-                        this.enabled = false
-                    }
-                }
-            }
         }
     }
 }
