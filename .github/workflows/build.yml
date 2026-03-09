@@ -57,9 +57,7 @@ jobs:
           else
             TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
           fi
-          ./gradlew $TASKS \
-            --parallel --warning-mode all -s --build-cache --configuration-cache \
-            2>&1 | tee checks_output.log
+          ./gradlew $TASKS --warning-mode all -s 2>&1 | tee checks_output.log
 
       - name: Collect & Upload Reports
         if: always()
@@ -141,10 +139,7 @@ jobs:
           else
             TASKS="assembleDevRelease assembleDevDebug"
           fi
-          ./gradlew $TASKS \
-            --parallel --warning-mode all -s --build-cache --configuration-cache \
-            -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} \
-            2>&1 | tee build_output.log
+          ./gradlew $TASKS --warning-mode all -s -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} 2>&1 | tee build_output.log
 
       - name: Upload Build Logs
         if: always()
@@ -223,8 +218,7 @@ jobs:
       # This prevents compilation from happening while the emulator is using resources.
       - name: Compile Test APKs
         run: |
-          ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest \
-            --parallel --warning-mode all -s --build-cache --configuration-cache
+          ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest --warning-mode all -s
 
       - name: Prepare Test Environment
         run: |
