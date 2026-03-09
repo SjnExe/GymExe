@@ -1,4 +1,3 @@
-
 pluginManagement {
     includeBuild("build-logic")
     plugins {
@@ -21,7 +20,6 @@ develocity {
         termsOfUseAgree.set("yes")
     }
 }
-
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
