@@ -7,7 +7,6 @@ on:
   push:
     tags: [ "v*" ]
 
-env:
   # Base Gradle args to maximize performance.
   # Total runner memory is 16GB (14GB usable).
   # For non-emulator jobs, give Gradle 10GB. Emulator needs its own RAM, so we'll adjust for the test job.
