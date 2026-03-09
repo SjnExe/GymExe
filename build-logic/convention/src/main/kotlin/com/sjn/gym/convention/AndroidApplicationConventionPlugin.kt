@@ -27,6 +27,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         val testTask = this as? org.gradle.api.tasks.testing.Test
                         testTask?.useJUnitPlatform()
                         testTask?.setProperty("failOnNoDiscoveredTests", false)
+                        testTask?.jvmArgs("--enable-native-access=ALL-UNNAMED")
                     }
                 }
 

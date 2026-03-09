@@ -10,7 +10,15 @@ pluginManagement {
     }
 }
 plugins {
+    id("com.gradle.develocity") version "4.3.2"
     id("org.gradle.toolchains.foojay-resolver-convention")
+}
+
+develocity {
+    buildScan {
+        termsOfUseUrl.set("https://gradle.com/terms-of-service")
+        termsOfUseAgree.set("yes")
+    }
 }
 
 dependencyResolutionManagement {

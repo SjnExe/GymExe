@@ -21,6 +21,9 @@ class RoborazziConventionPlugin : Plugin<Project> {
             tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach {
                 systemProperty("robolectric.graphicsMode", "NATIVE")
                 systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                
+                // Add this line to silence the Conscrypt native access warning
+                jvmArgs("--enable-native-access=ALL-UNNAMED")
             }
         }
     }
