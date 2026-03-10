@@ -12,7 +12,11 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("com.android.application")
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
+                apply("gymexe.android.test")
             }
+
+            val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
+            dependencies.add("implementation", libs.findLibrary("androidx.profileinstaller").get())
 
             extensions.configure<ApplicationExtension> {
                 defaultConfig.targetSdk = 36
@@ -20,6 +24,11 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 compileSdk = 36
 
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+                buildFeatures {
+                    buildConfig = false
+                    resValues = false
+                }
 
                 testOptions {
                     unitTests.isIncludeAndroidResources = true
