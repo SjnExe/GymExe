@@ -9,9 +9,7 @@ plugins {
     alias(libs.plugins.dependencyGuard)
 }
 
-dependencyGuard {
-    configuration("devReleaseRuntimeClasspath")
-}
+dependencyGuard { configuration("devReleaseRuntimeClasspath") }
 
 android {
     buildFeatures { buildConfig = true }
