@@ -256,7 +256,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: emulator-logs
+          name: emulator-logs-api${{ matrix.api-level }}
           path: emulator_logs.zip
 
   release:
