@@ -126,9 +126,5 @@ Run this before submitting any change:
 ```bash
 ./gradlew vCU
 ```
-*   **Dependency Analysis:**
-```bash
-./gradlew buildHealth
-```
 *   **Develocity Build Scans & Cache:**
 Build scans and local caching are automatically enabled via `settings.gradle.kts`. Use `--no-scan` if you wish to bypass build scan generation for a particular run.
