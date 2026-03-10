@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
@@ -58,7 +58,7 @@ jobs:
           zip -r -0 checks_logs.zip checks_output.log reports/ || true
       - name: Upload Checks Logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: checks-logs
           path: checks_logs.zip
@@ -72,12 +72,12 @@ jobs:
       BUILD_TYPE: ${{ steps.version.outputs.BUILD_TYPE }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
@@ -128,7 +128,7 @@ jobs:
       - name: Upload Build Logs
         if: always()
         run: zip -r -0 build_logs.zip build_output.log || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: build-logs
@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compiled-apks
           path: |
@@ -148,7 +148,7 @@ jobs:
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compiled-apks
           path: app/build/outputs/apk/stable/release/*.apk
@@ -158,6 +158,7 @@ jobs:
   instrumented_tests:
     name: API ${{ matrix.api-level }} tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
     strategy:
       matrix:
@@ -167,12 +168,12 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
@@ -187,17 +188,18 @@ jobs:
             echo "BUILD_TYPE=dev" >> $GITHUB_ENV
           fi
 
-      - name: AVD Cache
-        uses: actions/cache@v4
-        id: avd-cache
+      - name: Android SDK Cache
+        uses: actions/cache@v5
+        id: sdk-cache
         with:
           path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-            /usr/local/lib/android/sdk/system-images/android-${{ matrix.api-level }}/google_apis/${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}/
-          key: avd-api${{ matrix.api-level }}
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/build-tools/
+            /usr/local/lib/android/sdk/platform-tools/
+            /usr/local/lib/android/sdk/platforms/
+          key: android-sdk-api${{ matrix.api-level }}-v1
           restore-keys: |
-            avd-api${{ matrix.api-level }}
+            android-sdk-api
 
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
@@ -212,25 +214,6 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: google_apis
-          arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
-          profile: pixel_7_pro
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          disable-linux-hw-accel: false
-          emulator-boot-timeout: 300
-          ram-size: 8192M
-          heap-size: 2048M
-          disk-size: 6000M
-          cores: 4
-          script: echo "Generated AVD snapshot for caching."
 
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -258,7 +241,7 @@ jobs:
           zip -r -0 emulator_logs.zip reports/ || true
       - name: Upload Emulator Logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: emulator-logs-api${{ matrix.api-level }}
           path: emulator_logs.zip
@@ -273,7 +256,7 @@ jobs:
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
