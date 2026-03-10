@@ -155,7 +155,31 @@ jobs:
           compression-level: 0
           overwrite: true
 
+  setup_sdk_cache:
+    name: Pre-warm SDK Cache
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - name: Cache Android SDK Components
+        uses: actions/cache@v5
+        id: sdk-cache
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/build-tools/
+            /usr/local/lib/android/sdk/platform-tools/
+            /usr/local/lib/android/sdk/cmdline-tools/
+            /usr/local/lib/android/sdk/extras/
+          key: android-sdk-base
+
+      - name: Download Base SDK
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;35.0.0"
+
   instrumented_tests:
+    needs: setup_sdk_cache
     name: API ${{ matrix.api-level }} tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -189,7 +213,7 @@ jobs:
           fi
 
       - name: Android SDK Cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         id: sdk-cache
         with:
           path: |
