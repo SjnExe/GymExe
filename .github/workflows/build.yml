@@ -156,7 +156,7 @@ jobs:
           overwrite: true
 
   instrumented_tests:
-    name: Run Emulator Tests API ${{ matrix.api-level }}
+    name: API ${{ matrix.api-level }} tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
     strategy:
