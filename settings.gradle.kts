@@ -18,6 +18,11 @@ develocity {
     buildScan {
         termsOfUseUrl.set("https://gradle.com/terms-of-service")
         termsOfUseAgree.set("yes")
+
+        val isCI = System.getenv("CI") == "true"
+        val isDevelocityEnabled = providers.gradleProperty("enableDevelocity").getOrElse("false") == "true"
+
+        publishing.onlyIf { isCI || isDevelocityEnabled }
     }
 }
 
