@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
@@ -58,10 +58,11 @@ jobs:
           zip -r -0 checks_logs.zip checks_output.log reports/ || true
       - name: Upload Checks Logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: checks-logs
           path: checks_logs.zip
+          overwrite: true
 
   build_apks:
     name: Build APKs
@@ -71,12 +72,12 @@ jobs:
       BUILD_TYPE: ${{ steps.version.outputs.BUILD_TYPE }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
@@ -127,29 +128,32 @@ jobs:
       - name: Upload Build Logs
         if: always()
         run: zip -r -0 build_logs.zip build_output.log || true
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: build-logs
           path: build_logs.zip
+          overwrite: true
 
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: compiled-apks
           path: |
             app/build/outputs/apk/dev/release/*.apk
             app/build/outputs/apk/dev/debug/*.apk
           compression-level: 0
+          overwrite: true
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: compiled-apks
           path: app/build/outputs/apk/stable/release/*.apk
           compression-level: 0
+          overwrite: true
 
   instrumented_tests:
     name: Run Emulator Tests API ${{ matrix.api-level }}
@@ -163,12 +167,12 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
@@ -184,13 +188,13 @@ jobs:
           fi
 
       - name: AVD Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         id: avd-cache
         with:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-            /usr/local/lib/android/sdk/system-images/android-${{ matrix.api-level }}/google_apis/x86_64/
+            /usr/local/lib/android/sdk/system-images/android-${{ matrix.api-level }}/google_apis/${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}/
           key: avd-api${{ matrix.api-level }}
           restore-keys: |
             avd-api${{ matrix.api-level }}
@@ -215,7 +219,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           target: google_apis
-          arch: x86_64
+          arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -233,7 +237,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           target: google_apis
-          arch: x86_64
+          arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -254,10 +258,11 @@ jobs:
           zip -r -0 emulator_logs.zip reports/ || true
       - name: Upload Emulator Logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: emulator-logs-api${{ matrix.api-level }}
           path: emulator_logs.zip
+          overwrite: true
 
   release:
     name: Release APKs
@@ -268,7 +273,7 @@ jobs:
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
