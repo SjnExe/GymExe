@@ -130,6 +130,5 @@ Run this before submitting any change:
 ```bash
 ./gradlew buildHealth
 ```
-> **Note on `com.autonomousapps.dependency-analysis`:** The dependency analysis plugin must be applied manually to subprojects (via `alias(libs.plugins.dependency.analysis)`) to support Isolated Projects. Be aware that running `./gradlew vCU` might inadvertently reset or revert `build.gradle.kts` files depending on the Version Catalog Update configuration. If your changes to subproject build files are lost, apply them manually after running `vCU`.
 *   **Develocity Build Scans & Cache:**
 Build scans and local caching are automatically enabled via `settings.gradle.kts`. Use `--no-scan` if you wish to bypass build scan generation for a particular run.
