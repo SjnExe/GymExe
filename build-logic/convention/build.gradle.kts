@@ -52,6 +52,14 @@ gradlePlugin {
             id = "gymexe.android.feature"
             implementationClass = "com.sjn.gym.convention.AndroidFeatureConventionPlugin"
         }
+        register("androidRoom") {
+            id = "gymexe.android.room"
+            implementationClass = "com.sjn.gym.convention.AndroidRoomConventionPlugin"
+        }
+        register("androidTest") {
+            id = "gymexe.android.test"
+            implementationClass = "com.sjn.gym.convention.AndroidTestConventionPlugin"
+        }
         register("spotless") {
             id = "gymexe.spotless"
             implementationClass = "com.sjn.gym.convention.SpotlessConventionPlugin"
