@@ -62,6 +62,7 @@ jobs:
         with:
           name: checks-logs
           path: checks_logs.zip
+          overwrite: true
 
   build_apks:
     name: Build APKs
@@ -132,6 +133,7 @@ jobs:
         with:
           name: build-logs
           path: build_logs.zip
+          overwrite: true
 
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
@@ -142,6 +144,7 @@ jobs:
             app/build/outputs/apk/dev/release/*.apk
             app/build/outputs/apk/dev/debug/*.apk
           compression-level: 0
+          overwrite: true
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
@@ -150,11 +153,67 @@ jobs:
           name: compiled-apks
           path: app/build/outputs/apk/stable/release/*.apk
           compression-level: 0
+          overwrite: true
 
-  instrumented_tests:
-    name: Run Emulator Tests
+  build_test_apks:
+    name: Compile Test APKs
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Compile Test APKs
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+
+      - name: Upload Test APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-apks
+          path: |
+            app/build/outputs/apk/dev/benchmark/*.apk
+            app/build/outputs/apk/androidTest/dev/benchmark/*.apk
+          compression-level: 0
+
+  setup_sdk_cache:
+    name: Pre-warm SDK Cache
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - name: Fix Android SDK permissions
+        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+
+      - name: Cache Android SDK Components
+        uses: actions/cache@v5
+        id: sdk-cache
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/build-tools/
+            /usr/local/lib/android/sdk/platform-tools/
+            /usr/local/lib/android/sdk/cmdline-tools/
+            /usr/local/lib/android/sdk/extras/
+          key: android-sdk-base
+
+      - name: Download Base SDK
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
+
+  instrumented_tests:
+    needs: [setup_sdk_cache, build_test_apks]
+    name: API ${{ matrix.api-level }} tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    strategy:
+      matrix:
+        api-level: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
     permissions:
       actions: write
       contents: read
@@ -180,59 +239,48 @@ jobs:
             echo "BUILD_TYPE=dev" >> $GITHUB_ENV
           fi
 
-      - name: AVD Cache
-        uses: actions/cache@v5
-        id: avd-cache
+      - name: Fix Android SDK permissions
+        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+
+      - name: Android SDK Cache
+        uses: actions/cache/restore@v5
+        id: sdk-cache
         with:
           path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-            /usr/local/lib/android/sdk/system-images/android-36/google_apis/x86_64/
-          key: avd-${{ runner.os }}-api36-x86_64
-          restore-keys: |
-            avd-${{ runner.os }}-api36-x86_64
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/build-tools/
+            /usr/local/lib/android/sdk/platform-tools/
+            /usr/local/lib/android/sdk/cmdline-tools/
+            /usr/local/lib/android/sdk/extras/
+          key: android-sdk-base
 
-      - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+      - name: Download Test APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: test-apks
+          path: app/build/outputs/apk
 
-      - name: Free Memory
-        run: ./gradlew --stop
+      - name: Copy Test APKs to Source Directory
+        run: |
+          mkdir -p app/build/outputs/apk/androidTest/dev/benchmark
+          cp -r app/build/outputs/apk/dev/benchmark/* app/build/outputs/apk/dev/benchmark/ 2>/dev/null || true
+          cp -r app/build/outputs/apk/androidTest/dev/benchmark/* app/build/outputs/apk/androidTest/dev/benchmark/ 2>/dev/null || true
 
       - name: Prepare Test Environment
         run: |
           sudo apt-get update
           sudo apt-get install -y libx11-6 libx11-xcb1 libvulkan1 telnet netcat-openbsd
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-          sudo usermod -a -G kvm $USER
-          sudo chmod 666 /dev/kvm
-          sudo chown $USER /dev/kvm
-
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 36
-          target: google_apis
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          disable-linux-hw-accel: false
-          emulator-boot-timeout: 300
-          ram-size: 8192M
-          heap-size: 2048M
-          disk-size: 6000M
-          cores: 4
-          script: echo "Generated AVD snapshot for caching."
 
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 36
+          api-level: ${{ matrix.api-level }}
           target: google_apis
-          arch: x86_64
+          arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
+          profile: pixel_7_pro
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
@@ -254,8 +302,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: emulator-logs
+          name: emulator-logs-api${{ matrix.api-level }}
           path: emulator_logs.zip
+          overwrite: true
 
   release:
     name: Release APKs
