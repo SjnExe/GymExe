@@ -332,14 +332,8 @@ jobs:
             adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
             OUTPUT=$(adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner)
             echo "$OUTPUT"
-            if echo "$OUTPUT" | grep -q "FAILURES!!!"; then
-              echo "Tests failed."
-              exit 1
-            fi
-            if echo "$OUTPUT" | grep -q "Process crashed"; then
-              echo "Test process crashed."
-              exit 1
-            fi
+            if echo "$OUTPUT" | grep -q "FAILURES!!!"; then echo "Tests failed."; exit 1; fi
+            if echo "$OUTPUT" | grep -q "Process crashed"; then echo "Test process crashed."; exit 1; fi
 
   release:
     name: Release APKs
