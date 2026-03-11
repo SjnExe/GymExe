@@ -220,6 +220,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.4.0'
+          cache-cleanup: on-success
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
 
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
