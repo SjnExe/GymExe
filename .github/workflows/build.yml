@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
@@ -33,8 +31,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
@@ -79,8 +75,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
@@ -215,8 +209,6 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/dev')
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -257,7 +249,7 @@ jobs:
             /usr/local/lib/android/sdk/platform-tools/
             /usr/local/lib/android/sdk/cmdline-tools/
             /usr/local/lib/android/sdk/extras/
-          key: android-sdk-base
+          key: android-sdk-base-36.0.0
 
       - name: Download Base SDK
         if: steps.sdk-cache.outputs.cache-hit != 'true'
@@ -275,7 +267,7 @@ jobs:
             /usr/local/lib/android/sdk/platform-tools/
             /usr/local/lib/android/sdk/cmdline-tools/
             /usr/local/lib/android/sdk/extras/
-          key: android-sdk-base
+          key: android-sdk-base-36.0.0
 
   instrumented_tests:
     needs: [setup_sdk_cache, build_test_apks]
@@ -292,8 +284,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Fix Android SDK permissions
         run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
@@ -308,7 +298,7 @@ jobs:
             /usr/local/lib/android/sdk/platform-tools/
             /usr/local/lib/android/sdk/cmdline-tools/
             /usr/local/lib/android/sdk/extras/
-          key: android-sdk-base
+          key: android-sdk-base-36.0.0
 
       - name: Download Test APKs
         uses: actions/download-artifact@v7
@@ -364,8 +354,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Download Compiled APKs
         uses: actions/download-artifact@v7
