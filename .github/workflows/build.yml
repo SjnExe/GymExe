@@ -66,7 +66,7 @@ jobs:
           zip -r -0 lint_logs.zip lint_output.log reports/ || true
       - name: Upload Lint Logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: lint-logs
           path: lint_logs.zip
@@ -111,7 +111,7 @@ jobs:
           zip -r -0 test_logs.zip tests_output.log reports/ || true
       - name: Upload Test Logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-logs
           path: test_logs.zip
@@ -181,7 +181,7 @@ jobs:
       - name: Upload Build Logs
         if: always()
         run: zip -r -0 build_logs.zip build_output.log || true
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: build-logs
@@ -190,7 +190,7 @@ jobs:
 
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
           path: |
@@ -201,7 +201,7 @@ jobs:
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
           path: app/build/outputs/apk/stable/release/*.apk
@@ -224,7 +224,7 @@ jobs:
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
 
       - name: Upload Test APKs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-apks
           path: |
@@ -292,7 +292,7 @@ jobs:
           key: android-sdk-base
 
       - name: Download Test APKs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: test-apks
           path: app/build/outputs/apk
@@ -349,7 +349,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download Compiled APKs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: compiled-apks
           path: apks/
