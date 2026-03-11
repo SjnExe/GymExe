@@ -8,15 +8,14 @@ on:
     tags: [ "v*" ]
 
 jobs:
-  checks:
-    name: Run Checks
+  spotless_check:
+    name: Spotless Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
@@ -24,44 +23,98 @@ jobs:
           cache-cleanup: on-success
           cache-read-only: false
           cache-overwrite-existing: true
+      - name: Run Spotless Check
+        run: ./gradlew spotlessCheck -s --no-watch-fs
 
-      - name: Calculate Version
-        id: version
+  lint_check:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.4.0'
+          cache-cleanup: on-success
+          cache-read-only: false
+          cache-overwrite-existing: true
+      - name: Calculate Build Type
         run: |
-          git fetch --tags --force
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          VERSION_BASE=${LATEST_TAG#v}
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            BUILD_TYPE=stable
+            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
           else
-            BUILD_TYPE=dev
+            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
           fi
-          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-
-      - name: Run Checks
+      - name: Run Lint Check
         run: |
           set -o pipefail
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="spotlessCheck lintStableRelease testStableDebugUnitTest"
+            TASKS="lintStableRelease"
           else
-            TASKS="spotlessCheck lintDevDebug testDevDebugUnitTest"
+            TASKS="lintDevDebug"
           fi
-          ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee checks_output.log
-
+          ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee lint_output.log
       - name: Collect & Upload Reports
         if: always()
         run: |
-          mkdir -p reports/lint reports/tests
+          mkdir -p reports/lint
           find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
           find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
-          find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
-          zip -r -0 checks_logs.zip checks_output.log reports/ || true
-      - name: Upload Checks Logs
+          zip -r -0 lint_logs.zip lint_output.log reports/ || true
+      - name: Upload Lint Logs
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: checks-logs
-          path: checks_logs.zip
+          name: lint-logs
+          path: lint_logs.zip
+          overwrite: true
+
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.4.0'
+          cache-cleanup: on-success
+          cache-read-only: false
+          cache-overwrite-existing: true
+      - name: Calculate Build Type
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
+          else
+            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
+          fi
+      - name: Run Unit Tests
+        run: |
+          set -o pipefail
+          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
+            TASKS="testStableDebugUnitTest"
+          else
+            TASKS="testDevDebugUnitTest"
+          fi
+          ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee tests_output.log
+      - name: Collect & Upload Reports
+        if: always()
+        run: |
+          mkdir -p reports/tests
+          find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
+          zip -r -0 test_logs.zip tests_output.log reports/ || true
+      - name: Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-logs
+          path: test_logs.zip
           overwrite: true
 
   build_apks:
@@ -223,22 +276,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: '9.4.0'
-          cache-cleanup: on-success
-          cache-read-only: false
-          cache-overwrite-existing: true
-
-      - name: Calculate Version
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
-          else
-            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
-          fi
-
       - name: Fix Android SDK permissions
         run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
 
@@ -290,26 +327,18 @@ jobs:
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          script: ./gradlew connectedDevBenchmarkAndroidTest --no-watch-fs -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx1g -XX:MaxMetaspaceSize=512m --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
-
-      - name: Collect & Upload Reports
-        if: always()
-        run: |
-          mkdir -p reports/androidTests
-          find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
-          zip -r -0 emulator_logs.zip reports/ || true
-      - name: Upload Emulator Logs
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: emulator-logs-api${{ matrix.api-level }}
-          path: emulator_logs.zip
-          overwrite: true
+          script: |
+            adb install -r -t app/build/outputs/apk/dev/benchmark/GymExe-dev-benchmark-universal.apk
+            adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
+            OUTPUT=$(adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner)
+            echo "$OUTPUT"
+            if echo "$OUTPUT" | grep -q "FAILURES!!!"; then echo "Tests failed."; exit 1; fi
+            if echo "$OUTPUT" | grep -q "Process crashed"; then echo "Test process crashed."; exit 1; fi
 
   release:
     name: Release APKs
     runs-on: ubuntu-latest
-    needs: [checks, build_apks, instrumented_tests]
+    needs: [spotless_check, lint_check, unit_tests, build_apks, instrumented_tests]
     permissions:
       contents: write
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
