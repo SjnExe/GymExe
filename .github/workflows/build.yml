@@ -2,10 +2,11 @@ name: Build and Release
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ "dev" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "dev" ]
-  push:
-    tags: [ "v*" ]
 
 jobs:
   spotless_check:
@@ -21,8 +22,8 @@ jobs:
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
-          cache-read-only: false
-          cache-overwrite-existing: true
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
       - name: Run Spotless Check
         run: ./gradlew spotlessCheck -s --no-watch-fs
 
@@ -39,8 +40,8 @@ jobs:
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
-          cache-read-only: false
-          cache-overwrite-existing: true
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -66,7 +67,7 @@ jobs:
           zip -r -0 lint_logs.zip lint_output.log reports/ || true
       - name: Upload Lint Logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: lint-logs
           path: lint_logs.zip
@@ -85,8 +86,8 @@ jobs:
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
-          cache-read-only: false
-          cache-overwrite-existing: true
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -111,7 +112,7 @@ jobs:
           zip -r -0 test_logs.zip tests_output.log reports/ || true
       - name: Upload Test Logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-logs
           path: test_logs.zip
@@ -134,8 +135,8 @@ jobs:
         with:
           gradle-version: '9.4.0'
           cache-cleanup: on-success
-          cache-read-only: false
-          cache-overwrite-existing: true
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
 
       - name: Calculate Version
         id: version
@@ -181,7 +182,7 @@ jobs:
       - name: Upload Build Logs
         if: always()
         run: zip -r -0 build_logs.zip build_output.log || true
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: build-logs
@@ -190,7 +191,7 @@ jobs:
 
       - name: Upload APKs (Dev)
         if: env.BUILD_TYPE == 'dev'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
           path: |
@@ -201,7 +202,7 @@ jobs:
 
       - name: Upload APKs (Stable)
         if: env.BUILD_TYPE == 'stable'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
           path: app/build/outputs/apk/stable/release/*.apk
@@ -219,12 +220,18 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.4.0'
+          cache-cleanup: on-success
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
 
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
 
       - name: Upload Test APKs
-        uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
         with:
           name: test-apks
           path: |
@@ -240,8 +247,8 @@ jobs:
       - name: Fix Android SDK permissions
         run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
 
-      - name: Cache Android SDK Components
-        uses: actions/cache@v5
+      - name: Restore Android SDK Cache
+        uses: actions/cache/restore@v5
         id: sdk-cache
         with:
           path: |
@@ -258,12 +265,24 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
 
+      - name: Save Android SDK Cache
+        if: github.event_name != 'pull_request' && steps.sdk-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/build-tools/
+            /usr/local/lib/android/sdk/platform-tools/
+            /usr/local/lib/android/sdk/cmdline-tools/
+            /usr/local/lib/android/sdk/extras/
+          key: android-sdk-base
+
   instrumented_tests:
     needs: [setup_sdk_cache, build_test_apks]
     name: API ${{ matrix.api-level }} tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    if: github.event_name == 'pull_request'
     strategy:
       matrix:
         api-level: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
@@ -292,7 +311,7 @@ jobs:
           key: android-sdk-base
 
       - name: Download Test APKs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: test-apks
           path: app/build/outputs/apk
@@ -341,7 +360,7 @@ jobs:
     needs: [spotless_check, lint_check, unit_tests, build_apks, instrumented_tests]
     permissions:
       contents: write
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && (github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v'))
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -349,13 +368,13 @@ jobs:
           fetch-depth: 0
 
       - name: Download Compiled APKs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: compiled-apks
           path: apks/
 
       - name: Create Release (Stable)
-        if: needs.build_apks.outputs.BUILD_TYPE == 'stable'
+        if: needs.build_apks.outputs.BUILD_TYPE == 'stable' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_NAME: ${{ needs.build_apks.outputs.VERSION_NAME }}
@@ -367,7 +386,7 @@ jobs:
              --target ${{ github.sha }}
 
       - name: Create/Update Dev Release
-        if: needs.build_apks.outputs.BUILD_TYPE == 'dev'
+        if: needs.build_apks.outputs.BUILD_TYPE == 'dev' && github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_NAME: ${{ needs.build_apks.outputs.VERSION_NAME }}
