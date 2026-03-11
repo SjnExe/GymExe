@@ -155,6 +155,21 @@ jobs:
           compression-level: 0
           overwrite: true
 
+  build_test_apks:
+    name: Compile Test APKs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Compile Test APKs
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+
   setup_sdk_cache:
     name: Pre-warm SDK Cache
     runs-on: ubuntu-latest
@@ -179,7 +194,7 @@ jobs:
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;35.0.0"
 
   instrumented_tests:
-    needs: setup_sdk_cache
+    needs: [setup_sdk_cache, build_test_apks]
     name: API ${{ matrix.api-level }} tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -223,12 +238,6 @@ jobs:
             /usr/local/lib/android/sdk/cmdline-tools/
             /usr/local/lib/android/sdk/extras/
           key: android-sdk-base
-
-      - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
-
-      - name: Free Memory
-        run: ./gradlew --stop
 
       - name: Prepare Test Environment
         run: |
