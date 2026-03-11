@@ -276,22 +276,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: '9.4.0'
-          cache-cleanup: on-success
-          cache-read-only: true
-          cache-overwrite-existing: false
-
-      - name: Calculate Version
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
-          else
-            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
-          fi
-
       - name: Fix Android SDK permissions
         run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
 
@@ -343,21 +327,19 @@ jobs:
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
-          script: ./gradlew connectedDevBenchmarkAndroidTest --no-watch-fs -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
-
-      - name: Collect & Upload Reports
-        if: always()
-        run: |
-          mkdir -p reports/androidTests
-          find . -type d -path "*/build/reports/androidTests" -exec cp -r --parents {} reports/androidTests/ \; || true
-          zip -r -0 emulator_logs.zip reports/ || true
-      - name: Upload Emulator Logs
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: emulator-logs-api${{ matrix.api-level }}
-          path: emulator_logs.zip
-          overwrite: true
+          script: |
+            adb install -r -t app/build/outputs/apk/dev/benchmark/GymExe-dev-benchmark-universal.apk
+            adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
+            OUTPUT=$(adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner)
+            echo "$OUTPUT"
+            if echo "$OUTPUT" | grep -q "FAILURES!!!"; then
+              echo "Tests failed."
+              exit 1
+            fi
+            if echo "$OUTPUT" | grep -q "Process crashed"; then
+              echo "Test process crashed."
+              exit 1
+            fi
 
   release:
     name: Release APKs
