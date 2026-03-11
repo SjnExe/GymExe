@@ -155,7 +155,58 @@ jobs:
           compression-level: 0
           overwrite: true
 
+  build_test_apks:
+    name: Compile Test APKs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Compile Test APKs
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+
+      - name: Upload Test APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-apks
+          path: |
+            app/build/outputs/apk/dev/benchmark/*.apk
+            app/build/outputs/apk/androidTest/dev/benchmark/*.apk
+          compression-level: 0
+
+  setup_sdk_cache:
+    name: Pre-warm SDK Cache
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/dev'
+    steps:
+      - name: Fix Android SDK permissions
+        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+
+      - name: Cache Android SDK Components
+        uses: actions/cache@v5
+        id: sdk-cache
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/build-tools/
+            /usr/local/lib/android/sdk/platform-tools/
+            /usr/local/lib/android/sdk/cmdline-tools/
+            /usr/local/lib/android/sdk/extras/
+          key: android-sdk-base
+
+      - name: Download Base SDK
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
+
   instrumented_tests:
+    needs: [setup_sdk_cache, build_test_apks]
     name: API ${{ matrix.api-level }} tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -188,8 +239,11 @@ jobs:
             echo "BUILD_TYPE=dev" >> $GITHUB_ENV
           fi
 
+      - name: Fix Android SDK permissions
+        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+
       - name: Android SDK Cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         id: sdk-cache
         with:
           path: |
@@ -200,11 +254,17 @@ jobs:
             /usr/local/lib/android/sdk/extras/
           key: android-sdk-base
 
-      - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+      - name: Download Test APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: test-apks
+          path: app/build/outputs/apk
 
-      - name: Free Memory
-        run: ./gradlew --stop
+      - name: Copy Test APKs to Source Directory
+        run: |
+          mkdir -p app/build/outputs/apk/androidTest/dev/benchmark
+          cp -r app/build/outputs/apk/dev/benchmark/* app/build/outputs/apk/dev/benchmark/ 2>/dev/null || true
+          cp -r app/build/outputs/apk/androidTest/dev/benchmark/* app/build/outputs/apk/androidTest/dev/benchmark/ 2>/dev/null || true
 
       - name: Prepare Test Environment
         run: |
