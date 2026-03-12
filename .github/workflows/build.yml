@@ -18,7 +18,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
@@ -35,7 +34,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
@@ -74,17 +72,19 @@ jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          dependency-graph: generate-and-submit
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -127,7 +127,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
@@ -196,7 +195,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
