@@ -84,7 +84,6 @@ jobs:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          dependency-graph: generate-and-submit
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
