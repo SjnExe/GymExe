@@ -167,8 +167,8 @@ constructor(
             _updateStatus.value = UpdateStatus.Checking
             _downloadStatus.value = DownloadStatus.Idle
 
-            val isDevBuild = appVersion.contains("dev", ignoreCase = true)
-            val updateInfo = updaterRepository.checkForUpdates(appVersion, isDevBuild)
+            // Only check for stable updates, ignoring dev flavor
+            val updateInfo = updaterRepository.checkForUpdates(appVersion)
 
             if (updateInfo != null) {
                 _updateStatus.value = UpdateStatus.UpdateAvailable(updateInfo)
