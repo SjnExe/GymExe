@@ -10,6 +10,22 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.versionCatalogUpdate)
     alias(libs.plugins.kover)
+    alias(libs.plugins.moduleGraph)
+}
+
+moduleGraphAssert {
+    maxHeight = 4
+    allowed = arrayOf(
+        ".* -> :core:.*",
+        ":feature:.* -> :core:.*",
+        ":app -> :feature:.*",
+        ":app -> :core:.*"
+    )
+    restricted = arrayOf(
+        ":core:model -X> :core:data", // Model should not depend on data
+        ":core:model -X> :core:ui",   // Model should not depend on UI
+        ":feature:.* -X> :feature:.*" // Features should not depend on each other
+    )
 }
 
 dependencies {
@@ -25,4 +41,10 @@ dependencies {
 
 tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {
     notCompatibleWithConfigurationCache("The VersionCatalogUpdateTask is not compatible with the configuration cache")
+}
+
+tasks.withType<Task>().configureEach {
+    if (name.startsWith("assert")) {
+        notCompatibleWithConfigurationCache("ModuleGraphAssert is not compatible with the configuration cache")
+    }
 }

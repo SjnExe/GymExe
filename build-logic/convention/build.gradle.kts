@@ -65,6 +65,10 @@ gradlePlugin {
             id = "gymexe.android.test"
             implementationClass = "com.sjn.gym.convention.AndroidTestConventionPlugin"
         }
+        register("jvmLibrary") {
+            id = "gymexe.jvm.library"
+            implementationClass = "com.sjn.gym.convention.JvmLibraryConventionPlugin"
+        }
         register("spotless") {
             id = "gymexe.spotless"
             implementationClass = "com.sjn.gym.convention.SpotlessConventionPlugin"
