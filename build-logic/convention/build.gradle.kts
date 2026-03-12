@@ -45,6 +45,10 @@ gradlePlugin {
             id = "gymexe.android.library"
             implementationClass = "com.sjn.gym.convention.AndroidLibraryConventionPlugin"
         }
+        register("jvmLibrary") {
+            id = "gymexe.jvm.library"
+            implementationClass = "com.sjn.gym.convention.JvmLibraryConventionPlugin"
+        }
         register("androidHilt") {
             id = "gymexe.android.hilt"
             implementationClass = "com.sjn.gym.convention.AndroidHiltConventionPlugin"
