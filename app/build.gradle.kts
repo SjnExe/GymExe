@@ -99,12 +99,11 @@ androidComponents {
         val nameProp = project.providers.gradleProperty("versionName")
 
         variant.outputs.forEach { output ->
-            // Dynamically inject versionCode and versionName at execution time to preserve Configuration Cache
+            // Dynamically inject versionCode and versionName at execution time to preserve
+            // Configuration Cache
             output.versionCode.set(codeProp.map { it.toIntOrNull() ?: 1 }.orElse(1))
             output.versionName.set(
-                nameProp.orElse(
-                    if (variant.flavorName == "dev") "0.0.1-dev" else "0.0.1"
-                )
+                nameProp.orElse(if (variant.flavorName == "dev") "0.0.1-dev" else "0.0.1")
             )
 
             val buildType = variant.buildType
