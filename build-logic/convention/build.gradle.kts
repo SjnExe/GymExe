@@ -22,6 +22,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
+tasks.withType<ProcessResources>().configureEach {
+    // Normalize inputs to ensure 100% configuration cache hits across different CI environments
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
 dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)

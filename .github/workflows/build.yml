@@ -22,6 +22,7 @@ jobs:
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Spotless Check
         run: ./gradlew spotlessCheck -s --no-watch-fs
 
@@ -38,6 +39,7 @@ jobs:
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -82,6 +84,7 @@ jobs:
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -128,6 +131,7 @@ jobs:
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Set Build Type
         id: version
@@ -196,6 +200,7 @@ jobs:
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
