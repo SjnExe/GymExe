@@ -10,7 +10,7 @@
 ## 2. Environment & Tooling (Implemented)
 *   **Language:** Kotlin 2.3.10
 *   **JDK:** Java 25 (OpenJDK). Build logic uses Java 25 Toolchain.
-*   **Build System:** Gradle 9.3.1 (Wrapper included)
+*   **Build System:** Gradle 9.4.0 (Wrapper included)
 *   **Android SDK:** Compile 36, Min 26.
 *   **UI Framework:** Jetpack Compose (Material 3).
 *   **Dependency Injection:** Hilt.
