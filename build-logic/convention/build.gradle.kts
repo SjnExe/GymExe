@@ -22,10 +22,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
-tasks.withType<ProcessResources>().configureEach {
-    // Normalize inputs to ensure 100% configuration cache hits across different CI environments
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
 }
 
 dependencies {
