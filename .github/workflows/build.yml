@@ -18,10 +18,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Spotless Check
         run: ./gradlew spotlessCheck -s --no-watch-fs
 
@@ -34,10 +34,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -72,16 +72,18 @@ jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Calculate Build Type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -116,62 +118,41 @@ jobs:
     name: Build APKs
     runs-on: ubuntu-latest
     outputs:
-      VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
       BUILD_TYPE: ${{ steps.version.outputs.BUILD_TYPE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Calculate Version
+      - name: Set Build Type
         id: version
         run: |
-          git fetch --tags --force
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          VERSION_BASE=${LATEST_TAG#v}
-          RAW_COUNT=$(git rev-list --count HEAD)
-          VERSION_CODE=$((RAW_COUNT - 1))
-
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION_NAME=${GITHUB_REF#refs/tags/v}
             BUILD_TYPE=stable
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            PR_NUMBER=${{ github.event.pull_request.number }}
-            RAW_PR_COMMITS=$(git rev-list --count origin/${{ github.base_ref }}..HEAD)
-            PR_COMMITS=$((RAW_PR_COMMITS - 1))
-            if [ $PR_COMMITS -lt 0 ]; then PR_COMMITS=0; fi
-            VERSION_NAME="${VERSION_BASE}-dev-PR${PR_NUMBER}.${PR_COMMITS}"
-            BUILD_TYPE=dev
           else
-            RUN_NUMBER=${{ github.run_number }}
-            VERSION_NAME="${VERSION_BASE}-dev-run${RUN_NUMBER}"
             BUILD_TYPE=dev
           fi
-
-          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
       - name: Build APKs
         run: |
           set -o pipefail
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="assembleStableRelease"
+            VERSION_NAME=${GITHUB_REF_NAME#v}
+            VERSION_CODE=${{ github.run_number }}
+            ./gradlew assembleStableRelease -s --no-watch-fs -PversionName=$VERSION_NAME -PversionCode=$VERSION_CODE 2>&1 | tee build_output.log
           else
-            TASKS="assembleDevRelease assembleDevDebug"
+            # For dev/PR builds, skip dynamic versions to allow 100% Configuration Cache hits
+            ./gradlew assembleDevRelease assembleDevDebug -s --no-watch-fs 2>&1 | tee build_output.log
           fi
-          ./gradlew $TASKS -s --no-watch-fs -PversionName=${{ env.VERSION_NAME }} -PversionCode=${{ env.VERSION_CODE }} 2>&1 | tee build_output.log
 
       - name: Upload Build Logs
         if: always()
@@ -213,10 +194,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.4.0'
           cache-cleanup: on-success
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
@@ -365,8 +346,8 @@ jobs:
         if: needs.build_apks.outputs.BUILD_TYPE == 'stable' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION_NAME: ${{ needs.build_apks.outputs.VERSION_NAME }}
         run: |
+           VERSION_NAME=${GITHUB_REF_NAME#v}
            gh release create $VERSION_NAME \
              apks/**/*.apk \
              --title "Release $VERSION_NAME" \
@@ -377,13 +358,12 @@ jobs:
         if: needs.build_apks.outputs.BUILD_TYPE == 'dev' && github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION_NAME: ${{ needs.build_apks.outputs.VERSION_NAME }}
         run: |
           gh release delete dev --cleanup-tag -y || true
 
           gh release create dev \
             apks/**/*.apk \
-            --title "Development Build $VERSION_NAME" \
-            --notes "$(printf 'Development build triggered by %s.\nVersion: %s' '${{ github.event_name }}' "$VERSION_NAME")" \
+            --title "Development Build dev" \
+            --notes "$(printf 'Development build triggered by %s.' '${{ github.event_name }}')" \
             --prerelease \
             --target ${{ github.sha }}

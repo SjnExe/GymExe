@@ -167,8 +167,8 @@ constructor(
             _updateStatus.value = UpdateStatus.Checking
             _downloadStatus.value = DownloadStatus.Idle
 
-            val isDevBuild = appVersion.contains("dev", ignoreCase = true)
-            val updateInfo = updaterRepository.checkForUpdates(appVersion, isDevBuild)
+            // Only check for stable updates, ignoring dev flavor
+            val updateInfo = updaterRepository.checkForUpdates(appVersion)
 
             if (updateInfo != null) {
                 _updateStatus.value = UpdateStatus.UpdateAvailable(updateInfo)
@@ -271,6 +271,18 @@ constructor(
         } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "Failed to save logs" }
             _backupStatus.value = BackupStatus.Error("Failed to save logs: ${e.message}")
+        }
+    }
+
+    fun clearLogs() {
+        viewModelScope.launch {
+            try {
+                logRepository.clearLog()
+                _backupStatus.value = BackupStatus.Success("Logs cleared successfully")
+            } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Failed to clear logs" }
+                _backupStatus.value = BackupStatus.Error("Failed to clear logs: ${e.message}")
+            }
         }
     }
 }

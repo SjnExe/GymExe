@@ -19,11 +19,9 @@ android {
         applicationId = "com.sjn.gym"
         // minSdk, targetSdk handled by convention plugin
 
-        val codeProp = project.providers.gradleProperty("versionCode").orNull
-        val nameProp = project.providers.gradleProperty("versionName").orNull
-
-        versionCode = codeProp?.toIntOrNull() ?: 1
-        versionName = nameProp ?: "0.0.1"
+        // Base defaults, dynamic versions injected at execution time via onVariants
+        versionCode = 1
+        versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -97,7 +95,17 @@ androidComponents {
     }
 
     onVariants { variant ->
+        val codeProp = project.providers.gradleProperty("versionCode")
+        val nameProp = project.providers.gradleProperty("versionName")
+
         variant.outputs.forEach { output ->
+            // Dynamically inject versionCode and versionName at execution time to preserve
+            // Configuration Cache
+            output.versionCode.set(codeProp.map { it.toIntOrNull() ?: 1 }.orElse(1))
+            output.versionName.set(
+                nameProp.orElse(if (variant.flavorName == "dev") "0.0.1-dev" else "0.0.1")
+            )
+
             val buildType = variant.buildType
             val flavorName = variant.flavorName
 

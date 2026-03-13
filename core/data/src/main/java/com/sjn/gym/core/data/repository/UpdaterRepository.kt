@@ -34,105 +34,54 @@ sealed class DownloadStatus {
 
 @Singleton
 class UpdaterRepository @Inject constructor(private val gitHubService: GitHubService) {
-    suspend fun checkForUpdates(currentVersion: String, isDevBuild: Boolean): UpdateInfo? {
+    suspend fun checkForUpdates(currentVersion: String): UpdateInfo? {
         return try {
             val releases = gitHubService.getReleases()
             if (releases.isEmpty()) return null
 
-            if (isDevBuild) {
-                // Dev Build Logic: Check 'dev' tag
-                val devRelease = releases.find { it.tagName == "dev" } ?: return null
+            // Stable Build Logic: Check latest stable release
+            val stableRelease = releases.firstOrNull { !it.prerelease } ?: return null
 
-                // Parse version from body
-                // Expected format: "Version: 1.2.3-dev-..."
-                val versionRegex = "Version: (.*)".toRegex()
-                val matchResult = versionRegex.find(devRelease.body)
-                val remoteVersion = matchResult?.groupValues?.get(1)?.trim() ?: return null
+            // Compare versions
+            val remoteVersion = stableRelease.tagName
+            if (remoteVersion == currentVersion) return null
 
-                if (remoteVersion == currentVersion) return null
+            // Find APK: Architecture specific > Universal > Any
+            val supportedAbis = Build.SUPPORTED_ABIS
+            var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
+            var arch: String? = null
 
-                // Find APK: Architecture specific > Universal
-                // Format: GymExe-dev-release-{abi}.apk
-                // We target 'release' build type for updates even if running debug
-                val supportedAbis = Build.SUPPORTED_ABIS
-                var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
-                var arch: String? = null
-
-                // 1. Check for GymExe-dev-release-{abi}.apk
-                for (abi in supportedAbis) {
-                    selectedAsset =
-                        devRelease.assets.find {
-                            it.name.equals("GymExe-dev-release-$abi.apk", ignoreCase = true)
-                        }
-                    if (selectedAsset != null) {
-                        arch = abi
-                        break
+            // 1. Check for GymExe-{abi}.apk
+            // Example: GymExe-arm64-v8a.apk
+            for (abi in supportedAbis) {
+                selectedAsset =
+                    stableRelease.assets.find {
+                        it.name.equals("GymExe-$abi.apk", ignoreCase = true)
                     }
+                if (selectedAsset != null) {
+                    arch = abi
+                    break
                 }
-
-                // 2. Fallback to GymExe-dev-release-universal.apk
-                if (selectedAsset == null) {
-                    selectedAsset =
-                        devRelease.assets.find {
-                            it.name.equals("GymExe-dev-release-universal.apk", ignoreCase = true)
-                        }
-                    if (selectedAsset != null) arch = "universal"
-                }
-
-                if (selectedAsset == null) return null
-
-                UpdateInfo(
-                    version = remoteVersion,
-                    releaseNotes = devRelease.body,
-                    downloadUrl = selectedAsset.downloadUrl,
-                    isStable = false,
-                    architecture = arch ?: "universal",
-                )
-            } else {
-                // Stable Build Logic: Check latest stable release
-                val stableRelease = releases.firstOrNull { !it.prerelease } ?: return null
-
-                // Compare versions
-                val remoteVersion = stableRelease.tagName
-                if (remoteVersion == currentVersion) return null
-
-                // Find APK: Architecture specific > Universal > Any
-                val supportedAbis = Build.SUPPORTED_ABIS
-                var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
-                var arch: String? = null
-
-                // 1. Check for GymExe-{abi}.apk
-                // Example: GymExe-arm64-v8a.apk
-                for (abi in supportedAbis) {
-                    selectedAsset =
-                        stableRelease.assets.find {
-                            it.name.equals("GymExe-$abi.apk", ignoreCase = true)
-                        }
-                    if (selectedAsset != null) {
-                        arch = abi
-                        break
-                    }
-                }
-
-                // 2. Fallback to GymExe-universal.apk
-                if (selectedAsset == null) {
-                    selectedAsset =
-                        stableRelease.assets.find {
-                            it.name.equals("GymExe-universal.apk", ignoreCase = true)
-                        }
-                    if (selectedAsset != null) arch = "universal"
-                }
-
-                if (selectedAsset == null) return null
-
-                UpdateInfo(
-                    version = stableRelease.tagName,
-                    releaseNotes = stableRelease.body,
-                    downloadUrl = selectedAsset.downloadUrl,
-                    isStable = true,
-                    architecture = arch ?: "universal",
-                )
             }
+
+            // 2. Fallback to GymExe-universal.apk
+            if (selectedAsset == null) {
+                selectedAsset =
+                    stableRelease.assets.find {
+                        it.name.equals("GymExe-universal.apk", ignoreCase = true)
+                    }
+                if (selectedAsset != null) arch = "universal"
+            }
+
+            if (selectedAsset == null) return null
+
+            UpdateInfo(
+                version = stableRelease.tagName,
+                releaseNotes = stableRelease.body,
+                downloadUrl = selectedAsset.downloadUrl,
+                isStable = true,
+                architecture = arch ?: "universal",
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             null

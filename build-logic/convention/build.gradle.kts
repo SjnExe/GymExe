@@ -22,6 +22,11 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
 dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
@@ -39,6 +44,10 @@ gradlePlugin {
         register("androidLibrary") {
             id = "gymexe.android.library"
             implementationClass = "com.sjn.gym.convention.AndroidLibraryConventionPlugin"
+        }
+        register("jvmLibrary") {
+            id = "gymexe.jvm.library"
+            implementationClass = "com.sjn.gym.convention.JvmLibraryConventionPlugin"
         }
         register("androidHilt") {
             id = "gymexe.android.hilt"
