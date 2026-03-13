@@ -50,7 +50,7 @@ object DatabaseModule {
 
                         exercises.forEach { values ->
                             db.execSQL(
-                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom) VALUES $values"
+                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom, instructions) VALUES $values"
                             )
                         }
                     }
