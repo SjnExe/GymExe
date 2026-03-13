@@ -4,9 +4,9 @@ pluginManagement {
         id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     }
     repositories {
+        gradlePluginPortal()
         google()
         mavenCentral()
-        gradlePluginPortal()
     }
 }
 plugins {
