@@ -162,7 +162,6 @@ The app follows a modular architecture:
 ### Code Quality & Architecture
 - [ ] **Konsist Tests**: Integrate `Konsist` to enforce architectural rules (e.g., "Repositories must reside in `data` package").
 - [ ] **Detekt Refinement**: Review strict rules (e.g., `MagicNumber` for UI definitions) and adjust excludes.
-- [ ] **Module Graph**: Automate generation of Mermaid diagrams for `README.md` using the `moduleGraph` plugin.
 
 ### CI/CD Enhancements
 - [x] **Roborazzi on CI**: Ensure screenshot tests run and upload artifacts on failure.
