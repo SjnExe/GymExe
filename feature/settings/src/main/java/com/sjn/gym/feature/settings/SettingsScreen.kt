@@ -115,6 +115,7 @@ fun SettingsScreen(
         onClearUpdateStatus = { viewModel.clearUpdateStatus() },
         onCopyLogs = { viewModel.copyLogs() },
         onSaveLogs = { viewModel.saveLogs(it) },
+        onClearLogs = { viewModel.clearLogs() },
     )
 }
 
@@ -144,6 +145,7 @@ fun SettingsScreenContent(
     onClearUpdateStatus: () -> Unit = {},
     onCopyLogs: () -> Unit = {},
     onSaveLogs: (android.content.Context) -> Unit = {},
+    onClearLogs: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -330,6 +332,9 @@ fun SettingsScreenContent(
                         modifier = Modifier.weight(1f),
                     ) {
                         Text("Save Logs")
+                    }
+                    FilledTonalButton(onClick = onClearLogs, modifier = Modifier.weight(1f)) {
+                        Text("Clear Logs")
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
