@@ -25,6 +25,7 @@ class UserPreferencesRepository @Inject constructor(@ApplicationContext context:
         val THEME_MODE = stringPreferencesKey("theme_mode") // SYSTEM, LIGHT, DARK
         val USE_DYNAMIC_COLOR = booleanPreferencesKey("use_dynamic_color")
         val UNIT_SYSTEM = stringPreferencesKey("unit_system") // METRIC, IMPERIAL
+        val ACTIVE_ROUTINE_ID = stringPreferencesKey("active_routine_id")
     }
 
     val isOnboardingCompleted: Flow<Boolean> =
@@ -40,6 +41,9 @@ class UserPreferencesRepository @Inject constructor(@ApplicationContext context:
 
     val unitSystem: Flow<String> =
         dataStore.data.map { preferences -> preferences[PreferencesKeys.UNIT_SYSTEM] ?: "METRIC" }
+
+    val activeRoutineId: Flow<String?> =
+        dataStore.data.map { preferences -> preferences[PreferencesKeys.ACTIVE_ROUTINE_ID] }
 
     val userData: Flow<UserPreferences> =
         dataStore.data.map { preferences ->
@@ -69,5 +73,15 @@ class UserPreferencesRepository @Inject constructor(@ApplicationContext context:
 
     suspend fun setUnitSystem(system: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.UNIT_SYSTEM] = system }
+    }
+
+    suspend fun setActiveRoutineId(routineId: String?) {
+        dataStore.edit { preferences ->
+            if (routineId == null) {
+                preferences.remove(PreferencesKeys.ACTIVE_ROUTINE_ID)
+            } else {
+                preferences[PreferencesKeys.ACTIVE_ROUTINE_ID] = routineId
+            }
+        }
     }
 }

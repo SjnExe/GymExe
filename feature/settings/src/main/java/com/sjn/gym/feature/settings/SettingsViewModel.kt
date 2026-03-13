@@ -273,6 +273,18 @@ constructor(
             _backupStatus.value = BackupStatus.Error("Failed to save logs: ${e.message}")
         }
     }
+
+    fun clearLogs() {
+        viewModelScope.launch {
+            try {
+                logRepository.clearLog()
+                _backupStatus.value = BackupStatus.Success("Logs cleared successfully")
+            } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Failed to clear logs" }
+                _backupStatus.value = BackupStatus.Error("Failed to clear logs: ${e.message}")
+            }
+        }
+    }
 }
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L

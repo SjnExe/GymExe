@@ -14,4 +14,5 @@ data class ExerciseEntity(
     val equipment: String,
     val type: ExerciseType,
     val isCustom: Boolean,
+    val instructions: String = "",
 )
