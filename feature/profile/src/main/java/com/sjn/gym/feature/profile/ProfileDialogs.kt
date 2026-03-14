@@ -204,11 +204,12 @@ fun EditWeightDialog(
                         val newUnit = WeightUnit.valueOf(newUnitStr)
                         if (newUnit != weightUnit) {
                             weightValue.toDoubleOrNull()?.let { currentVal ->
-                                val converted = if (newUnit == WeightUnit.LBS) {
-                                    currentVal * 2.20462
-                                } else {
-                                    currentVal * 0.453592
-                                }
+                                val converted =
+                                    if (newUnit == WeightUnit.LBS) {
+                                        currentVal * 2.20462
+                                    } else {
+                                        currentVal * 0.453592
+                                    }
                                 weightValue = (Math.round(converted * 10.0) / 10.0).toString()
                             }
                             weightUnit = newUnit
