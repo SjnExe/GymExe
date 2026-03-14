@@ -15,10 +15,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -79,17 +79,11 @@ fun ProfileScreen(
                 actions = {
                     if (editMode) {
                         IconButton(onClick = { editMode = false }) {
-                            Icon(
-                                Icons.Filled.Check,
-                                contentDescription = "Done",
-                            )
+                            Icon(Icons.Filled.Check, contentDescription = "Done")
                         }
                     } else {
                         IconButton(onClick = { editMode = true }) {
-                            Icon(
-                                Icons.Filled.Edit,
-                                contentDescription = "Edit Profile",
-                            )
+                            Icon(Icons.Filled.Edit, contentDescription = "Edit Profile")
                         }
                         IconButton(onClick = onNavigateToSettings) {
                             Icon(Icons.Filled.Settings, contentDescription = "Settings")
