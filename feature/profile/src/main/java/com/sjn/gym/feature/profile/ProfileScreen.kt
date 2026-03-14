@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -110,20 +111,15 @@ fun ProfileScreen(
                         model = uiState.profilePictureUri,
                         contentDescription = "Profile Picture",
                         modifier =
-                            Modifier.padding(8.dp)
-                                .androidx
-                                .compose
-                                .foundation
-                                .layout
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .clickable(enabled = editMode) {
-                                    imagePickerLauncher.launch(
-                                        androidx.activity.result.PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                                        )
+                            Modifier.padding(8.dp).size(120.dp).clip(CircleShape).clickable(
+                                enabled = editMode
+                            ) {
+                                imagePickerLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
                                     )
-                                },
+                                )
+                            },
                         contentScale = ContentScale.Crop,
                     )
                 } else {
@@ -131,20 +127,15 @@ fun ProfileScreen(
                         imageVector = Icons.Rounded.AccountCircle,
                         contentDescription = "Profile Picture",
                         modifier =
-                            Modifier.padding(8.dp)
-                                .androidx
-                                .compose
-                                .foundation
-                                .layout
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .clickable(enabled = editMode) {
-                                    imagePickerLauncher.launch(
-                                        androidx.activity.result.PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                                        )
+                            Modifier.padding(8.dp).size(120.dp).clip(CircleShape).clickable(
+                                enabled = editMode
+                            ) {
+                                imagePickerLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
                                     )
-                                },
+                                )
+                            },
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
