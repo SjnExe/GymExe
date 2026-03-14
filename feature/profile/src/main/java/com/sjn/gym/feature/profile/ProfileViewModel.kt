@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 
 data class ProfileUiState(
     val name: String = "",
-    val age: Int = 0,
+    val birthDate: Long = 0L,
+    val profilePictureUri: String? = null,
     val gender: String? = null,
     val weightValue: Double? = null,
     val weightUnit: WeightUnit = WeightUnit.KG,
@@ -41,7 +42,8 @@ constructor(private val userProfileRepository: UserProfileRepository) : ViewMode
             ) { profile, wUnit, hUnit, exp, equip ->
                 ProfileUiState(
                     name = profile?.name ?: "",
-                    age = profile?.age ?: 0,
+                    birthDate = profile?.birthDate ?: 0L,
+                    profilePictureUri = profile?.profilePictureUri,
                     gender = profile?.gender?.name,
                     weightValue = profile?.weight,
                     weightUnit = wUnit,
@@ -62,8 +64,12 @@ constructor(private val userProfileRepository: UserProfileRepository) : ViewMode
         viewModelScope.launch { userProfileRepository.setName(name) }
     }
 
-    fun setAge(age: Int) {
-        viewModelScope.launch { userProfileRepository.setAge(age) }
+    fun setBirthDate(birthDate: Long) {
+        viewModelScope.launch { userProfileRepository.setBirthDate(birthDate) }
+    }
+
+    fun setProfilePictureUri(uri: String?) {
+        viewModelScope.launch { userProfileRepository.setProfilePictureUri(uri) }
     }
 
     fun setGender(gender: String) {

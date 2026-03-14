@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -25,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.WeightUnit
 import com.sjn.gym.core.ui.components.SegmentedButton
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun EditNameDialog(initialName: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
@@ -48,28 +52,78 @@ fun EditNameDialog(initialName: String, onDismiss: () -> Unit, onSave: (String) 
 }
 
 @Composable
-fun EditAgeDialog(initialAge: Int, onDismiss: () -> Unit, onSave: (Int) -> Unit) {
-    var ageStr by remember { mutableStateOf(if (initialAge > 0) initialAge.toString() else "") }
+fun EditBirthDateDialog(initialBirthDate: Long, onDismiss: () -> Unit, onSave: (Long) -> Unit) {
+    val initialDate =
+        if (initialBirthDate > 0) {
+            java.time.Instant.ofEpochMilli(initialBirthDate)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+        } else {
+            LocalDate.now().minusYears(20) // default 20 years old
+        }
+
+    var year by remember { mutableStateOf(initialDate.year.toString()) }
+    var month by remember { mutableStateOf(initialDate.monthValue.toString().padStart(2, '0')) }
+    var day by remember { mutableStateOf(initialDate.dayOfMonth.toString().padStart(2, '0')) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Age") },
+        title = { Text("Edit Birth Date") },
         text = {
-            OutlinedTextField(
-                value = ageStr,
-                onValueChange = {
-                    if (it.isEmpty() || it.all { char -> char.isDigit() }) {
-                        ageStr = it
-                    }
-                },
-                label = { Text("Age") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-            )
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField(
+                    value = year,
+                    onValueChange = {
+                        if (it.length <= 4 && it.all { c -> c.isDigit() }) year = it
+                    },
+                    label = { Text("YYYY") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1.5f),
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = month,
+                    onValueChange = {
+                        if (it.length <= 2 && it.all { c -> c.isDigit() }) month = it
+                    },
+                    label = { Text("MM") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = day,
+                    onValueChange = { if (it.length <= 2 && it.all { c -> c.isDigit() }) day = it },
+                    label = { Text("DD") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                )
+            }
         },
         confirmButton = {
-            Button(onClick = { onSave(ageStr.toIntOrNull() ?: 0) }, enabled = ageStr.isNotEmpty()) {
+            Button(
+                onClick = {
+                    try {
+                        val y = year.toInt()
+                        val m = month.toInt()
+                        val d = day.toInt()
+                        val localDate = LocalDate.of(y, m, d)
+                        val timestamp =
+                            localDate
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant()
+                                .toEpochMilli()
+                        onSave(timestamp)
+                    } catch (e: Exception) {
+                        // ignore invalid dates
+                    }
+                },
+                enabled = year.length == 4 && month.isNotEmpty() && day.isNotEmpty(),
+            ) {
                 Text("Save")
             }
         },
@@ -288,12 +342,12 @@ fun EditHeightDialog(
 
 @Composable
 fun EditLevelDialog(initialLevel: String?, onDismiss: () -> Unit, onSave: (String) -> Unit) {
-    var selectedLevel by remember { mutableStateOf(initialLevel ?: "BEGINNER") }
-    val options = listOf("BEGINNER", "INTERMEDIATE", "ADVANCED")
+    var selectedLevel by remember { mutableStateOf(initialLevel ?: "Freestyle") }
+    val options = listOf("Freestyle", "Split Routine", "Full Body")
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Experience Level") },
+        title = { Text("Edit Training Style") },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 options.forEach { option ->
@@ -305,10 +359,7 @@ fun EditLevelDialog(initialLevel: String?, onDismiss: () -> Unit, onSave: (Strin
                             selected = selectedLevel == option,
                             onClick = { selectedLevel = option },
                         )
-                        Text(
-                            text = option.lowercase().replaceFirstChar { it.uppercase() },
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
+                        Text(text = option, modifier = Modifier.padding(start = 8.dp))
                     }
                 }
             }
@@ -325,14 +376,27 @@ fun EditEquipmentDialog(
     onSave: (Set<String>) -> Unit,
 ) {
     var selectedEquipment by remember { mutableStateOf(initialEquipment) }
-    val options = listOf("BARBELL", "DUMBBELL", "KETTLEBELL", "MACHINE", "CABLE", "BODYWEIGHT")
+    val options =
+        listOf(
+            "Dumbbells",
+            "Barbell",
+            "Kettlebell",
+            "Pull-up Bar",
+            "Cable Machine",
+            "Leg Press",
+            "Smith Machine",
+            "Squat Rack",
+            "Bench",
+            "Medicine Ball",
+            "Resistance Bands",
+        )
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Equipment") },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                options.forEach { option ->
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(options) { option ->
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -345,10 +409,7 @@ fun EditEquipmentDialog(
                                 selectedEquipment = newSet
                             },
                         )
-                        Text(
-                            text = option.lowercase().replaceFirstChar { it.uppercase() },
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
+                        Text(text = option, modifier = Modifier.padding(start = 8.dp))
                     }
                 }
             }

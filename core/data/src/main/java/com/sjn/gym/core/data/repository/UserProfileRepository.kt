@@ -33,7 +33,8 @@ constructor(@param:ApplicationContext private val context: Context) {
 
     private object ProfileKeys {
         val NAME = stringPreferencesKey("name")
-        val AGE = intPreferencesKey("age")
+        val BIRTH_DATE = androidx.datastore.preferences.core.longPreferencesKey("birth_date")
+        val PROFILE_PICTURE_URI = stringPreferencesKey("profile_picture_uri")
         val GENDER = stringPreferencesKey("gender")
         val WEIGHT_VALUE = doublePreferencesKey("weight_value")
         val WEIGHT_UNIT = stringPreferencesKey("weight_unit") // KG, LBS
@@ -116,7 +117,8 @@ constructor(@param:ApplicationContext private val context: Context) {
     val userProfile: Flow<UserProfile?> =
         dataStore.data.map { preferences ->
             val name = preferences[ProfileKeys.NAME] ?: "User"
-            val age = preferences[ProfileKeys.AGE] ?: 0
+            val birthDate = preferences[ProfileKeys.BIRTH_DATE] ?: 0L
+            val profilePictureUri = preferences[ProfileKeys.PROFILE_PICTURE_URI]
             val weight = preferences[ProfileKeys.WEIGHT_VALUE] ?: 0.0
             val height = preferences[ProfileKeys.HEIGHT_VALUE] ?: 0.0
             val genderStr = preferences[ProfileKeys.GENDER]
@@ -132,10 +134,11 @@ constructor(@param:ApplicationContext private val context: Context) {
             UserProfile(
                 id = "local",
                 name = name,
-                age = age,
+                birthDate = birthDate,
                 weight = weight,
                 height = height,
                 gender = gender,
+                profilePictureUri = profilePictureUri,
             )
         }
 
@@ -143,8 +146,18 @@ constructor(@param:ApplicationContext private val context: Context) {
         dataStore.edit { it[ProfileKeys.NAME] = name }
     }
 
-    suspend fun setAge(age: Int) {
-        dataStore.edit { it[ProfileKeys.AGE] = age }
+    suspend fun setBirthDate(birthDate: Long) {
+        dataStore.edit { it[ProfileKeys.BIRTH_DATE] = birthDate }
+    }
+
+    suspend fun setProfilePictureUri(uri: String?) {
+        dataStore.edit {
+            if (uri != null) {
+                it[ProfileKeys.PROFILE_PICTURE_URI] = uri
+            } else {
+                it.remove(ProfileKeys.PROFILE_PICTURE_URI)
+            }
+        }
     }
 
     suspend fun setGender(gender: String) {
@@ -200,7 +213,13 @@ constructor(@param:ApplicationContext private val context: Context) {
     suspend fun saveProfile(profile: UserProfile) {
         dataStore.edit { preferences ->
             preferences[ProfileKeys.NAME] = profile.name
-            preferences[ProfileKeys.AGE] = profile.age
+            preferences[ProfileKeys.BIRTH_DATE] = profile.birthDate
+            val uri = profile.profilePictureUri
+            if (uri != null) {
+                preferences[ProfileKeys.PROFILE_PICTURE_URI] = uri
+            } else {
+                preferences.remove(ProfileKeys.PROFILE_PICTURE_URI)
+            }
             preferences[ProfileKeys.WEIGHT_VALUE] = profile.weight
             preferences[ProfileKeys.HEIGHT_VALUE] = profile.height
             preferences[ProfileKeys.GENDER] = profile.gender.name

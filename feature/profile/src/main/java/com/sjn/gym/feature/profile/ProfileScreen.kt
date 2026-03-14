@@ -1,5 +1,7 @@
 package com.sjn.gym.feature.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,9 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -31,8 +37,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil3.compose.AsyncImage
 import com.sjn.gym.core.model.HeightUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,21 +54,46 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     var showNameDialog by remember { mutableStateOf(false) }
-    var showAgeDialog by remember { mutableStateOf(false) }
+    var showBirthDateDialog by remember { mutableStateOf(false) }
     var showGenderDialog by remember { mutableStateOf(false) }
     var showWeightDialog by remember { mutableStateOf(false) }
     var showHeightDialog by remember { mutableStateOf(false) }
     var showLevelDialog by remember { mutableStateOf(false) }
     var showEquipmentDialog by remember { mutableStateOf(false) }
 
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
+            uri ->
+            if (uri != null) {
+                viewModel.setProfilePictureUri(uri.toString())
+            }
+        }
+
+    var editMode by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Profile") },
+                title = { Text(if (editMode) "Edit Profile" else "Profile") },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    if (editMode) {
+                        IconButton(onClick = { editMode = false }) {
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = "Done",
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = { editMode = true }) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription = "Edit Profile",
+                            )
+                        }
+                        IconButton(onClick = onNavigateToSettings) {
+                            Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                        }
                     }
                 },
             )
@@ -72,109 +106,181 @@ fun ProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Personal Details
-            ProfileSectionCard(title = "Personal Details") {
-                ProfileItemRow(
-                    label = "Name",
-                    value = uiState.name.ifEmpty { "Not set" },
-                    onClick = { showNameDialog = true },
+            // Profile Picture & Name Overview
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (uiState.profilePictureUri != null) {
+                    AsyncImage(
+                        model = uiState.profilePictureUri,
+                        contentDescription = "Profile Picture",
+                        modifier =
+                            Modifier.padding(8.dp).height(120.dp).clip(CircleShape).clickable(
+                                enabled = editMode
+                            ) {
+                                imagePickerLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = "Profile Picture",
+                        modifier =
+                            Modifier.padding(8.dp).height(120.dp).clip(CircleShape).clickable(
+                                enabled = editMode
+                            ) {
+                                imagePickerLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                    )
+                }
+                Text(
+                    text = uiState.name.ifEmpty { "User" },
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 8.dp),
                 )
-                Divider()
-                ProfileItemRow(
-                    label = "Age",
-                    value = if (uiState.age > 0) "${uiState.age}" else "Not set",
-                    onClick = { showAgeDialog = true },
-                )
-                Divider()
-                ProfileItemRow(
-                    label = "Gender",
-                    value = uiState.gender ?: "Not set",
-                    onClick = { showGenderDialog = true },
-                )
+                if (editMode) {
+                    Text(
+                        text = "Tap to change photo",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier =
+                            Modifier.padding(top = 4.dp).clickable {
+                                imagePickerLauncher.launch(
+                                    androidx.activity.result.PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                    )
+                }
             }
 
-            // Health Details
-            ProfileSectionCard(title = "Health Details") {
-                ProfileItemRow(
-                    label = "Weight",
-                    value =
+            if (!editMode) {
+                // Stats and History (Prominent in viewing mode)
+                ProfileSectionCard(title = "Stats & History") {
+                    Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                        Text("Weight History", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         if (uiState.weightValue != null && uiState.weightValue!! > 0) {
-                            "${uiState.weightValue} ${uiState.weightUnit.name}"
-                        } else "Not set",
-                    onClick = { showWeightDialog = true },
-                )
-                Divider()
-                ProfileItemRow(
-                    label = "Height",
-                    value =
-                        if (uiState.heightValue != null && uiState.heightValue!! > 0) {
-                            if (uiState.heightUnit == HeightUnit.CM) {
-                                "${uiState.heightValue} cm"
-                            } else {
-                                val totalInches = uiState.heightValue!! * 12
-                                val feet = (totalInches / 12).toInt()
-                                val inches = (totalInches % 12).toInt()
-                                "$feet' $inches\""
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = "Current",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Text(
+                                    text = "${uiState.weightValue} ${uiState.weightUnit.name}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
                             }
-                        } else "Not set",
-                    onClick = { showHeightDialog = true },
-                )
-            }
-
-            // Fitness Details
-            ProfileSectionCard(title = "Fitness Details") {
-                ProfileItemRow(
-                    label = "Experience Level",
-                    value = uiState.experienceLevel ?: "Not set",
-                    onClick = { showLevelDialog = true },
-                )
-                Divider()
-                ProfileItemRow(
-                    label = "Equipment",
-                    value =
-                        if (uiState.equipmentList.isNotEmpty()) {
-                            "${uiState.equipmentList.size} items"
-                        } else "Not set",
-                    onClick = { showEquipmentDialog = true },
-                )
-            }
-
-            // Stats and History
-            ProfileSectionCard(title = "Stats") {
-                Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-                    Text("Weight History", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    if (uiState.weightValue != null && uiState.weightValue!! > 0) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                            Divider(modifier = Modifier.padding(vertical = 8.dp))
                             Text(
-                                text = "Current",
+                                text = "Historical charts will appear here in future updates.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            Text(
+                                "No weight data available.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Text(
-                                text = "${uiState.weightValue} ${uiState.weightUnit.name}",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
                         }
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
-                        Text(
-                            text = "Historical charts will appear here.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    } else {
-                        Text(
-                            "No weight data available.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
                     }
+                }
+            } else {
+                // Personal Details (Editable)
+                ProfileSectionCard(title = "Personal Details") {
+                    ProfileItemRow(
+                        label = "Name",
+                        value = uiState.name.ifEmpty { "Not set" },
+                        onClick = { showNameDialog = true },
+                    )
+                    Divider()
+                    ProfileItemRow(
+                        label = "Age",
+                        value =
+                            if (uiState.birthDate > 0) {
+                                val birthDate =
+                                    java.time.Instant.ofEpochMilli(uiState.birthDate)
+                                        .atZone(java.time.ZoneId.systemDefault())
+                                        .toLocalDate()
+                                val age =
+                                    java.time.Period.between(birthDate, java.time.LocalDate.now())
+                                        .years
+                                "$age years"
+                            } else "Not set",
+                        onClick = { showBirthDateDialog = true },
+                    )
+                    Divider()
+                    ProfileItemRow(
+                        label = "Gender",
+                        value = uiState.gender ?: "Not set",
+                        onClick = { showGenderDialog = true },
+                    )
+                }
+
+                // Health Details (Editable)
+                ProfileSectionCard(title = "Health Details") {
+                    ProfileItemRow(
+                        label = "Weight",
+                        value =
+                            if (uiState.weightValue != null && uiState.weightValue!! > 0) {
+                                "${uiState.weightValue} ${uiState.weightUnit.name}"
+                            } else "Not set",
+                        onClick = { showWeightDialog = true },
+                    )
+                    Divider()
+                    ProfileItemRow(
+                        label = "Height",
+                        value =
+                            if (uiState.heightValue != null && uiState.heightValue!! > 0) {
+                                if (uiState.heightUnit == HeightUnit.CM) {
+                                    "${uiState.heightValue} cm"
+                                } else {
+                                    val totalInches = uiState.heightValue!! * 12
+                                    val feet = (totalInches / 12).toInt()
+                                    val inches = (totalInches % 12).toInt()
+                                    "$feet' $inches\""
+                                }
+                            } else "Not set",
+                        onClick = { showHeightDialog = true },
+                    )
+                }
+
+                // Fitness Preferences (Editable)
+                ProfileSectionCard(title = "Training Preferences") {
+                    ProfileItemRow(
+                        label = "Training Style",
+                        value = uiState.experienceLevel ?: "Not set",
+                        onClick = { showLevelDialog = true },
+                    )
+                    Divider()
+                    ProfileItemRow(
+                        label = "Equipment Access",
+                        value =
+                            if (uiState.equipmentList.isNotEmpty()) {
+                                "${uiState.equipmentList.size} items"
+                            } else "Not set",
+                        onClick = { showEquipmentDialog = true },
+                    )
                 }
             }
 
@@ -193,13 +299,13 @@ fun ProfileScreen(
             )
         }
 
-        if (showAgeDialog) {
-            EditAgeDialog(
-                initialAge = uiState.age,
-                onDismiss = { showAgeDialog = false },
+        if (showBirthDateDialog) {
+            EditBirthDateDialog(
+                initialBirthDate = uiState.birthDate,
+                onDismiss = { showBirthDateDialog = false },
                 onSave = {
-                    viewModel.setAge(it)
-                    showAgeDialog = false
+                    viewModel.setBirthDate(it)
+                    showBirthDateDialog = false
                 },
             )
         }

@@ -80,6 +80,10 @@
 -keep class com.sjn.gym.dev.**_GeneratedInjector { *; }
 -keep class com.sjn.gym.dev.GymExeApp_HiltComponents** { *; }
 
+# Preserve test instrument runner application package rules
+-keep class com.sjn.gym.dev.test.** { *; }
+-keep class com.sjn.gym.test.** { *; }
+
 # Preserve test runners and test components inside the minified test apk
 -keep class androidx.test.** { *; }
 -keep class org.junit.** { *; }
