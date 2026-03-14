@@ -56,7 +56,12 @@ fun EditNameDialog(initialName: String, onDismiss: () -> Unit, onSave: (String) 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditBirthDateDialog(initialBirthDate: Long, onDismiss: () -> Unit, onSave: (Long) -> Unit) {
+fun EditBirthDateDialog(
+    initialBirthDate: Long,
+    onDismiss: () -> Unit,
+    onSave: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val initialMillis =
         if (initialBirthDate > 0) {
             initialBirthDate
@@ -71,6 +76,7 @@ fun EditBirthDateDialog(initialBirthDate: Long, onDismiss: () -> Unit, onSave: (
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
 
     DatePickerDialog(
+        modifier = modifier,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = { datePickerState.selectedDateMillis?.let { onSave(it) } }) {
