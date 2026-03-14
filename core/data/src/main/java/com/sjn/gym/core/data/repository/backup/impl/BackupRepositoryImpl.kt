@@ -70,7 +70,16 @@ constructor(
     private fun UserProfile.toBackup() =
         BackupProfile(
             name = name,
-            age = age,
+            age =
+                if (birthDate > 0L) {
+                    java.time.Period.between(
+                            java.time.Instant.ofEpochMilli(birthDate)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate(),
+                            java.time.LocalDate.now(),
+                        )
+                        .years
+                } else 0,
             weight = weight,
             height = height,
             gender = gender.name,
@@ -82,7 +91,14 @@ constructor(
                 UUID.randomUUID()
                     .toString(), // Profile usually singular, ID might not matter or be overwritten
             name = name ?: "",
-            age = age ?: 0,
+            birthDate =
+                age?.let {
+                    java.time.LocalDate.now()
+                        .minusYears(it.toLong())
+                        .atStartOfDay(java.time.ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
+                } ?: 0L,
             weight = weight ?: 0.0,
             height = height ?: 0.0,
             gender =

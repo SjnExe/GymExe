@@ -2,4 +2,8 @@ plugins { id("gymexe.android.feature") }
 
 android { namespace = "com.sjn.gym.feature.profile" }
 
-dependencies { implementation(libs.androidx.core.ktx) }
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+}
