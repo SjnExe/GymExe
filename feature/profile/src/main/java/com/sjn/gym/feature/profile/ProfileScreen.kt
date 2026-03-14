@@ -18,8 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -110,31 +110,42 @@ fun ProfileScreen(
                         model = uiState.profilePictureUri,
                         contentDescription = "Profile Picture",
                         modifier =
-                            Modifier.padding(8.dp).height(120.dp).clip(CircleShape).clickable(
-                                enabled = editMode
-                            ) {
-                                imagePickerLauncher.launch(
-                                    androidx.activity.result.PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                            Modifier.padding(8.dp)
+                                .androidx
+                                .compose
+                                .foundation
+                                .layout
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .clickable(enabled = editMode) {
+                                    imagePickerLauncher.launch(
+                                        androidx.activity.result.PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
                                     )
-                                )
-                            },
+                                },
                         contentScale = ContentScale.Crop,
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Filled.Person,
+                        imageVector = Icons.Rounded.AccountCircle,
                         contentDescription = "Profile Picture",
                         modifier =
-                            Modifier.padding(8.dp).height(120.dp).clip(CircleShape).clickable(
-                                enabled = editMode
-                            ) {
-                                imagePickerLauncher.launch(
-                                    androidx.activity.result.PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                            Modifier.padding(8.dp)
+                                .androidx
+                                .compose
+                                .foundation
+                                .layout
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .clickable(enabled = editMode) {
+                                    imagePickerLauncher.launch(
+                                        androidx.activity.result.PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
                                     )
-                                )
-                            },
+                                },
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Text(
@@ -144,19 +155,33 @@ fun ProfileScreen(
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 if (editMode) {
-                    Text(
-                        text = "Tap to change photo",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier =
-                            Modifier.padding(top = 4.dp).clickable {
-                                imagePickerLauncher.launch(
-                                    androidx.activity.result.PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        Text(
+                            text = "Change",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier =
+                                Modifier.clickable {
+                                    imagePickerLauncher.launch(
+                                        androidx.activity.result.PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
                                     )
-                                )
-                            },
-                    )
+                                },
+                        )
+                        if (uiState.profilePictureUri != null) {
+                            Text(
+                                text = "Remove",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier =
+                                    Modifier.clickable { viewModel.setProfilePictureUri(null) },
+                            )
+                        }
+                    }
                 }
             }
 
