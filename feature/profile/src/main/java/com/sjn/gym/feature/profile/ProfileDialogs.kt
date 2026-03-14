@@ -200,7 +200,20 @@ fun EditWeightDialog(
                 SegmentedButton(
                     options = listOf("KG", "LBS"),
                     selectedOption = weightUnit.name,
-                    onOptionSelected = { weightUnit = WeightUnit.valueOf(it) },
+                    onOptionSelected = { newUnitStr ->
+                        val newUnit = WeightUnit.valueOf(newUnitStr)
+                        if (newUnit != weightUnit) {
+                            weightValue.toDoubleOrNull()?.let { currentVal ->
+                                val converted = if (newUnit == WeightUnit.LBS) {
+                                    currentVal * 2.20462
+                                } else {
+                                    currentVal * 0.453592
+                                }
+                                weightValue = (Math.round(converted * 10.0) / 10.0).toString()
+                            }
+                            weightUnit = newUnit
+                        }
+                    },
                 )
             }
         },
@@ -307,11 +320,28 @@ fun EditHeightDialog(
                 SegmentedButton(
                     options = listOf("CM", "FT"),
                     selectedOption = heightUnit.name,
-                    onOptionSelected = {
-                        heightUnit = HeightUnit.valueOf(it)
-                        heightValue = ""
-                        heightFeet = ""
-                        heightInches = ""
+                    onOptionSelected = { newUnitStr ->
+                        val newUnit = HeightUnit.valueOf(newUnitStr)
+                        if (newUnit != heightUnit) {
+                            if (newUnit == HeightUnit.FT) {
+                                heightValue.toDoubleOrNull()?.let { cm ->
+                                    val totalInches = cm / 2.54
+                                    val feet = (totalInches / 12).toInt()
+                                    val inches = Math.round(totalInches % 12).toInt()
+                                    heightFeet = feet.toString()
+                                    heightInches = inches.toString()
+                                }
+                            } else {
+                                val f = heightFeet.toDoubleOrNull() ?: 0.0
+                                val i = heightInches.toDoubleOrNull() ?: 0.0
+                                val totalInches = (f * 12) + i
+                                if (totalInches > 0) {
+                                    val cm = totalInches * 2.54
+                                    heightValue = Math.round(cm).toString()
+                                }
+                            }
+                            heightUnit = newUnit
+                        }
                     },
                 )
             }
