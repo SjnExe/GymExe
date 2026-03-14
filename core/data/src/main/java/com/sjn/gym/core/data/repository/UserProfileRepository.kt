@@ -139,6 +139,14 @@ constructor(@param:ApplicationContext private val context: Context) {
             )
         }
 
+    suspend fun setName(name: String) {
+        dataStore.edit { it[ProfileKeys.NAME] = name }
+    }
+
+    suspend fun setAge(age: Int) {
+        dataStore.edit { it[ProfileKeys.AGE] = age }
+    }
+
     suspend fun setGender(gender: String) {
         dataStore.edit { it[ProfileKeys.GENDER] = gender }
     }
