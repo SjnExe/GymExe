@@ -403,12 +403,18 @@ fun EditLevelDialog(initialLevel: String?, onDismiss: () -> Unit, onSave: (Strin
             Column(modifier = Modifier.fillMaxWidth()) {
                 options.forEach { option ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .androidx
+                                .compose
+                                .foundation
+                                .clickable { selectedLevel = option }
+                                .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         androidx.compose.material3.RadioButton(
                             selected = selectedLevel == option,
-                            onClick = { selectedLevel = option },
+                            onClick = null,
                         )
                         Text(text = option, modifier = Modifier.padding(start = 8.dp))
                     }
@@ -449,16 +455,23 @@ fun EditEquipmentDialog(
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(options) { option ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .androidx
+                                .compose
+                                .foundation
+                                .clickable {
+                                    val isChecked = !selectedEquipment.contains(option)
+                                    val newSet = selectedEquipment.toMutableSet()
+                                    if (isChecked) newSet.add(option) else newSet.remove(option)
+                                    selectedEquipment = newSet
+                                }
+                                .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         androidx.compose.material3.Checkbox(
                             checked = selectedEquipment.contains(option),
-                            onCheckedChange = { isChecked ->
-                                val newSet = selectedEquipment.toMutableSet()
-                                if (isChecked) newSet.add(option) else newSet.remove(option)
-                                selectedEquipment = newSet
-                            },
+                            onCheckedChange = null,
                         )
                         Text(text = option, modifier = Modifier.padding(start = 8.dp))
                     }
