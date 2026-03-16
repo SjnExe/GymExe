@@ -43,9 +43,6 @@ This file contains instructions for AI agents working on the **GymExe** reposito
   - `release`: Minified, optimized, no test rules. Used for `devRelease` (manual QA) and `stableRelease` (Production).
   - `debug`: Non-minified, debuggable.
   - `benchmark`: Inherits from `release`. Minified but includes extra ProGuard rules to allow instrumented tests to run. Used for CI (`connectedDevBenchmarkAndroidTest`).
-- **Versioning:** Automated via GitHub Actions.
-  - Strategy: `v{Tag}-dev-PR{Num}.{Commits}`
-  - Version Code: `Total Commits - 1`
 
 ## Environment
 - **Local:** Standard Android Studio setup.

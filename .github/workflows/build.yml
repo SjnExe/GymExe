@@ -3,10 +3,10 @@ name: Build and Release
 on:
   workflow_dispatch:
   push:
-    branches: [ "dev" ]
+    branches: [ "main" ]
     tags: [ "v*" ]
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "main" ]
 
 jobs:
   spotless_check:
@@ -187,7 +187,7 @@ jobs:
   build_test_apks:
     name: Compile Test APKs
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/dev')
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
       - uses: actions/checkout@v6
 
@@ -215,7 +215,7 @@ jobs:
   setup_sdk_cache:
     name: Pre-warm SDK Cache
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/dev')
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
       - name: Fix Android SDK permissions
         run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
