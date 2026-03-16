@@ -127,7 +127,7 @@ fun ImageCropScreen(
                     .onSizeChanged { size = it }
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
-                            scale = (scale * zoom).coerceIn(1f, 5f)
+                            scale = (scale * zoom).coerceIn(0.1f, 5f)
                             offset += pan
                         }
                     },
