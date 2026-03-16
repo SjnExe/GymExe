@@ -1,5 +1,6 @@
 package com.sjn.gym.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -17,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -110,7 +110,8 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean, modifier: Modifier = Modifier)
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background),
+            modifier =
+                Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background),
             enterTransition = {
                 androidx.compose.animation.fadeIn(
                     animationSpec = androidx.compose.animation.core.tween(0)

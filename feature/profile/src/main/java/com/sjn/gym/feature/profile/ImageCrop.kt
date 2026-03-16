@@ -37,7 +37,12 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImageCropScreen(uri: Uri, onCropSuccess: (String) -> Unit, onCancel: () -> Unit) {
+fun ImageCropScreen(
+    uri: Uri,
+    onCropSuccess: (String) -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
@@ -77,6 +82,7 @@ fun ImageCropScreen(uri: Uri, onCropSuccess: (String) -> Unit, onCancel: () -> U
     val cropDiameterPx = cropSize.value * density
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Crop Photo") },
@@ -111,7 +117,7 @@ fun ImageCropScreen(uri: Uri, onCropSuccess: (String) -> Unit, onCancel: () -> U
                     }
                 },
             )
-        }
+        },
     ) { paddingValues ->
         Box(
             modifier =
