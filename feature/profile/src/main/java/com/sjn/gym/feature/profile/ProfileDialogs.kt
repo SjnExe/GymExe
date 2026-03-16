@@ -1,5 +1,6 @@
 package com.sjn.gym.feature.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -405,9 +406,6 @@ fun EditLevelDialog(initialLevel: String?, onDismiss: () -> Unit, onSave: (Strin
                     Row(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .androidx
-                                .compose
-                                .foundation
                                 .clickable { selectedLevel = option }
                                 .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -457,9 +455,6 @@ fun EditEquipmentDialog(
                     Row(
                         modifier =
                             Modifier.fillMaxWidth()
-                                .androidx
-                                .compose
-                                .foundation
                                 .clickable {
                                     val isChecked = !selectedEquipment.contains(option)
                                     val newSet = selectedEquipment.toMutableSet()
