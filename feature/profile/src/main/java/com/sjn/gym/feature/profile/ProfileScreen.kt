@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,18 +63,40 @@ fun ProfileScreen(
     var showLevelDialog by remember { mutableStateOf(false) }
     var showEquipmentDialog by remember { mutableStateOf(false) }
 
+    var imageUriToCrop by remember { mutableStateOf<android.net.Uri?>(null) }
+    var showCropScreen by remember { mutableStateOf(false) }
+
     val imagePickerLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
             uri ->
             if (uri != null) {
-                viewModel.setProfilePictureUri(uri.toString())
+                imageUriToCrop = uri
+                showCropScreen = true
             }
         }
 
     var editMode by remember { mutableStateOf(false) }
 
+    if (showCropScreen && imageUriToCrop != null) {
+        ImageCropScreen(
+            uri = imageUriToCrop!!,
+            onCropSuccess = { path ->
+                // Ensure the path is stored as a proper file URI so AsyncImage can load it
+                val uriString = if (path.startsWith("file://")) path else "file://$path"
+                viewModel.setProfilePictureUri(uriString)
+                showCropScreen = false
+                imageUriToCrop = null
+            },
+            onCancel = {
+                showCropScreen = false
+                imageUriToCrop = null
+            }
+        )
+        return
+    }
+
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
             TopAppBar(
                 title = { Text(if (editMode) "Edit Profile" else "Profile") },
@@ -242,7 +265,7 @@ fun ProfileScreen(
                     Divider()
                     ProfileItemRow(
                         label = "Gender",
-                        value = uiState.gender ?: "Not set",
+                        value = uiState.gender?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Not set",
                         onClick = { showGenderDialog = true },
                     )
                 }

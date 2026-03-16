@@ -221,7 +221,7 @@ fun SettingsScreenContent(
     LoadingOverlay(state.backupStatus, state.updateStatus)
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },
