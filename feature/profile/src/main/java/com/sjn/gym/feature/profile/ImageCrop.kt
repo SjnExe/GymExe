@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
@@ -38,27 +37,24 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImageCropScreen(
-    uri: Uri,
-    onCropSuccess: (String) -> Unit,
-    onCancel: () -> Unit
-) {
+fun ImageCropScreen(uri: Uri, onCropSuccess: (String) -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(uri) {
         withContext(Dispatchers.IO) {
             try {
-                bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    val source = ImageDecoder.createSource(context.contentResolver, uri)
-                    ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                        decoder.isMutableRequired = true
+                bitmap =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        val source = ImageDecoder.createSource(context.contentResolver, uri)
+                        ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                            decoder.isMutableRequired = true
+                        }
+                    } else {
+                        @Suppress("DEPRECATION")
+                        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
                     }
-                } else {
-                    @Suppress("DEPRECATION")
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -90,79 +86,86 @@ fun ImageCropScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        val croppedBitmap = cropImage(
-                            bitmap = bitmap!!,
-                            containerSize = size,
-                            scale = scale,
-                            offset = offset,
-                            cropDiameter = cropDiameterPx
-                        )
-                        val file = File(context.filesDir, "profile_pic_${System.currentTimeMillis()}.jpg")
-                        FileOutputStream(file).use { out ->
-                            croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                    IconButton(
+                        onClick = {
+                            val croppedBitmap =
+                                cropImage(
+                                    bitmap = bitmap!!,
+                                    containerSize = size,
+                                    scale = scale,
+                                    offset = offset,
+                                    cropDiameter = cropDiameterPx,
+                                )
+                            val file =
+                                File(
+                                    context.filesDir,
+                                    "profile_pic_${System.currentTimeMillis()}.jpg",
+                                )
+                            FileOutputStream(file).use { out ->
+                                croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                            }
+                            onCropSuccess(file.absolutePath)
                         }
-                        onCropSuccess(file.absolutePath)
-                    }) {
+                    ) {
                         Icon(Icons.Default.Check, contentDescription = "Done")
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color.Black)
-                .onSizeChanged { size = it }
-                .pointerInput(Unit) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        scale = (scale * zoom).coerceIn(1f, 5f)
-                        offset += pan
-                    }
-                },
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color.Black)
+                    .onSizeChanged { size = it }
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, pan, zoom, _ ->
+                            scale = (scale * zoom).coerceIn(1f, 5f)
+                            offset += pan
+                        }
+                    },
+            contentAlignment = Alignment.Center,
         ) {
             Image(
                 bitmap = bitmap!!.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offset.x,
-                        translationY = offset.y
-                    ),
-                contentScale = ContentScale.Fit
+                modifier =
+                    Modifier.fillMaxSize()
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            translationX = offset.x,
+                            translationY = offset.y,
+                        ),
+                contentScale = ContentScale.Fit,
             )
 
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val circleRadius = cropDiameterPx / 2f
                 val circleCenter = Offset(size.width / 2f, size.height / 2f)
 
-                val overlayPath = Path().apply {
-                    addRect(Rect(0f, 0f, size.width.toFloat(), size.height.toFloat()))
-                }
+                val overlayPath =
+                    Path().apply {
+                        addRect(Rect(0f, 0f, size.width.toFloat(), size.height.toFloat()))
+                    }
 
-                val circlePath = Path().apply {
-                    addOval(Rect(
-                        left = circleCenter.x - circleRadius,
-                        top = circleCenter.y - circleRadius,
-                        right = circleCenter.x + circleRadius,
-                        bottom = circleCenter.y + circleRadius
-                    ))
-                }
+                val circlePath =
+                    Path().apply {
+                        addOval(
+                            Rect(
+                                left = circleCenter.x - circleRadius,
+                                top = circleCenter.y - circleRadius,
+                                right = circleCenter.x + circleRadius,
+                                bottom = circleCenter.y + circleRadius,
+                            )
+                        )
+                    }
 
-                val combinedPath = Path().apply {
-                    op(overlayPath, circlePath, PathOperation.Difference)
-                }
+                val combinedPath =
+                    Path().apply { op(overlayPath, circlePath, PathOperation.Difference) }
 
-                drawPath(
-                    path = combinedPath,
-                    color = Color.Black.copy(alpha = 0.6f)
-                )
+                drawPath(path = combinedPath, color = Color.Black.copy(alpha = 0.6f))
             }
         }
     }
@@ -173,7 +176,7 @@ private fun cropImage(
     containerSize: IntSize,
     scale: Float,
     offset: Offset,
-    cropDiameter: Float
+    cropDiameter: Float,
 ): Bitmap {
     val bitmapAspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
     val containerAspectRatio = containerSize.width.toFloat() / containerSize.height.toFloat()
@@ -212,17 +215,19 @@ private fun cropImage(
     val safeStartY = startY.coerceIn(0, bitmap.height - 1)
 
     // Check if x + width goes out of bounds
-    val safeWidth = if (safeStartX + cropWidth > bitmap.width) {
-        bitmap.width - safeStartX
-    } else {
-        cropWidth
-    }
+    val safeWidth =
+        if (safeStartX + cropWidth > bitmap.width) {
+            bitmap.width - safeStartX
+        } else {
+            cropWidth
+        }
 
-    val safeHeight = if (safeStartY + cropHeight > bitmap.height) {
-        bitmap.height - safeStartY
-    } else {
-        cropHeight
-    }
+    val safeHeight =
+        if (safeStartY + cropHeight > bitmap.height) {
+            bitmap.height - safeStartY
+        } else {
+            cropHeight
+        }
 
     return if (safeWidth > 0 && safeHeight > 0) {
         Bitmap.createBitmap(bitmap, safeStartX, safeStartY, safeWidth, safeHeight)

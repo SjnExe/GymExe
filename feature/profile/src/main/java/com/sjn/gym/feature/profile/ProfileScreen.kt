@@ -2,6 +2,7 @@ package com.sjn.gym.feature.profile
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.background
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -90,7 +90,7 @@ fun ProfileScreen(
             onCancel = {
                 showCropScreen = false
                 imageUriToCrop = null
-            }
+            },
         )
         return
     }
@@ -265,7 +265,9 @@ fun ProfileScreen(
                     Divider()
                     ProfileItemRow(
                         label = "Gender",
-                        value = uiState.gender?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Not set",
+                        value =
+                            uiState.gender?.lowercase()?.replaceFirstChar { it.uppercase() }
+                                ?: "Not set",
                         onClick = { showGenderDialog = true },
                     )
                 }

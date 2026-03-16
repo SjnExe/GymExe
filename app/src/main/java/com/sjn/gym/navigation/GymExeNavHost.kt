@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -108,11 +110,27 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean, modifier: Modifier = Modifier)
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding).androidx.compose.foundation.background(androidx.compose.material3.MaterialTheme.colorScheme.background),
-            enterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0)) },
-            exitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0)) },
-            popEnterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(0)) },
-            popExitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(0)) }
+            modifier = Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background),
+            enterTransition = {
+                androidx.compose.animation.fadeIn(
+                    animationSpec = androidx.compose.animation.core.tween(0)
+                )
+            },
+            exitTransition = {
+                androidx.compose.animation.fadeOut(
+                    animationSpec = androidx.compose.animation.core.tween(0)
+                )
+            },
+            popEnterTransition = {
+                androidx.compose.animation.fadeIn(
+                    animationSpec = androidx.compose.animation.core.tween(0)
+                )
+            },
+            popExitTransition = {
+                androidx.compose.animation.fadeOut(
+                    animationSpec = androidx.compose.animation.core.tween(0)
+                )
+            },
         ) {
             composable<Onboarding> {
                 OnboardingScreen(
