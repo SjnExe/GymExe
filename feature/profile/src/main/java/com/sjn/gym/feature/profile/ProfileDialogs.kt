@@ -1,20 +1,29 @@
 package com.sjn.gym.feature.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Man
+import androidx.compose.material.icons.filled.Woman
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -92,33 +101,74 @@ fun EditBirthDateDialog(
 @Composable
 fun EditGenderDialog(initialGender: String?, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     var selectedGender by remember { mutableStateOf(initialGender ?: "MALE") }
-    val options = listOf("MALE", "FEMALE", "OTHER")
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Gender") },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                options.forEach { option ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        androidx.compose.material3.RadioButton(
-                            selected = selectedGender == option,
-                            onClick = { selectedGender = option },
-                        )
-                        Text(
-                            text = option.lowercase().replaceFirstChar { it.uppercase() },
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
-                    }
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                GenderCard(
+                    gender = "Male",
+                    icon = Icons.Filled.Man,
+                    isSelected = selectedGender == "MALE",
+                    onClick = {
+                        selectedGender = "MALE"
+                        onSave("MALE")
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+                GenderCard(
+                    gender = "Female",
+                    icon = Icons.Filled.Woman,
+                    isSelected = selectedGender == "FEMALE",
+                    onClick = {
+                        selectedGender = "FEMALE"
+                        onSave("FEMALE")
+                    },
+                    modifier = Modifier.weight(1f),
+                )
             }
         },
-        confirmButton = { Button(onClick = { onSave(selectedGender) }) { Text("Save") } },
+        confirmButton = {},
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
+}
+
+@Composable
+fun GenderCard(
+    gender: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    androidx.compose.material3.Card(
+        onClick = onClick,
+        modifier = modifier.height(120.dp),
+        colors =
+            androidx.compose.material3.CardDefaults.cardColors(
+                containerColor =
+                    if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor =
+                    if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        shape = MaterialTheme.shapes.medium,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(imageVector = icon, contentDescription = gender, modifier = Modifier.size(48.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = gender, style = MaterialTheme.typography.headlineSmall)
+        }
+    }
 }
 
 @Composable
@@ -135,7 +185,11 @@ fun EditWeightDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Weight") },
         text = {
-            Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 OutlinedTextField(
                     value = weightValue,
                     onValueChange = { newValue ->
@@ -221,7 +275,11 @@ fun EditHeightDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Height") },
         text = {
-            Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 if (heightUnit == HeightUnit.CM) {
                     OutlinedTextField(
                         value = heightValue,
@@ -238,13 +296,13 @@ fun EditHeightDialog(
                         },
                         label = { Text("Height (cm)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.weight(1f),
                     ) {
                         OutlinedTextField(
                             value = heightFeet,
@@ -275,34 +333,39 @@ fun EditHeightDialog(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                SegmentedButton(
-                    options = listOf("CM", "FT"),
-                    selectedOption = heightUnit.name,
-                    onOptionSelected = { newUnitStr ->
-                        val newUnit = HeightUnit.valueOf(newUnitStr)
-                        if (newUnit != heightUnit) {
-                            if (newUnit == HeightUnit.FT) {
-                                heightValue.toDoubleOrNull()?.let { cm ->
-                                    val totalInches = cm / 2.54
-                                    val feet = (totalInches / 12).toInt()
-                                    val inches = Math.round(totalInches % 12).toInt()
-                                    heightFeet = feet.toString()
-                                    heightInches = inches.toString()
+
+                Box(
+                    modifier = Modifier.height(56.dp).padding(top = 8.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    com.sjn.gym.core.ui.components.SegmentedButton(
+                        options = listOf("CM", "FT"),
+                        selectedOption = heightUnit.name,
+                        onOptionSelected = { newUnitStr ->
+                            val newUnit = HeightUnit.valueOf(newUnitStr)
+                            if (newUnit != heightUnit) {
+                                if (newUnit == HeightUnit.FT) {
+                                    heightValue.toDoubleOrNull()?.let { cm ->
+                                        val totalInches = cm / 2.54
+                                        val feet = (totalInches / 12).toInt()
+                                        val inches = Math.round(totalInches % 12).toInt()
+                                        heightFeet = feet.toString()
+                                        heightInches = inches.toString()
+                                    }
+                                } else {
+                                    val f = heightFeet.toDoubleOrNull() ?: 0.0
+                                    val i = heightInches.toDoubleOrNull() ?: 0.0
+                                    val totalInches = (f * 12) + i
+                                    if (totalInches > 0) {
+                                        val cm = totalInches * 2.54
+                                        heightValue = Math.round(cm).toString()
+                                    }
                                 }
-                            } else {
-                                val f = heightFeet.toDoubleOrNull() ?: 0.0
-                                val i = heightInches.toDoubleOrNull() ?: 0.0
-                                val totalInches = (f * 12) + i
-                                if (totalInches > 0) {
-                                    val cm = totalInches * 2.54
-                                    heightValue = Math.round(cm).toString()
-                                }
+                                heightUnit = newUnit
                             }
-                            heightUnit = newUnit
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
         },
         confirmButton = {
@@ -341,12 +404,15 @@ fun EditLevelDialog(initialLevel: String?, onDismiss: () -> Unit, onSave: (Strin
             Column(modifier = Modifier.fillMaxWidth()) {
                 options.forEach { option ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clickable { selectedLevel = option }
+                                .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         androidx.compose.material3.RadioButton(
                             selected = selectedLevel == option,
-                            onClick = { selectedLevel = option },
+                            onClick = null,
                         )
                         Text(text = option, modifier = Modifier.padding(start = 8.dp))
                     }
@@ -387,16 +453,20 @@ fun EditEquipmentDialog(
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(options) { option ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clickable {
+                                    val isChecked = !selectedEquipment.contains(option)
+                                    val newSet = selectedEquipment.toMutableSet()
+                                    if (isChecked) newSet.add(option) else newSet.remove(option)
+                                    selectedEquipment = newSet
+                                }
+                                .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         androidx.compose.material3.Checkbox(
                             checked = selectedEquipment.contains(option),
-                            onCheckedChange = { isChecked ->
-                                val newSet = selectedEquipment.toMutableSet()
-                                if (isChecked) newSet.add(option) else newSet.remove(option)
-                                selectedEquipment = newSet
-                            },
+                            onCheckedChange = null,
                         )
                         Text(text = option, modifier = Modifier.padding(start = 8.dp))
                     }

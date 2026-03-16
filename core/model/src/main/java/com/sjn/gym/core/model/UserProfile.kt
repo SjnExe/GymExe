@@ -13,5 +13,4 @@ data class UserProfile(
 enum class Gender {
     MALE,
     FEMALE,
-    OTHER,
 }
