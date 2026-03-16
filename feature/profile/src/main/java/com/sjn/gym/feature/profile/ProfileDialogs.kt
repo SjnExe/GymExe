@@ -113,19 +113,25 @@ fun EditGenderDialog(initialGender: String?, onDismiss: () -> Unit, onSave: (Str
                     gender = "Male",
                     icon = Icons.Filled.Man,
                     isSelected = selectedGender == "MALE",
-                    onClick = { selectedGender = "MALE" },
+                    onClick = {
+                        selectedGender = "MALE"
+                        onSave("MALE")
+                    },
                     modifier = Modifier.weight(1f),
                 )
                 GenderCard(
                     gender = "Female",
                     icon = Icons.Filled.Woman,
                     isSelected = selectedGender == "FEMALE",
-                    onClick = { selectedGender = "FEMALE" },
+                    onClick = {
+                        selectedGender = "FEMALE"
+                        onSave("FEMALE")
+                    },
                     modifier = Modifier.weight(1f),
                 )
             }
         },
-        confirmButton = { Button(onClick = { onSave(selectedGender) }) { Text("Save") } },
+        confirmButton = {},
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
