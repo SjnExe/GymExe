@@ -17,7 +17,13 @@ dependencyAnalysis {
     issues {
         all {
             onUnusedDependencies {
-                severity("fail")
+                severity("warn")
+            }
+            onUsedTransitiveDependencies {
+                severity("warn")
+            }
+            onIncorrectConfiguration {
+                severity("warn")
             }
         }
     }

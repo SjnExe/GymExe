@@ -3,4 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-dependencies { implementation(libs.kotlinx.serialization.json) }
+dependencies {
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.10.0")
+}

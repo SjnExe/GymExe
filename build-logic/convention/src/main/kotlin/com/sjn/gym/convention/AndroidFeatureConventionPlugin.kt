@@ -17,9 +17,9 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("implementation", project(":core:ui"))
-                add("implementation", project(":core:model"))
-                add("implementation", project(":core:data"))
+                add("api", project(":core:ui"))
+                add("api", project(":core:model"))
+                add("api", project(":core:data"))
 
                 // Standard Compose UI libraries for Features
                 add("implementation", libs.findLibrary("androidx.ui").get())
@@ -32,7 +32,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("testImplementation", libs.findLibrary("junit").get())
                 add("androidTestImplementation", libs.findLibrary("androidx.ui.test.junit4").get())
-                add("debugImplementation", libs.findLibrary("androidx.ui.test.manifest").get())
+                add("debugRuntimeOnly", libs.findLibrary("androidx.ui.test.manifest").get())
             }
         }
     }

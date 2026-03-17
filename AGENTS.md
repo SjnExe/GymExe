@@ -119,6 +119,12 @@ Run this before submitting any change:
 ./gradlew clean build
 ```
 ### Maintenance
+*   **Dependency Health (Build Health):**
+```bash
+./gradlew buildHealth --no-configuration-cache -Dorg.gradle.unsafe.isolated-projects=false
+```
+  *(Note: Project Isolation and Configuration Cache must be bypassed as they are currently incompatible with the Dependency Analysis plugin).*
+
 *   **Update Dependencies:**
 ```bash
 ./gradlew vCU

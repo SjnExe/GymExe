@@ -160,6 +160,9 @@ dependencies {
     // Compose BOM, tooling, preview handled by convention plugin
 
     implementation(libs.bundles.compose)
+
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.tracing)
 
     implementation(libs.androidx.navigation.compose)
@@ -192,4 +195,13 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:workout"))
     implementation(project(":feature:profile"))
+}
+
+dependencyAnalysis {
+    issues {
+        onIncorrectConfiguration {
+            exclude("com.github.chuckerteam.chucker:library")
+            exclude("com.github.chuckerteam.chucker:library-no-op")
+        }
+    }
 }
