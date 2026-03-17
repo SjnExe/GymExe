@@ -26,9 +26,5 @@ dependencies {
 }
 
 dependencyAnalysis {
-    issues {
-        onIncorrectConfiguration {
-            exclude("androidx.compose.ui:ui-test-manifest")
-        }
-    }
+    issues { onIncorrectConfiguration { exclude("androidx.compose.ui:ui-test-manifest") } }
 }
