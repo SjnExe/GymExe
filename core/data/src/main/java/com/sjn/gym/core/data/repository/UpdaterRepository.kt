@@ -39,10 +39,8 @@ class UpdaterRepository @Inject constructor(private val gitHubService: GitHubSer
             val releases = gitHubService.getReleases()
             if (releases.isEmpty()) return null
 
-            // Stable Build Logic: Check latest stable release
             val stableRelease = releases.firstOrNull { !it.prerelease } ?: return null
 
-            // Compare versions
             val remoteVersion = stableRelease.tagName
             if (remoteVersion == currentVersion) return null
 
@@ -51,8 +49,6 @@ class UpdaterRepository @Inject constructor(private val gitHubService: GitHubSer
             var selectedAsset: com.sjn.gym.core.data.network.GitHubAsset? = null
             var arch: String? = null
 
-            // 1. Check for GymExe-{abi}.apk
-            // Example: GymExe-arm64-v8a.apk
             for (abi in supportedAbis) {
                 selectedAsset =
                     stableRelease.assets.find {
@@ -64,7 +60,6 @@ class UpdaterRepository @Inject constructor(private val gitHubService: GitHubSer
                 }
             }
 
-            // 2. Fallback to GymExe-universal.apk
             if (selectedAsset == null) {
                 selectedAsset =
                     stableRelease.assets.find {
@@ -114,8 +109,6 @@ class UpdaterRepository @Inject constructor(private val gitHubService: GitHubSer
                             val progress = (total * 100 / fileLength).toInt()
                             emit(DownloadStatus.Downloading(progress, total, fileLength))
                         } else {
-                            // If content-length is unknown, progress is indeterminate (-1 or just
-                            // total bytes)
                             emit(DownloadStatus.Downloading(-1, total, -1))
                         }
                         output.write(data, 0, count)

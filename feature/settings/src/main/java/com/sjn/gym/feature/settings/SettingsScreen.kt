@@ -163,9 +163,7 @@ fun SettingsScreenContent(
                     context.contentResolver.openOutputStream(it)?.let { outputStream ->
                         onBackupRequested(outputStream)
                     }
-                } catch (e: Exception) {
-                    // Handle error
-                }
+                } catch (e: Exception) {}
             }
         }
 
@@ -198,9 +196,7 @@ fun SettingsScreenContent(
                     context.contentResolver.openInputStream(restoreUri!!)?.let { inputStream ->
                         onRestoreRequested(inputStream, options)
                     }
-                } catch (e: Exception) {
-                    // Handle error
-                }
+                } catch (e: Exception) {}
                 showRestoreDialog = false
                 restoreUri = null
             },
@@ -855,25 +851,25 @@ fun <T : Enum<T>> SelectionDialog(
 object ThemeColors {
     val PALETTE =
         listOf(
-                0xFFF44336, // Red
-                0xFFE91E63, // Pink
-                0xFF9C27B0, // Purple
-                0xFF673AB7, // Deep Purple
-                0xFF3F51B5, // Indigo
-                0xFF2196F3, // Blue
-                0xFF03A9F4, // Light Blue
-                0xFF00BCD4, // Cyan
-                0xFF009688, // Teal
-                0xFF4CAF50, // Green
-                0xFF8BC34A, // Light Green
-                0xFFCDDC39, // Lime
-                0xFFFFEB3B, // Yellow
-                0xFFFFC107, // Amber
-                0xFFFF9800, // Orange
-                0xFFFF5722, // Deep Orange
-                0xFF795548, // Brown
-                0xFF9E9E9E, // Grey
-                0xFF607D8B, // Blue Grey
+                0xFFF44336,
+                0xFFE91E63,
+                0xFF9C27B0,
+                0xFF673AB7,
+                0xFF3F51B5,
+                0xFF2196F3,
+                0xFF03A9F4,
+                0xFF00BCD4,
+                0xFF009688,
+                0xFF4CAF50,
+                0xFF8BC34A,
+                0xFFCDDC39,
+                0xFFFFEB3B,
+                0xFFFFC107,
+                0xFFFF9800,
+                0xFFFF5722,
+                0xFF795548,
+                0xFF9E9E9E,
+                0xFF607D8B,
             )
             .map { it.toInt() }
 }

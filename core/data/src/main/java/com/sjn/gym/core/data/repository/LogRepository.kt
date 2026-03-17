@@ -25,7 +25,6 @@ class LogRepository @Inject constructor(@param:ApplicationContext private val co
     @Synchronized
     fun appendLog(priority: Int, tag: String?, message: String, t: Throwable?) {
         try {
-            // Ensure directory exists
             if (logFile.parentFile?.exists() == false) {
                 logFile.parentFile?.mkdirs()
             }
@@ -44,14 +43,11 @@ class LogRepository @Inject constructor(@param:ApplicationContext private val co
 
             val logMessage = "$timestamp $priorityString/$tag: $message\n"
 
-            // Append to file synchronously as logging is often synchronous
-            // Use append mode
             FileWriter(logFile, true).use { writer ->
                 writer.append(logMessage)
                 t?.printStackTrace(java.io.PrintWriter(writer))
             }
         } catch (e: IOException) {
-            // Fallback to system log if file write fails
             Log.e("LogRepository", "Error writing to log file: ${e.message}")
         }
     }

@@ -26,25 +26,20 @@ class GymExeApp : Application() {
             writers.add(LogcatWriter())
         }
 
-        // Plant FileLoggingTree for all dev builds (debug and release)
         if (BuildConfig.FLAVOR == "dev") {
             writers.add(FileLogWriter(logRepository))
             Logger.setLogWriters(writers)
-            Logger.i { "App started" } // Ensure log file is created
+            Logger.i { "App started" }
 
-            // Capture uncaught exceptions
             val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
             Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
                 try {
-                    // Log to file
                     Logger.e(throwable) { "Uncaught Exception on thread ${thread.name}" }
 
-                    // Convert stack trace to string
                     val sw = StringWriter()
                     throwable.printStackTrace(PrintWriter(sw))
                     val stackTrace = sw.toString()
 
-                    // Launch CrashActivity
                     val intent =
                         Intent(this, CrashActivity::class.java).apply {
                             putExtra("error_details", stackTrace)
@@ -54,11 +49,9 @@ class GymExeApp : Application() {
                         }
                     startActivity(intent)
 
-                    // Kill the process to avoid system crash dialog and ensure fresh start
                     Process.killProcess(Process.myPid())
                     exitProcess(10)
                 } catch (e: Exception) {
-                    // If crash handling fails, fall back to default
                     defaultHandler?.uncaughtException(thread, throwable)
                 }
             }

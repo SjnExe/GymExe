@@ -28,25 +28,12 @@ class MainActivity : ComponentActivity() {
             val viewModel: MainViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-            // Handle intent (e.g., opening a .gym file)
-            // Ideally, this should be passed to the ViewModel or NavHost to trigger a dialog or
-            // navigation
-            // For now, we'll just log or prepare it.
-            // In a real implementation, you might want to use a SideEffect or a specific Intent
-            // Handler
-
-            // val intentUri = intent?.data
-
             when (val state = uiState) {
                 is MainActivityUiState.Loading -> {
-                    // Placeholder loading screen
-                    Surface(modifier = Modifier.fillMaxSize()) {
-                        // Empty surface or splash
-                    }
+                    Surface(modifier = Modifier.fillMaxSize()) {}
                 }
 
                 is MainActivityUiState.Success -> {
-                    // Determine theme
                     val darkTheme =
                         when (state.userData.themeConfig) {
                             ThemeConfig.DARK -> true
@@ -65,11 +52,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-
-                    // TODO: If intentUri is present, trigger restore dialog in Settings or a global
-                    // restore dialog.
-                    // This requires moving the Restore Dialog to a higher level or navigating to
-                    // Settings with an argument.
                 }
             }
         }
@@ -78,6 +60,5 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        // Handle new intent if activity is already running
     }
 }

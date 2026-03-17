@@ -16,6 +16,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
                 apply("gymexe.android.test")
+                apply("gymexe.dependency.analysis")
             }
 
             extensions.configure<LibraryExtension> {

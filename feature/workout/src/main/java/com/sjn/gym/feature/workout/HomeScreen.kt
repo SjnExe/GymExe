@@ -31,7 +31,7 @@ fun HomeScreen(
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Today's Workout", style = MaterialTheme.typography.titleMedium)
-                    Text("Push Day (Placeholder)", style = MaterialTheme.typography.headlineSmall)
+                    Text("Push Day", style = MaterialTheme.typography.headlineSmall)
                     Button(onClick = onNavigateToWorkout, modifier = Modifier.padding(top = 8.dp)) {
                         Text("Start Workout")
                     }
