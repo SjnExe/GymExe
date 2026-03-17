@@ -46,11 +46,9 @@ fun LibraryScreen(onNavigateToWorkout: (String) -> Unit, modifier: Modifier = Mo
                 }
 
                 1 -> {
-                    // Routines Placeholder
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("My Routines")
                         Text("Saved Splits")
-                        // TODO: Implement Routine List
                     }
                 }
             }

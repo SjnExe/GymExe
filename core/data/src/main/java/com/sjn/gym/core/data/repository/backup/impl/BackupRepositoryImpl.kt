@@ -34,9 +34,14 @@ constructor(
     override suspend fun exportData(outputStream: OutputStream): Result<Unit> = runCatching {
         val preferences = userPreferencesRepository.userData.first()
         val profile = userProfileRepository.userProfile.first()
+        val weightUnit = userProfileRepository.weightUnit.first()
+        val heightUnit = userProfileRepository.heightUnit.first()
 
         val backupData =
-            GymBackupData(profile = profile?.toBackup(), settings = preferences.toBackup())
+            GymBackupData(
+                profile = profile?.toBackup(),
+                settings = preferences.toBackup(weightUnit.name, heightUnit.name),
+            )
 
         val jsonString = json.encodeToString(backupData)
 
@@ -56,9 +61,16 @@ constructor(
             val settings = data.settings
             if (options.restoreSettings && settings != null) {
                 userPreferencesRepository.setThemeMode(settings.themeMode)
-                // TODO: Add methods to UserPreferencesRepository to set units if not present
-                // userPreferencesRepository.setWeightUnit(data.settings.weightUnit)
-                // userPreferencesRepository.setHeightUnit(data.settings.heightUnit)
+                try {
+                    userProfileRepository.setWeightUnit(
+                        com.sjn.gym.core.model.WeightUnit.valueOf(settings.weightUnit)
+                    )
+                } catch (@Suppress("SwallowedException") e: Exception) {}
+                try {
+                    userProfileRepository.setHeightUnit(
+                        com.sjn.gym.core.model.HeightUnit.valueOf(settings.heightUnit)
+                    )
+                } catch (@Suppress("SwallowedException") e: Exception) {}
             }
 
             val profile = data.profile
@@ -111,10 +123,6 @@ constructor(
                 } ?: com.sjn.gym.core.model.Gender.MALE,
         )
 
-    private fun UserPreferences.toBackup() =
-        BackupSettings(
-            themeMode = themeMode,
-            weightUnit = "KG", // Placeholder, need to get from preferences if stored
-            heightUnit = "CM", // Placeholder
-        )
+    private fun UserPreferences.toBackup(weightUnit: String, heightUnit: String) =
+        BackupSettings(themeMode = themeMode, weightUnit = weightUnit, heightUnit = heightUnit)
 }

@@ -12,6 +12,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
                 apply("org.jetbrains.kotlin.jvm")
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
+                apply("gymexe.dependency.analysis")
             }
             configureKotlinJvm()
         }

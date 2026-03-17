@@ -10,6 +10,17 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.versionCatalogUpdate)
     alias(libs.plugins.kover)
+    alias(libs.plugins.dependencyAnalysis)
+}
+
+dependencyAnalysis {
+    issues {
+        all {
+            onUnusedDependencies {
+                severity("fail")
+            }
+        }
+    }
 }
 
 dependencies {

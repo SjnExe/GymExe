@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.kover.gradlePlugin)
     implementation(libs.roborazzi.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
+    implementation("com.autonomousapps:dependency-analysis-gradle-plugin:2.0.2")
 }
 
 gradlePlugin {
@@ -80,6 +81,10 @@ gradlePlugin {
         register("kover") {
             id = "gymexe.kover"
             implementationClass = "com.sjn.gym.convention.KoverConventionPlugin"
+        }
+        register("dependencyAnalysis") {
+            id = "gymexe.dependency.analysis"
+            implementationClass = "com.sjn.gym.convention.DependencyAnalysisConventionPlugin"
         }
     }
 }
