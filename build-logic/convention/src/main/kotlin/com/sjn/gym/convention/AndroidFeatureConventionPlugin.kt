@@ -17,22 +17,28 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("implementation", project(":core:ui"))
                 add("implementation", project(":core:model"))
                 add("implementation", project(":core:data"))
 
-                // Standard Compose UI libraries for Features
-                add("implementation", libs.findLibrary("androidx.ui").get())
-                add("implementation", libs.findLibrary("androidx.ui.graphics").get())
-                add("implementation", libs.findLibrary("androidx.material3").get())
+                add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel").get())
+                add("implementation", libs.findLibrary("hilt-lifecycle-viewmodel-compose").get())
 
-                add("implementation", libs.findLibrary("androidx.hilt.navigation.compose").get())
-                add("implementation", libs.findLibrary("androidx.lifecycle.runtime.compose").get())
-                add("implementation", libs.findLibrary("androidx.navigation.compose").get())
+                add("implementation", libs.findLibrary("kotlinx-coroutines-core").get())
 
-                add("testImplementation", libs.findLibrary("junit").get())
-                add("androidTestImplementation", libs.findLibrary("androidx.ui.test.junit4").get())
-                add("debugImplementation", libs.findLibrary("androidx.ui.test.manifest").get())
+                add("implementation", project(":core:ui"))
+                add("implementation", libs.findLibrary("androidx-activity").get())
+                add("implementation", libs.findLibrary("androidx-compose-material-icons-core").get())
+                add("implementation", libs.findLibrary("androidx-material-icons-extended").get())
+
+                add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
+                add("implementation", libs.findBundle("compose-core").get())
+                add("implementation", libs.findLibrary("androidx-ui").get())
+                add("implementation", libs.findLibrary("androidx-ui-graphics").get())
+                add("implementation", libs.findLibrary("androidx-ui-tooling-preview").get())
+                add("implementation", libs.findLibrary("androidx-material3").get())
+                add("implementation", libs.findLibrary("androidx-activity-compose").get())
+
+                add("androidTestRuntimeOnly", libs.findLibrary("androidx-test-core").get())
             }
         }
     }

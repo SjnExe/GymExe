@@ -95,7 +95,7 @@ jobs:
         run: |
           set -o pipefail
           if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="testStableDebugUnitTest"
+            TASKS="testDevDebugUnitTest"
           else
             TASKS="testDevDebugUnitTest"
           fi

@@ -19,22 +19,18 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
                     ?: return
 
             if (extension is ApplicationExtension) {
-                extension.buildFeatures {
-                    compose = true
-                }
+                extension.buildFeatures { compose = true }
             } else if (extension is LibraryExtension) {
-                extension.buildFeatures {
-                    compose = true
-                }
+                extension.buildFeatures { compose = true }
             }
 
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("implementation", platform(libs.findLibrary("androidx.compose.bom").get()))
-                add("implementation", libs.findBundle("compose").get())
-                add("debugImplementation", libs.findBundle("compose.debug").get())
-                add("lintChecks", libs.findLibrary("slack.compose.lints").get())
+                add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
+                add("implementation", libs.findBundle("compose-core").get())
+                add("debugRuntimeOnly", libs.findLibrary("androidx-ui-test-manifest").get())
+                add("lintChecks", libs.findLibrary("slack-compose-lints").get())
             }
         }
     }

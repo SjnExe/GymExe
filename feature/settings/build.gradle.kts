@@ -10,9 +10,22 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
+    api(libs.dagger)
+    api(libs.javax.inject)
+    api(libs.kotlinx.coroutines.core)
+
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.animation.core)
+    implementation(libs.androidx.core)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.common)
+    implementation(libs.hilt.core)
+
     implementation(libs.kermit)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.androidx.ui.test.junit4)
+    "testDevImplementation"(libs.androidx.compose.runtime)
+    "testDevImplementation"(libs.androidx.compose.ui.test)
+    "testDevImplementation"(libs.androidx.ui.test.junit4)
+    "testDevImplementation"(libs.roborazzi.core)
+    "testDevImplementation"(libs.robolectric.annotations)
 }

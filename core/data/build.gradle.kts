@@ -6,29 +6,35 @@ plugins {
 android { namespace = "com.sjn.gym.core.data" }
 
 dependencies {
-    implementation(project(":core:model"))
+    api(project(":core:model"))
+    api(libs.androidx.datastore.core)
+    api(libs.androidx.datastore.preferences.core)
 
-    implementation(libs.androidx.core.ktx)
+    api(libs.dagger)
+    api(libs.javax.inject)
+    api(libs.kotlinx.coroutines.core)
+    api(libs.kotlinx.serialization.core)
+
+    api(libs.hilt.android)
+    api(libs.retrofit)
+
+    implementation(libs.androidx.collection)
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.hilt.core)
+
     implementation(libs.kotlinx.serialization.json)
 
-    // Room
     implementation(libs.bundles.room)
     ksp(libs.androidx.room.compiler)
 
-    // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Retrofit
-    implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp)
 
-    // Chucker
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
 
-    // Hilt handled by convention plugin (hilt-android, hilt-compiler)
-
-    // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 }

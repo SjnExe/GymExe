@@ -11,17 +11,16 @@ class AndroidTestConventionPlugin : Plugin<Project> {
         with(target) {
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
 
+            configurations.maybeCreate("testDevImplementation")
+            configurations.maybeCreate("testDevRuntimeOnly")
             dependencies {
-                add("testImplementation", libs.findLibrary("junit").get())
-                add("testImplementation", libs.findLibrary("junit.jupiter").get())
-                add("testRuntimeOnly", libs.findLibrary("junit.jupiter.engine").get())
-                add("testRuntimeOnly", libs.findLibrary("junit.platform.launcher").get())
-                add("testRuntimeOnly", libs.findLibrary("junit.vintage.engine").get())
-                add("testImplementation", "org.junit.vintage:junit-vintage-engine")
-                add("testImplementation", libs.findLibrary("turbine").get())
-                add("testImplementation", libs.findLibrary("kotlinx.coroutines.test").get())
-                add("testImplementation", libs.findLibrary("mockk.agent").get())
-                add("testImplementation", libs.findLibrary("mockk.android").get())
+                add("testDevImplementation", libs.findBundle("testing-common").get())
+                add("testDevImplementation", libs.findLibrary("junit-jupiter").get())
+                add("testDevRuntimeOnly", libs.findLibrary("junit-jupiter-engine").get())
+                add("testDevRuntimeOnly", libs.findLibrary("junit-platform-launcher").get())
+                add("testDevRuntimeOnly", libs.findLibrary("junit-vintage-engine").get())
+                add("testDevImplementation", libs.findLibrary("turbine").get())
+                add("testDevImplementation", libs.findLibrary("kotlinx-coroutines-test").get())
             }
         }
     }

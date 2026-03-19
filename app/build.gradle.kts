@@ -154,35 +154,56 @@ androidComponents {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    // Compose BOM, tooling, preview handled by convention plugin
+    implementation(libs.kermit)
 
-    implementation(libs.bundles.compose)
-    implementation(libs.androidx.tracing)
-
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.animation.core)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.unit)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.fragment)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.common)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.common)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation.compose)
-    // Hilt handled by convention plugin
+    implementation(libs.androidx.navigation.runtime)
 
-    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.dagger)
+    implementation(libs.hilt.core)
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.okhttp)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.bundles.junit.jupiter)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.bundles.roborazzi)
-    testImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.tracing)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    "androidTestDevImplementation"(libs.junit)
+
+    "testDevImplementation"(libs.androidx.compose.runtime)
+    "testDevImplementation"(libs.androidx.compose.ui.test)
+    "testDevImplementation"(libs.roborazzi.core)
+    "testDevImplementation"(libs.robolectric.annotations)
+
+    "androidTestDevImplementation"(libs.androidx.junit)
+    "androidTestDevImplementation"(platform(libs.androidx.compose.bom))
+    "androidTestDevImplementation"(libs.androidx.ui.test.junit4)
+    "testDevImplementation"(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.bundles.compose.debug)
     debugImplementation(libs.leakcanary.android)
+
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
-    implementation(libs.kermit)
 
     // Modular dependencies
     implementation(project(":core:ui"))
