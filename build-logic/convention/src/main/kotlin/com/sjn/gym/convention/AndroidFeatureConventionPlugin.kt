@@ -17,13 +17,13 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("api", project(":core:model"))
-                add("api", project(":core:data"))
+                add("implementation", project(":core:model"))
+                add("implementation", project(":core:data"))
 
-                add("api", libs.findLibrary("androidx-lifecycle-viewmodel").get())
+                add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel").get())
                 add("implementation", libs.findLibrary("hilt-lifecycle-viewmodel-compose").get())
 
-                add("api", libs.findLibrary("kotlinx-coroutines-core").get())
+                add("implementation", libs.findLibrary("kotlinx-coroutines-core").get())
 
                 add("implementation", project(":core:ui"))
                 add("implementation", libs.findLibrary("androidx-activity").get())

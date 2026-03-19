@@ -11,11 +11,16 @@ class AndroidTestConventionPlugin : Plugin<Project> {
         with(target) {
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
 
+            configurations.maybeCreate("testDevImplementation")
+            configurations.maybeCreate("testDevRuntimeOnly")
             dependencies {
-                add("testImplementation", libs.findBundle("testing-common").get())
-                add("testImplementation", libs.findBundle("junit-jupiter").get())
-                add("testImplementation", libs.findLibrary("turbine").get())
-                add("testImplementation", libs.findLibrary("kotlinx-coroutines-test").get())
+                add("testDevImplementation", libs.findBundle("testing-common").get())
+                add("testDevImplementation", libs.findLibrary("junit-jupiter").get())
+                add("testDevRuntimeOnly", libs.findLibrary("junit-jupiter-engine").get())
+                add("testDevRuntimeOnly", libs.findLibrary("junit-platform-launcher").get())
+                add("testDevRuntimeOnly", libs.findLibrary("junit-vintage-engine").get())
+                add("testDevImplementation", libs.findLibrary("turbine").get())
+                add("testDevImplementation", libs.findLibrary("kotlinx-coroutines-test").get())
             }
         }
     }

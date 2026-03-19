@@ -36,5 +36,5 @@ dependencies {
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
 
-    runtimeOnly(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.android)
 }

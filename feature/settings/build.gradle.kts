@@ -23,8 +23,9 @@ dependencies {
 
     implementation(libs.kermit)
 
-    testImplementation(libs.androidx.compose.runtime)
-    testImplementation(libs.androidx.compose.ui.test)
-    testImplementation(libs.roborazzi.core)
-    testImplementation(libs.robolectric.annotations)
+    "testDevImplementation"(libs.androidx.compose.runtime)
+    "testDevImplementation"(libs.androidx.compose.ui.test)
+    "testDevImplementation"(libs.androidx.ui.test.junit4)
+    "testDevImplementation"(libs.roborazzi.core)
+    "testDevImplementation"(libs.robolectric.annotations)
 }

@@ -27,8 +27,8 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("api", platform(libs.findLibrary("androidx-compose-bom").get()))
-                add("api", libs.findBundle("compose-core").get())
+                add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
+                add("implementation", libs.findBundle("compose-core").get())
                 add("debugRuntimeOnly", libs.findLibrary("androidx-ui-test-manifest").get())
                 add("lintChecks", libs.findLibrary("slack-compose-lints").get())
             }

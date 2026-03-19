@@ -13,6 +13,8 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
             }
 
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
+            configurations.maybeCreate("testDevImplementation")
+            configurations.maybeCreate("testDevRuntimeOnly")
             dependencies {
                 add("implementation", libs.findBundle("room").get())
                 add("ksp", libs.findLibrary("androidx.room.compiler").get())
