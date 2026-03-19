@@ -154,35 +154,48 @@ androidComponents {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    // Compose BOM, tooling, preview handled by convention plugin
+    debugImplementation(libs.kermit.android.debug)
+    debugImplementation(libs.kermit.core.android.debug)
+    releaseImplementation(libs.kermit.core)
 
-    implementation(libs.bundles.compose)
-    implementation(libs.androidx.tracing)
-
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.animation.core)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.fragment)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.common)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+    implementation(libs.androidx.navigation.common)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation.compose)
-    // Hilt handled by convention plugin
+    implementation(libs.androidx.navigation.runtime)
 
-    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.dagger)
+    implementation(libs.hilt.core)
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.okhttp)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.bundles.junit.jupiter)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.bundles.roborazzi)
-    testImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.junit)
+
+    testImplementation(libs.androidx.compose.runtime)
+    testImplementation(libs.androidx.compose.ui.test)
+    testImplementation(libs.roborazzi.core)
+    testImplementation(libs.robolectric.annotations)
+
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.tracing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.bundles.compose.debug)
     debugImplementation(libs.leakcanary.android)
+
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
-    implementation(libs.kermit)
 
     // Modular dependencies
     implementation(project(":core:ui"))

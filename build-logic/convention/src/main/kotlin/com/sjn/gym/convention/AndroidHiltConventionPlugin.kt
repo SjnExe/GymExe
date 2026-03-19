@@ -15,10 +15,12 @@ class AndroidHiltConventionPlugin : Plugin<Project> {
 
             val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
             dependencies {
-                add("implementation", libs.findLibrary("hilt.android").get())
-                add("ksp", libs.findLibrary("hilt.compiler").get())
+                add("api", libs.findLibrary("dagger").get())
+                add("api", libs.findLibrary("javax-inject").get())
+                add("implementation", libs.findLibrary("hilt-core").get())
+                add("implementation", libs.findLibrary("hilt-android").get())
+                add("ksp", libs.findLibrary("hilt-compiler").get())
             }
-
         }
     }
 }

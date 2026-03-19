@@ -17,7 +17,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             }
 
             val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
-            dependencies.add("implementation", libs.findLibrary("androidx.profileinstaller").get())
+            dependencies.add("runtimeOnly", libs.findLibrary("androidx-profileinstaller").get())
 
             extensions.configure<ApplicationExtension> {
                 defaultConfig.targetSdk = 36

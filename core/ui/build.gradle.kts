@@ -7,14 +7,9 @@ plugins {
 android { namespace = "com.sjn.gym.core.ui" }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    // Compose BOM and tooling added by plugin
+    api(project(":core:model"))
 
-    implementation(project(":core:model"))
-    // implementation(libs.androidx.ui.tooling.preview) // added by plugin
-    // debugImplementation(libs.androidx.ui.tooling) // added by plugin
-
-    testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.bundles.roborazzi)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.foundation)
 }

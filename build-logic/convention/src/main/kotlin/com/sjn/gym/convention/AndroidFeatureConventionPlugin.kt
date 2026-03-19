@@ -17,22 +17,18 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
             dependencies {
-                add("implementation", project(":core:ui"))
-                add("implementation", project(":core:model"))
-                add("implementation", project(":core:data"))
+                add("api", project(":core:model"))
+                add("api", project(":core:data"))
 
-                // Standard Compose UI libraries for Features
-                add("implementation", libs.findLibrary("androidx.ui").get())
-                add("implementation", libs.findLibrary("androidx.ui.graphics").get())
-                add("implementation", libs.findLibrary("androidx.material3").get())
+                add("api", libs.findLibrary("androidx-lifecycle-viewmodel").get())
+                add("implementation", libs.findLibrary("hilt-lifecycle-viewmodel-compose").get())
 
-                add("implementation", libs.findLibrary("androidx.hilt.navigation.compose").get())
-                add("implementation", libs.findLibrary("androidx.lifecycle.runtime.compose").get())
-                add("implementation", libs.findLibrary("androidx.navigation.compose").get())
+                add("api", libs.findLibrary("kotlinx-coroutines-core").get())
 
-                add("testImplementation", libs.findLibrary("junit").get())
-                add("androidTestImplementation", libs.findLibrary("androidx.ui.test.junit4").get())
-                add("debugImplementation", libs.findLibrary("androidx.ui.test.manifest").get())
+                add("implementation", libs.findLibrary("androidx-activity").get())
+                add("implementation", libs.findLibrary("androidx-compose-material-icons-core").get())
+
+                add("androidTestRuntimeOnly", libs.findLibrary("androidx-test-core").get())
             }
         }
     }
