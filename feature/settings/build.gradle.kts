@@ -21,9 +21,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.common)
     implementation(libs.hilt.core)
 
-    debugImplementation(libs.kermit.android.debug)
-    debugImplementation(libs.kermit.core.android.debug)
-    releaseImplementation(libs.kermit.core)
+    implementation(libs.kermit)
 
     testImplementation(libs.androidx.compose.runtime)
     testImplementation(libs.androidx.compose.ui.test)

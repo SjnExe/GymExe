@@ -154,9 +154,7 @@ androidComponents {
 }
 
 dependencies {
-    debugImplementation(libs.kermit.android.debug)
-    debugImplementation(libs.kermit.core.android.debug)
-    releaseImplementation(libs.kermit.core)
+    implementation(libs.kermit)
 
     implementation(libs.androidx.activity)
     implementation(libs.androidx.annotation)
