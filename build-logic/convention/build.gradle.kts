@@ -33,7 +33,7 @@ dependencies {
     implementation(libs.kover.gradlePlugin)
     implementation(libs.roborazzi.gradlePlugin)
     implementation(libs.spotless.gradlePlugin)
-    implementation(libs.dependencyAnalysis.gradlePlugin)
+    implementation("com.autonomousapps:dependency-analysis-gradle-plugin:3.6.1")
 }
 
 gradlePlugin {
