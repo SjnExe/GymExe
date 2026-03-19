@@ -25,8 +25,18 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
                 add("api", libs.findLibrary("kotlinx-coroutines-core").get())
 
+                add("implementation", project(":core:ui"))
                 add("implementation", libs.findLibrary("androidx-activity").get())
                 add("implementation", libs.findLibrary("androidx-compose-material-icons-core").get())
+                add("implementation", libs.findLibrary("androidx-material-icons-extended").get())
+
+                add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
+                add("implementation", libs.findBundle("compose-core").get())
+                add("implementation", libs.findLibrary("androidx-ui").get())
+                add("implementation", libs.findLibrary("androidx-ui-graphics").get())
+                add("implementation", libs.findLibrary("androidx-ui-tooling-preview").get())
+                add("implementation", libs.findLibrary("androidx-material3").get())
+                add("implementation", libs.findLibrary("androidx-activity-compose").get())
 
                 add("androidTestRuntimeOnly", libs.findLibrary("androidx-test-core").get())
             }
