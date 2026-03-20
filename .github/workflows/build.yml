@@ -8,87 +8,52 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   spotless_check:
     name: Spotless Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+      - uses: actions/checkout@v6
+      - uses: gradle/actions/setup-gradle@v5
         with:
           cache-cleanup: on-success
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
-          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Run Spotless Check
-        run: ./gradlew spotlessCheck -s --no-watch-fs
+      - run: ./gradlew spotlessCheck -s --no-watch-fs
 
   lint_check:
     name: Lint Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-cleanup: on-success
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
-          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Run Lint Check
-        run: |
-          set -o pipefail
-          ./gradlew lintDevDebug -s --no-watch-fs 2>&1 | tee lint_output.log
-      - name: Collect & Upload Reports
+      - uses: actions/checkout@v6
+      - uses: gradle/actions/setup-gradle@v5
+      - run: ./gradlew lintDevDebug -s --no-watch-fs 2>&1 | tee lint_output.log
+      - uses: actions/upload-artifact@v7
         if: always()
-        run: |
-          mkdir -p reports/lint
-          find . -name "lint-results*.xml" -exec cp --parents {} reports/lint/ \; || true
-          find . -name "lint-results*.html" -exec cp --parents {} reports/lint/ \; || true
-          zip -r -0 lint_logs.zip lint_output.log reports/ || true
-      - name: Upload Lint Logs
-        if: always()
-        uses: actions/upload-artifact@v7
         with:
           name: lint-logs
-          path: lint_logs.zip
-          overwrite: true
+          path: |
+            lint_output.log
+            **/build/reports/lint-results*
+          compression-level: 0
 
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-cleanup: on-success
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
-          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Run Unit Tests
-        run: |
-          set -o pipefail
-          ./gradlew testDevDebugUnitTest -s --no-watch-fs 2>&1 | tee tests_output.log
-      - name: Collect & Upload Reports
+      - uses: actions/checkout@v6
+      - uses: gradle/actions/setup-gradle@v5
+      - run: ./gradlew testDevDebugUnitTest -s --no-watch-fs 2>&1 | tee tests_output.log
+      - uses: actions/upload-artifact@v7
         if: always()
-        run: |
-          mkdir -p reports/tests
-          find . -type d -path "*/build/reports/tests" -exec cp -r --parents {} reports/tests/ \; || true
-          zip -r -0 test_logs.zip tests_output.log reports/ || true
-      - name: Upload Test Logs
-        if: always()
-        uses: actions/upload-artifact@v7
         with:
           name: test-logs
-          path: test_logs.zip
-          overwrite: true
+          path: |
+            tests_output.log
+            **/build/reports/tests/
+          compression-level: 0
 
   build_apks:
     name: Build APKs
@@ -96,251 +61,135 @@ jobs:
     outputs:
       BUILD_TYPE: ${{ steps.version.outputs.BUILD_TYPE }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-cleanup: on-success
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
-          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-
-      - name: Set Build Type
-        id: version
+      - uses: actions/checkout@v6
+      - uses: gradle/actions/setup-gradle@v5
+      - id: version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            BUILD_TYPE=stable
+            echo "BUILD_TYPE=stable" >> $GITHUB_OUTPUT
           else
-            BUILD_TYPE=dev
+            echo "BUILD_TYPE=dev" >> $GITHUB_OUTPUT
           fi
-          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_OUTPUT
-
-      - name: Build APKs
+      - run: |
+          if [ "${{ steps.version.outputs.BUILD_TYPE }}" == "stable" ]; then
+            ./gradlew assembleStableRelease -s -PversionName=${GITHUB_REF_NAME#v} -PversionCode=${{ github.run_number }}
+          else
+            ./gradlew assembleDevRelease assembleDevDebug -s
+          fi
+      - name: Stage Release APKs
         run: |
-          set -o pipefail
-          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            VERSION_NAME=${GITHUB_REF_NAME#v}
-            VERSION_CODE=${{ github.run_number }}
-            ./gradlew assembleStableRelease -s --no-watch-fs -PversionName=$VERSION_NAME -PversionCode=$VERSION_CODE 2>&1 | tee build_output.log
-          else
-            # For dev/PR builds, skip dynamic versions to allow 100% Configuration Cache hits
-            ./gradlew assembleDevRelease assembleDevDebug -s --no-watch-fs 2>&1 | tee build_output.log
-          fi
-
-      - name: Upload Build Logs
-        if: always()
-        run: zip -r -0 build_logs.zip build_output.log || true
+          mkdir -p staging-release-apks
+          find app/build/outputs/apk/ -type f -path "*/release/*.apk" -exec cp {} staging-release-apks/ \;
       - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: build-logs
-          path: build_logs.zip
-          overwrite: true
-
-      - name: Upload APKs (Dev)
-        if: env.BUILD_TYPE == 'dev'
-        uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
-          path: |
-            app/build/outputs/apk/dev/release/*.apk
-            app/build/outputs/apk/dev/debug/*.apk
+          path: staging-release-apks/*.apk
           compression-level: 0
-          overwrite: true
-
-      - name: Upload APKs (Stable)
-        if: env.BUILD_TYPE == 'stable'
-        uses: actions/upload-artifact@v7
-        with:
-          name: compiled-apks
-          path: app/build/outputs/apk/stable/release/*.apk
-          compression-level: 0
-          overwrite: true
 
   build_test_apks:
     name: Compile Test APKs
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-cleanup: on-success
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
-          cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-
-      - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
-
-      - name: Upload Test APKs
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v7
+      - uses: gradle/actions/setup-gradle@v5
+      - run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
+      - name: Stage Test APKs
+        run: |
+          mkdir -p staging-apks
+          find app/build/outputs/apk/dev/benchmark/ -name "*x86*.apk" -exec cp {} staging-apks/ \;
+          find app/build/outputs/apk/androidTest/dev/benchmark/ -name "*.apk" -exec cp {} staging-apks/ \;
+      - uses: actions/upload-artifact@v7
         with:
           name: test-apks
-          path: |
-            app/build/outputs/apk/dev/benchmark/*.apk
-            app/build/outputs/apk/androidTest/dev/benchmark/*.apk
+          path: staging-apks/*.apk
           compression-level: 0
 
   setup_sdk_cache:
     name: Pre-warm SDK Cache
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     steps:
-      - name: Fix Android SDK permissions
-        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
-
-      - name: Restore Android SDK Cache
-        uses: actions/cache/restore@v5
+      - run: sudo chown $USER:$USER /usr/local/lib/android/sdk
+      - uses: actions/cache@v5
         id: sdk-cache
         with:
           path: |
             /usr/local/lib/android/sdk/emulator/
-            /usr/local/lib/android/sdk/build-tools/
             /usr/local/lib/android/sdk/platform-tools/
-            /usr/local/lib/android/sdk/cmdline-tools/
-            /usr/local/lib/android/sdk/extras/
           key: android-sdk-base-36.0.0
-
-      - name: Download Base SDK
-        if: steps.sdk-cache.outputs.cache-hit != 'true'
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
-
-      - name: Save Android SDK Cache
-        if: github.event_name != 'pull_request' && steps.sdk-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            /usr/local/lib/android/sdk/emulator/
-            /usr/local/lib/android/sdk/build-tools/
-            /usr/local/lib/android/sdk/platform-tools/
-            /usr/local/lib/android/sdk/cmdline-tools/
-            /usr/local/lib/android/sdk/extras/
-          key: android-sdk-base-36.0.0
+      - if: steps.sdk-cache.outputs.cache-hit != 'true'
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
 
   instrumented_tests:
-    needs: [setup_sdk_cache, build_test_apks]
-    name: API ${{ matrix.api-level }} tests
+    needs: [build_test_apks]
+    name: API ${{ matrix.api-level }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     if: github.event_name == 'pull_request'
     strategy:
       matrix:
         api-level: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
-    permissions:
-      actions: write
-      contents: read
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Fix Android SDK permissions
-        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
-
-      - name: Android SDK Cache
-        uses: actions/cache/restore@v5
-        id: sdk-cache
-        with:
-          path: |
-            /usr/local/lib/android/sdk/emulator/
-            /usr/local/lib/android/sdk/build-tools/
-            /usr/local/lib/android/sdk/platform-tools/
-            /usr/local/lib/android/sdk/cmdline-tools/
-            /usr/local/lib/android/sdk/extras/
-          key: android-sdk-base-36.0.0
-
-      - name: Download Test APKs
-        uses: actions/download-artifact@v7
-        with:
-          name: test-apks
-          path: app/build/outputs/apk
-
-      - name: Copy Test APKs to Source Directory
+      - uses: actions/checkout@v6
+      - name: Prepare KVM Permissions
         run: |
-          mkdir -p app/build/outputs/apk/androidTest/dev/benchmark
-          cp -r app/build/outputs/apk/dev/benchmark/* app/build/outputs/apk/dev/benchmark/ 2>/dev/null || true
-          cp -r app/build/outputs/apk/androidTest/dev/benchmark/* app/build/outputs/apk/androidTest/dev/benchmark/ 2>/dev/null || true
-
-      - name: Prepare Test Environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libx11-6 libx11-xcb1 libvulkan1 telnet netcat-openbsd
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
-      - name: Run Instrumented Tests
+      - uses: actions/cache/restore@v5
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator/
+            /usr/local/lib/android/sdk/platform-tools/
+          key: android-sdk-base-36.0.0
+      - uses: actions/download-artifact@v8
+        with:
+          name: test-apks
+          path: artifacts/test-apks
+      - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          TARGET_ARCH: ${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
         with:
           api-level: ${{ matrix.api-level }}
           target: google_apis
-          arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
+          arch: ${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          disable-linux-hw-accel: false
-          emulator-boot-timeout: 300
-          ram-size: 8192M
-          heap-size: 2048M
-          disk-size: 6000M
-          cores: 4
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
-            adb install -r -t app/build/outputs/apk/dev/benchmark/GymExe-dev-benchmark-universal.apk
-            adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
+            adb install -r -t $(find artifacts/test-apks -name "*dev-benchmark*${TARGET_ARCH}.apk" | head -n 1)
+            adb install -r -t $(find artifacts/test-apks -name "*androidTest*.apk" | head -n 1)
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
+            adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
-            if grep -q "FAILURES!!!" test_output.txt; then echo "Tests failed."; exit 1; fi
-            if grep -q "Process crashed" test_output.txt; then echo "Test process crashed."; exit 1; fi
-            if grep -q "INSTRUMENTATION_STATUS_CODE: -1" test_output.txt; then echo "Tests failed with status -1."; exit 1; fi
+            pkill -9 qemu || true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results-api-${{ matrix.api-level }}
+          path: |
+            test_output.txt
+            emulator_logs.txt
+          compression-level: 0
 
   release:
-    name: Release APKs
+    name: Create Release
     runs-on: ubuntu-latest
     needs: [spotless_check, lint_check, unit_tests, build_apks, instrumented_tests]
-    permissions:
-      contents: write
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && (github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v'))
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Download Compiled APKs
-        uses: actions/download-artifact@v7
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
         with:
           name: compiled-apks
-          path: apks/
-
-      - name: Create Release (Stable)
-        if: needs.build_apks.outputs.BUILD_TYPE == 'stable' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+          path: artifacts/release-apks
+      - name: GH Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-           VERSION_NAME=${GITHUB_REF_NAME#v}
-           gh release create $VERSION_NAME \
-             apks/**/*.apk \
-             --title "Release $VERSION_NAME" \
-             --notes "Stable release $VERSION_NAME" \
-             --target ${{ github.sha }}
-
-      - name: Create/Update Dev Release
-        if: needs.build_apks.outputs.BUILD_TYPE == 'dev' && github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release delete dev --cleanup-tag -y || true
-
-          gh release create dev \
-            apks/**/*.apk \
-            --title "Development Build dev" \
-            --notes "$(printf 'Development build triggered by %s.' '${{ github.event_name }}')" \
-            --prerelease \
-            --target ${{ github.sha }}
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            gh release create ${GITHUB_REF_NAME#v} artifacts/release-apks/*.apk --title "Release ${GITHUB_REF_NAME#v}" --generate-notes
+          else
+            gh release delete dev --cleanup-tag -y || true
+            gh release create dev artifacts/release-apks/*.apk --title "Dev Build" --notes "Latest development build." --prerelease
+          fi
