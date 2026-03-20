@@ -288,7 +288,7 @@ jobs:
           arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
-          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -no-boot-anim -camera-back none -no-metrics -logcat "GymExe:D *:E"
+          emulator-options: -no-snapshot -noaudio -no-window -gpu swiftshader_indirect -no-boot-anim -camera-back none -no-metrics -logcat "GymExe:D *:E"
           disable-animations: true
           disable-linux-hw-accel: false
           emulator-boot-timeout: 180
@@ -299,6 +299,7 @@ jobs:
           script: |
             adb install -r -t app/build/outputs/apk/dev/benchmark/GymExe-dev-benchmark-universal.apk
             adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
+            adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
             cat test_output.txt
             if grep -q "FAILURES!!!" test_output.txt; then echo "Tests failed."; exit 1; fi
