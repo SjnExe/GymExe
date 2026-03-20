@@ -295,11 +295,11 @@ jobs:
             adb install -r -t "$(find . -type f -name "*dev-benchmark*${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}.apk" | head -n 1)"
             adb install -r -t "$(find . -type f -name "*androidTest*.apk" | head -n 1)"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
-            adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
             if grep -q "FAILURES!!!" test_output.txt; then exit 1; fi
             if grep -q "Process crashed" test_output.txt; then exit 1; fi
             if grep -q "INSTRUMENTATION_STATUS_CODE: -1" test_output.txt; then exit 1; fi
+            pkill -9 qemu || true
 
       - name: Upload Test Logs
         if: always()
