@@ -179,7 +179,7 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
 
       - name: Upload Test APKs
         if: github.event_name == 'pull_request'
@@ -297,10 +297,17 @@ jobs:
           disk-size: 6000M
           cores: 4
           script: |
-            adb install -r -t app/build/outputs/apk/dev/benchmark/GymExe-dev-benchmark-universal.apk
-            adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
             adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
+            adb logcat -c
+            ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
+            APP_APK=$(ls app/build/outputs/apk/dev/benchmark/*-$ARCH*.apk)
+            TEST_APK=$(ls app/build/outputs/apk/androidTest/dev/benchmark/*-$ARCH*.apk)
+            echo "Installing App APK: $APP_APK"
+            adb install -r -t "$APP_APK"
+            echo "Installing Test APK: $TEST_APK"
+            adb install -r -t "$TEST_APK"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
+            adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
             if grep -q "FAILURES!!!" test_output.txt; then echo "Tests failed."; exit 1; fi
             if grep -q "Process crashed" test_output.txt; then echo "Test process crashed."; exit 1; fi
