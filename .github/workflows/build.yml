@@ -150,9 +150,15 @@ jobs:
           profile: pixel_7_pro
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
-            export TEST_ARCH=${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
-            adb install -r -t "$(find artifacts/test-apks -name "*dev-benchmark*$TEST_ARCH.apk" | head -n 1)"
-            adb install -r -t "$(find artifacts/test-apks -name "*androidTest*.apk" | head -n 1)"
+            if [ "${{ matrix.api-level }}" -le 27 ]; then
+              ARCH="x86"
+            else
+              ARCH="x86_64"
+            fi
+            BENCHMARK_APK=$(find artifacts/test-apks -name "*dev-benchmark*$ARCH.apk" | head -n 1)
+            TEST_APK=$(find artifacts/test-apks -name "*androidTest*.apk" | head -n 1)
+            adb install -r -t "$BENCHMARK_APK"
+            adb install -r -t "$TEST_APK"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
