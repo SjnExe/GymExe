@@ -179,7 +179,7 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs
 
       - name: Upload Test APKs
         if: github.event_name == 'pull_request'
@@ -187,8 +187,8 @@ jobs:
         with:
           name: test-apks
           path: |
-            app/build/outputs/apk/**/*.apk
-            app/build/intermediates/apk/**/*.apk
+            app/build/outputs/apk/dev/benchmark/**/*x86*.apk
+            app/build/outputs/apk/androidTest/dev/benchmark/*.apk
           compression-level: 0
 
   setup_sdk_cache:
@@ -285,7 +285,7 @@ jobs:
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics -qemu -m 2048
           disable-animations: true
           disable-linux-hw-accel: false
-          emulator-boot-timeout: 300
+          emulator-boot-timeout: 600
           ram-size: 10240M
           heap-size: 2048M
           disk-size: 6000M
@@ -294,10 +294,8 @@ jobs:
             adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
             adb logcat -c
             ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
-            APP_APK=$(find . -type f -name "*.apk" | grep -v "androidTest" | grep "$ARCH" | head -n 1)
-            if [ -z "$APP_APK" ]; then APP_APK=$(find . -type f -name "*.apk" | grep -v "androidTest" | head -n 1); fi
-            TEST_APK=$(find . -type f -name "*androidTest*" | grep "$ARCH" | head -n 1)
-            if [ -z "$TEST_APK" ]; then TEST_APK=$(find . -type f -name "*androidTest*" | head -n 1); fi
+            APP_APK=$(find . -type f -name "*dev-benchmark*$ARCH.apk" | head -n 1)
+            TEST_APK=$(find . -type f -name "*androidTest*.apk" | head -n 1)
             adb install -r -t "$APP_APK"
             adb install -r -t "$TEST_APK"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
@@ -341,6 +339,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
            VERSION_NAME=${GITHUB_REF_NAME#v}
+           VERSION_CODE=${{ github.run_number }}
            gh release create $VERSION_NAME \
              apks/**/*.apk \
              --title "Release $VERSION_NAME" \
