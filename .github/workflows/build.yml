@@ -179,7 +179,7 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.ndk.abiFilters=x86,x86_64
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
 
       - name: Upload Test APKs
         if: github.event_name == 'pull_request'
@@ -293,19 +293,20 @@ jobs:
           script: |
             adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
             adb logcat -c
-            APP_APK=$(find app/build/outputs/apk/dev/benchmark -type f -name "*universal.apk")
-            TEST_APK=$(find app/build/outputs/apk/androidTest/dev/benchmark -type f -name "*.apk" | head -n 1)
-            echo "Installing App APK: $APP_APK"
+            ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
+            APP_APK=$(find app/build/outputs/apk/dev/benchmark -type f -name "*$ARCH*.apk" | head -n 1)
+            if [ -z "$APP_APK" ]; then APP_APK=$(find app/build/outputs/apk/dev/benchmark -type f -name "*.apk" | head -n 1); fi
+            TEST_APK=$(find app/build/outputs/apk/androidTest/dev/benchmark -type f -name "*$ARCH*.apk" | head -n 1)
+            if [ -z "$TEST_APK" ]; then TEST_APK=$(find app/build/outputs/apk/androidTest/dev/benchmark -type f -name "*.apk" | head -n 1); fi
             adb install -r -t "$APP_APK"
-            echo "Installing Test APK: $TEST_APK"
             adb install -r -t "$TEST_APK"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
-            if grep -q "FAILURES!!!" test_output.txt; then echo "Tests failed."; exit 1; fi
-            if grep -q "Process crashed" test_output.txt; then echo "Test process crashed."; exit 1; fi
-            if grep -q "INSTRUMENTATION_STATUS_CODE: -1" test_output.txt; then echo "Tests failed with status -1."; exit 1; fi
-
+            if grep -q "FAILURES!!!" test_output.txt; then exit 1; fi
+            if grep -q "Process crashed" test_output.txt; then exit 1; fi
+            if grep -q "INSTRUMENTATION_STATUS_CODE: -1" test_output.txt; then exit 1; fi
+            
       - name: Upload Test Logs
         if: always()
         uses: actions/upload-artifact@v7
