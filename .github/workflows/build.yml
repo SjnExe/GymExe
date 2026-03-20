@@ -291,7 +291,6 @@ jobs:
           disk-size: 6000M
           cores: 4
           script: |
-            adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox || true
             adb logcat -c || true
             adb install -r -t "$(find . -type f -name "*dev-benchmark*${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}.apk" | head -n 1)"
             adb install -r -t "$(find . -type f -name "*androidTest*.apk" | head -n 1)"
