@@ -294,10 +294,10 @@ jobs:
             adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
             adb logcat -c
             ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
-            APP_APK=$(find . -type f -name "*dev-benchmark*$ARCH*.apk" | head -n 1)
-            if [ -z "$APP_APK" ]; then APP_APK=$(find . -type f -name "*dev-benchmark*.apk" | head -n 1); fi
-            TEST_APK=$(find . -type f -name "*androidTest*$ARCH*.apk" | head -n 1)
-            if [ -z "$TEST_APK" ]; then TEST_APK=$(find . -type f -name "*androidTest*.apk" | head -n 1); fi
+            APP_APK=$(find . -type f -name "*.apk" | grep -v "androidTest" | grep "$ARCH" | head -n 1)
+            if [ -z "$APP_APK" ]; then APP_APK=$(find . -type f -name "*.apk" | grep -v "androidTest" | head -n 1); fi
+            TEST_APK=$(find . -type f -name "*androidTest*" | grep "$ARCH" | head -n 1)
+            if [ -z "$TEST_APK" ]; then TEST_APK=$(find . -type f -name "*androidTest*" | head -n 1); fi
             adb install -r -t "$APP_APK"
             adb install -r -t "$TEST_APK"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
