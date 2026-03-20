@@ -90,12 +90,18 @@ jobs:
       - uses: actions/checkout@v6
       - uses: gradle/actions/setup-gradle@v5
       - run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
+      
+      # FIX: Flat staging area. Only copies x86/x86_64 and androidTest. No deep paths.
+      - name: Stage Test APKs
+        run: |
+          mkdir -p staging-apks
+          find app/build/outputs/apk/dev/benchmark/ -name "*x86*.apk" -exec cp {} staging-apks/ \;
+          find app/build/outputs/apk/androidTest/dev/benchmark/ -name "*.apk" -exec cp {} staging-apks/ \;
+          
       - uses: actions/upload-artifact@v7
         with:
           name: test-apks
-          path: |
-            app/build/outputs/apk/dev/benchmark/**/*.apk
-            app/build/outputs/apk/androidTest/dev/benchmark/*.apk
+          path: staging-apks/*.apk
           compression-level: 0
 
   setup_sdk_cache:
@@ -152,10 +158,10 @@ jobs:
           profile: pixel_7_pro
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
-            BENCHMARK_APK=$(find artifacts/test-apks -name "*dev-benchmark*$TARGET_ARCH.apk" | head -n 1)
-            TEST_APK=$(find artifacts/test-apks -name "*androidTest*.apk" | head -n 1)
-            adb install -r -t "$BENCHMARK_APK"
-            adb install -r -t "$TEST_APK"
+            # FIX: Direct wildcard install. No 'find' command needed since the folder is flat.
+            adb install -r -t artifacts/test-apks/*${TARGET_ARCH}.apk
+            adb install -r -t artifacts/test-apks/*androidTest*.apk
+            
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
