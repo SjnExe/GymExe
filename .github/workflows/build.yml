@@ -127,7 +127,6 @@ jobs:
   build_test_apks:
     name: Compile Test APKs
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -148,6 +147,7 @@ jobs:
           find app/build/outputs/apk/androidTest/dev/benchmark/ -name "*.apk" -exec cp {} staging-apks/ \;
       - name: Upload Test APKs
         uses: actions/upload-artifact@v7
+        if: github.event_name == 'pull_request'
         with:
           name: test-apks
           path: staging-apks/*.apk
