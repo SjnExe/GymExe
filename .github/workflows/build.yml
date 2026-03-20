@@ -17,20 +17,37 @@ jobs:
     name: Spotless Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: gradle/actions/setup-gradle@v5
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
         with:
-          cache-cleanup: on-success
-      - run: ./gradlew spotlessCheck -s --no-watch-fs
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Run Spotless Check
+        run: ./gradlew spotlessCheck -s
 
   lint_check:
     name: Lint Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: gradle/actions/setup-gradle@v5
-      - run: ./gradlew lintDevDebug -s --no-watch-fs 2>&1 | tee lint_output.log
-      - uses: actions/upload-artifact@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Run Linting
+        run: ./gradlew lintDevDebug -s 2>&1 | tee lint_output.log
+      - name: Upload Lint Logs
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lint-logs
@@ -43,10 +60,20 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: gradle/actions/setup-gradle@v5
-      - run: ./gradlew testDevDebugUnitTest -s --no-watch-fs 2>&1 | tee tests_output.log
-      - uses: actions/upload-artifact@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Run Unit Tests
+        run: ./gradlew testDevDebugUnitTest -s 2>&1 | tee tests_output.log
+      - name: Upload Test Logs
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-logs
@@ -56,21 +83,31 @@ jobs:
           compression-level: 0
 
   build_apks:
-    name: Build APKs
+    name: Build Release APKs
     runs-on: ubuntu-latest
     outputs:
       BUILD_TYPE: ${{ steps.version.outputs.BUILD_TYPE }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: gradle/actions/setup-gradle@v5
-      - id: version
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Determine Build Type
+        id: version
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "BUILD_TYPE=stable" >> $GITHUB_OUTPUT
           else
             echo "BUILD_TYPE=dev" >> $GITHUB_OUTPUT
           fi
-      - run: |
+      - name: Assemble APKs
+        run: |
           if [ "${{ steps.version.outputs.BUILD_TYPE }}" == "stable" ]; then
             ./gradlew assembleStableRelease -s -PversionName=${GITHUB_REF_NAME#v} -PversionCode=${{ github.run_number }}
           else
@@ -80,7 +117,8 @@ jobs:
         run: |
           mkdir -p staging-release-apks
           find app/build/outputs/apk/ -type f -path "*/release/*.apk" -exec cp {} staging-release-apks/ \;
-      - uses: actions/upload-artifact@v7
+      - name: Upload Compiled APKs
+        uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
           path: staging-release-apks/*.apk
@@ -91,15 +129,25 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v6
-      - uses: gradle/actions/setup-gradle@v5
-      - run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Assemble Benchmark and Test APKs
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
       - name: Stage Test APKs
         run: |
           mkdir -p staging-apks
           find app/build/outputs/apk/dev/benchmark/ -name "*x86*.apk" -exec cp {} staging-apks/ \;
           find app/build/outputs/apk/androidTest/dev/benchmark/ -name "*.apk" -exec cp {} staging-apks/ \;
-      - uses: actions/upload-artifact@v7
+      - name: Upload Test APKs
+        uses: actions/upload-artifact@v7
         with:
           name: test-apks
           path: staging-apks/*.apk
@@ -110,15 +158,18 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     steps:
-      - run: sudo chown $USER:$USER /usr/local/lib/android/sdk
-      - uses: actions/cache@v5
+      - name: Adjust SDK Permissions
+        run: sudo chown $USER:$USER /usr/local/lib/android/sdk
+      - name: Restore SDK Cache
+        uses: actions/cache@v5
         id: sdk-cache
         with:
           path: |
             /usr/local/lib/android/sdk/emulator/
             /usr/local/lib/android/sdk/platform-tools/
           key: android-sdk-base-36.0.0
-      - if: steps.sdk-cache.outputs.cache-hit != 'true'
+      - name: Install SDK Components
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
 
   instrumented_tests:
@@ -130,23 +181,26 @@ jobs:
       matrix:
         api-level: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout Repository
+        uses: actions/checkout@v6
       - name: Prepare KVM Permissions
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - uses: actions/cache/restore@v5
+      - name: Restore SDK Cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             /usr/local/lib/android/sdk/emulator/
             /usr/local/lib/android/sdk/platform-tools/
           key: android-sdk-base-36.0.0
-      - uses: actions/download-artifact@v8
+      - name: Download Test APKs
+        uses: actions/download-artifact@v8
         with:
           name: test-apks
           path: artifacts/test-apks
-      - name: Run Tests
+      - name: Run Instrumented Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
           TARGET_ARCH: ${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
@@ -163,7 +217,8 @@ jobs:
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
             pkill -9 qemu || true
-      - uses: actions/upload-artifact@v7
+      - name: Upload Emulator Test Results
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-api-${{ matrix.api-level }}
@@ -178,12 +233,14 @@ jobs:
     needs: [spotless_check, lint_check, unit_tests, build_apks, instrumented_tests]
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v8
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Download Release APKs
+        uses: actions/download-artifact@v8
         with:
           name: compiled-apks
           path: artifacts/release-apks
-      - name: GH Release
+      - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
