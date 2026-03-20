@@ -13,11 +13,11 @@ class RoborazziConventionPlugin : Plugin<Project> {
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
-            configurations.maybeCreate("testDevImplementation")
-            configurations.maybeCreate("testDevRuntimeOnly")
+            configurations.maybeCreate("testImplementation")
+            configurations.maybeCreate("testRuntimeOnly")
             dependencies {
-                add("testDevImplementation", libs.findLibrary("robolectric").get())
-                add("testDevImplementation", libs.findBundle("roborazzi").get())
+                add("testImplementation", libs.findLibrary("robolectric").get())
+                add("testImplementation", libs.findBundle("roborazzi").get())
             }
 
             tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach {
