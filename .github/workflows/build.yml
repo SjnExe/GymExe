@@ -179,12 +179,13 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
+        run: ./gradlew clean assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
 
       - name: Debug APK Paths
+        if: always()
         run: |
-          echo "Here are the exact paths of all generated APKs:"
-          find app/build/outputs/apk -type f -name "*.apk"
+          echo "Searching for all APKs in the entire project workspace:"
+          find . -name "*.apk"
           
       - name: Upload Test APKs
         if: github.event_name == 'pull_request'
