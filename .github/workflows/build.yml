@@ -246,7 +246,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Fix Android SDK permissions
-        run: sudo chown -R $USER:$USER /usr/local/lib/android/sdk
+        run: sudo chown $USER:$USER /usr/local/lib/android/sdk
 
       - name: Android SDK Cache
         uses: actions/cache/restore@v5
