@@ -7,6 +7,7 @@ on:
     tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -129,7 +130,6 @@ jobs:
             VERSION_CODE=${{ github.run_number }}
             ./gradlew assembleStableRelease -s --no-watch-fs -PversionName=$VERSION_NAME -PversionCode=$VERSION_CODE 2>&1 | tee build_output.log
           else
-            # For dev/PR builds, skip dynamic versions to allow 100% Configuration Cache hits
             ./gradlew assembleDevRelease assembleDevDebug -s --no-watch-fs 2>&1 | tee build_output.log
           fi
 
@@ -179,22 +179,16 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile Test APKs
-        run: ./gradlew clean assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.ndk.abiFilters=x86,x86_64
 
-      - name: Debug APK Paths
-        if: always()
-        run: |
-          echo "Searching for all APKs in the entire project workspace:"
-          find . -name "*.apk"
-          
       - name: Upload Test APKs
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
           name: test-apks
           path: |
-            app/build/outputs/apk/dev/benchmark/*.apk
-            app/build/outputs/apk/androidTest/dev/benchmark/*.apk
+            app/build/outputs/apk/dev/benchmark/**/*.apk
+            app/build/outputs/apk/androidTest/dev/benchmark/**/*.apk
           compression-level: 0
 
   setup_sdk_cache:
@@ -272,12 +266,6 @@ jobs:
           name: test-apks
           path: app/build/outputs/apk
 
-      - name: Copy Test APKs to Source Directory
-        run: |
-          mkdir -p app/build/outputs/apk/androidTest/dev/benchmark
-          cp -r app/build/outputs/apk/dev/benchmark/* app/build/outputs/apk/dev/benchmark/ 2>/dev/null || true
-          cp -r app/build/outputs/apk/androidTest/dev/benchmark/* app/build/outputs/apk/androidTest/dev/benchmark/ 2>/dev/null || true
-
       - name: Prepare Test Environment
         run: |
           sudo apt-get update
@@ -294,10 +282,10 @@ jobs:
           arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
-          emulator-options: -no-snapshot -noaudio -no-window -gpu swiftshader_indirect -no-boot-anim -camera-back none -no-metrics -logcat "GymExe:D *:E"
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           disable-animations: true
           disable-linux-hw-accel: false
-          emulator-boot-timeout: 180
+          emulator-boot-timeout: 300
           ram-size: 10240M
           heap-size: 2048M
           disk-size: 6000M
@@ -305,9 +293,8 @@ jobs:
           script: |
             adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
             adb logcat -c
-            ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
-            APP_APK=$(ls app/build/outputs/apk/dev/benchmark/*-$ARCH*.apk)
-            TEST_APK=$(ls app/build/outputs/apk/androidTest/dev/benchmark/*-$ARCH*.apk)
+            APP_APK=$(find app/build/outputs/apk/dev/benchmark -type f -name "*universal.apk")
+            TEST_APK=$(find app/build/outputs/apk/androidTest/dev/benchmark -type f -name "*.apk" | head -n 1)
             echo "Installing App APK: $APP_APK"
             adb install -r -t "$APP_APK"
             echo "Installing Test APK: $TEST_APK"
@@ -318,6 +305,17 @@ jobs:
             if grep -q "FAILURES!!!" test_output.txt; then echo "Tests failed."; exit 1; fi
             if grep -q "Process crashed" test_output.txt; then echo "Test process crashed."; exit 1; fi
             if grep -q "INSTRUMENTATION_STATUS_CODE: -1" test_output.txt; then echo "Tests failed with status -1."; exit 1; fi
+
+      - name: Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: emulator-logs-api-${{ matrix.api-level }}
+          path: |
+            test_output.txt
+            emulator_logs.txt
+          overwrite: true
+          retention-days: 7
 
   release:
     name: Release APKs
