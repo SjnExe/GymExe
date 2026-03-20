@@ -181,6 +181,11 @@ jobs:
       - name: Compile Test APKs
         run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s --no-watch-fs -Pandroid.injected.build.abi=x86,x86_64
 
+      - name: Debug APK Paths
+        run: |
+          echo "Here are the exact paths of all generated APKs:"
+          find app/build/outputs/apk -type f -name "*.apk"
+          
       - name: Upload Test APKs
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
