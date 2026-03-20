@@ -115,7 +115,6 @@ jobs:
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "emulator" "platform-tools" "build-tools;36.0.0"
 
   instrumented_tests:
-    # REMOVED setup_sdk_cache dependency to prevent PR skipping
     needs: [build_test_apks]
     name: API ${{ matrix.api-level }}
     runs-on: ubuntu-latest
@@ -125,8 +124,14 @@ jobs:
         api-level: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
     steps:
       - uses: actions/checkout@v6
-      - name: Restore SDK Cache
-        uses: actions/cache/restore@v5
+      - name: Prepare Test Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvulkan1 telnet netcat-openbsd
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/cache/restore@v5
         with:
           path: |
             /usr/local/lib/android/sdk/emulator/
@@ -143,7 +148,7 @@ jobs:
           target: google_apis
           arch: ${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
-          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -qemu -m 2048
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
             export TEST_ARCH=${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
             adb install -r -t "$(find artifacts/test-apks -name "*dev-benchmark*$TEST_ARCH.apk" | head -n 1)"
