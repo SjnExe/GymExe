@@ -76,10 +76,14 @@ jobs:
           else
             ./gradlew assembleDevRelease assembleDevDebug -s
           fi
+      - name: Stage Release APKs
+        run: |
+          mkdir -p staging-release-apks
+          find app/build/outputs/apk/ -type f -path "*/release/*.apk" -exec cp {} staging-release-apks/ \;
       - uses: actions/upload-artifact@v7
         with:
           name: compiled-apks
-          path: app/build/outputs/apk/**/release/*.apk
+          path: staging-release-apks/*.apk
           compression-level: 0
 
   build_test_apks:
@@ -90,14 +94,11 @@ jobs:
       - uses: actions/checkout@v6
       - uses: gradle/actions/setup-gradle@v5
       - run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
-      
-      # FIX: Flat staging area. Only copies x86/x86_64 and androidTest. No deep paths.
       - name: Stage Test APKs
         run: |
           mkdir -p staging-apks
           find app/build/outputs/apk/dev/benchmark/ -name "*x86*.apk" -exec cp {} staging-apks/ \;
           find app/build/outputs/apk/androidTest/dev/benchmark/ -name "*.apk" -exec cp {} staging-apks/ \;
-          
       - uses: actions/upload-artifact@v7
         with:
           name: test-apks
@@ -158,10 +159,15 @@ jobs:
           profile: pixel_7_pro
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
-            # FIX: Direct wildcard install. No 'find' command needed since the folder is flat.
-            adb install -r -t artifacts/test-apks/*${TARGET_ARCH}.apk
-            adb install -r -t artifacts/test-apks/*androidTest*.apk
-            
+            BENCHMARK_APK=$(find . -name "*dev-benchmark*${TARGET_ARCH}.apk" | head -n 1)
+            TEST_APK=$(find . -name "*androidTest*.apk" | head -n 1)
+            if [ -z "$BENCHMARK_APK" ] || [ -z "$TEST_APK" ]; then
+              echo "Error: APKs not found. Current directory structure:"
+              ls -R
+              exit 1
+            fi
+            adb install -r -t "$BENCHMARK_APK"
+            adb install -r -t "$TEST_APK"
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
@@ -181,6 +187,7 @@ jobs:
     needs: [spotless_check, lint_check, unit_tests, build_apks, instrumented_tests]
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v8
         with:
           name: compiled-apks
@@ -190,8 +197,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            gh release create ${GITHUB_REF_NAME#v} artifacts/release-apks/**/*.apk --title "Release ${GITHUB_REF_NAME#v}" --generate-notes
+            gh release create ${GITHUB_REF_NAME#v} artifacts/release-apks/*.apk --title "Release ${GITHUB_REF_NAME#v}" --generate-notes
           else
             gh release delete dev --cleanup-tag -y || true
-            gh release create dev artifacts/release-apks/**/*.apk --title "Dev Build" --notes "Latest development build." --prerelease
+            gh release create dev artifacts/release-apks/*.apk --title "Dev Build" --notes "Latest development build." --prerelease
           fi
