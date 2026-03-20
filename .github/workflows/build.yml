@@ -285,11 +285,11 @@ jobs:
           arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back -no-metrics none
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics -logcat "*:v" 
           disable-animations: true
           disable-linux-hw-accel: false
-          emulator-boot-timeout: 300
-          ram-size: 8192M
+          emulator-boot-timeout: 180
+          ram-size: 10240M
           heap-size: 2048M
           disk-size: 6000M
           cores: 4
