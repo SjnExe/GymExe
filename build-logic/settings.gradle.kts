@@ -44,7 +44,7 @@ buildCache {
     val r2SecretKey = System.getenv("R2_SECRET_ACCESS_KEY")
 
     if (!r2Endpoint.isNullOrBlank()) {
-        remote<com.github.burrunan.s3.S3BuildCache> {
+        remote(com.github.burrunan.s3.S3BuildCache::class.java) {
             bucket = "gradle-cache"
             endpoint = r2Endpoint
             region = "auto"
