@@ -93,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: gradle/actions/setup-gradle@v5
-      - run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s -PemulatorOnly=true
+      - run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
       - name: Stage Test APKs
         run: |
           mkdir -p staging-apks
