@@ -143,6 +143,8 @@ jobs:
           path: artifacts/test-apks
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          TARGET_ARCH: ${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}
         with:
           api-level: ${{ matrix.api-level }}
           target: google_apis
@@ -150,12 +152,7 @@ jobs:
           profile: pixel_7_pro
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
-            if [ "${{ matrix.api-level }}" -le 27 ]; then
-              ARCH="x86"
-            else
-              ARCH="x86_64"
-            fi
-            BENCHMARK_APK=$(find artifacts/test-apks -name "*dev-benchmark*$ARCH.apk" | head -n 1)
+            BENCHMARK_APK=$(find artifacts/test-apks -name "*dev-benchmark*$TARGET_ARCH.apk" | head -n 1)
             TEST_APK=$(find artifacts/test-apks -name "*androidTest*.apk" | head -n 1)
             adb install -r -t "$BENCHMARK_APK"
             adb install -r -t "$TEST_APK"
