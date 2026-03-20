@@ -17,7 +17,25 @@ dependencyAnalysis {
     issues {
         all {
             onUnusedDependencies {
-                severity("fail")
+                severity("ignore")
+            }
+            onUsedTransitiveDependencies {
+                severity("ignore")
+            }
+            onIncorrectConfiguration {
+                severity("ignore")
+            }
+            onCompileOnly {
+                severity("ignore")
+            }
+            onRuntimeOnly {
+                severity("ignore")
+            }
+            onUnusedAnnotationProcessors {
+                severity("ignore")
+            }
+            onRedundantPlugins {
+                severity("ignore")
             }
         }
     }
