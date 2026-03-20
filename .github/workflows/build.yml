@@ -38,22 +38,10 @@ jobs:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Calculate Build Type
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
-          else
-            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
-          fi
       - name: Run Lint Check
         run: |
           set -o pipefail
-          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="lintStableRelease"
-          else
-            TASKS="lintDevDebug"
-          fi
-          ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee lint_output.log
+          ./gradlew lintDevDebug -s --no-watch-fs 2>&1 | tee lint_output.log
       - name: Collect & Upload Reports
         if: always()
         run: |
@@ -84,22 +72,10 @@ jobs:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
           cache-overwrite-existing: ${{ github.event_name != 'pull_request' }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      - name: Calculate Build Type
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "BUILD_TYPE=stable" >> $GITHUB_ENV
-          else
-            echo "BUILD_TYPE=dev" >> $GITHUB_ENV
-          fi
       - name: Run Unit Tests
         run: |
           set -o pipefail
-          if [ "${{ env.BUILD_TYPE }}" == "stable" ]; then
-            TASKS="testDevDebugUnitTest"
-          else
-            TASKS="testDevDebugUnitTest"
-          fi
-          ./gradlew $TASKS -s --no-watch-fs 2>&1 | tee tests_output.log
+          ./gradlew testDevDebugUnitTest -s --no-watch-fs 2>&1 | tee tests_output.log
       - name: Collect & Upload Reports
         if: always()
         run: |
