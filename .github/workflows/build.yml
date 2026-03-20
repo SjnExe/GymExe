@@ -293,12 +293,14 @@ jobs:
           script: |
             adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox
             adb logcat -c
-            ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
-            APP_APK=$(find . -type f -name "*dev-benchmark*$ARCH.apk" | head -n 1)
-            TEST_APK=$(find . -type f -name "*androidTest*.apk" | head -n 1)
-            adb install -r -t "$APP_APK"
-            adb install -r -t "$TEST_APK"
-            adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
+            sh -c "
+              ARCH=${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
+              APP_APK=\$(find . -type f -name \"*dev-benchmark*\$ARCH.apk\" | head -n 1)
+              TEST_APK=\$(find . -type f -name \"*androidTest*.apk\" | head -n 1)
+              adb install -r -t \"\$APP_APK\"
+              adb install -r -t \"\$TEST_APK\"
+              adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
+            "
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
             if grep -q "FAILURES!!!" test_output.txt; then exit 1; fi
