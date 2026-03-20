@@ -7,6 +7,9 @@ on:
     tags: [ "v*" ]
   pull_request:
     branches: [ "main" ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   spotless_check:
@@ -285,7 +288,7 @@ jobs:
           arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
-          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics -logcat "GymExe:D *:E"
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -no-boot-anim -camera-back none -no-metrics -logcat "GymExe:D *:E"
           disable-animations: true
           disable-linux-hw-accel: false
           emulator-boot-timeout: 180
