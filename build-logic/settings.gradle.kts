@@ -1,7 +1,4 @@
 pluginManagement {
-    plugins {
-        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    }
     repositories {
         gradlePluginPortal()
         google()
@@ -11,7 +8,7 @@ pluginManagement {
 
 plugins {
     id("com.gradle.develocity") version "4.3.2"
-    id("org.gradle.toolchains.foojay-resolver-convention")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     id("com.github.burrunan.s3-build-cache") version "1.9.5"
 }
 
@@ -44,7 +41,7 @@ buildCache {
     val r2SecretKey = System.getenv("R2_SECRET_ACCESS_KEY")
 
     if (!r2Endpoint.isNullOrBlank()) {
-        remote(com.github.burrunan.s3.S3BuildCache::class.java) {
+        remote<com.github.burrunan.s3.S3BuildCache> {
             bucket = "gradle-cache"
             endpoint = r2Endpoint
             region = "auto"
