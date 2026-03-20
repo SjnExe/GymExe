@@ -159,15 +159,8 @@ jobs:
           profile: pixel_7_pro
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -qemu -m 2048
           script: |
-            BENCHMARK_APK=$(find . -name "*dev-benchmark*${TARGET_ARCH}.apk" | head -n 1)
-            TEST_APK=$(find . -name "*androidTest*.apk" | head -n 1)
-            if [ -z "$BENCHMARK_APK" ] || [ -z "$TEST_APK" ]; then
-              echo "Error: APKs not found. Current directory structure:"
-              ls -R
-              exit 1
-            fi
-            adb install -r -t "$BENCHMARK_APK"
-            adb install -r -t "$TEST_APK"
+            adb install -r -t $(find artifacts/test-apks -name "*dev-benchmark*${TARGET_ARCH}.apk" | head -n 1)
+            adb install -r -t $(find artifacts/test-apks -name "*androidTest*.apk" | head -n 1)
             adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
             adb logcat -d "GymExe:D" "*:E" > emulator_logs.txt
             cat test_output.txt
