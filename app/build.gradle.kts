@@ -32,8 +32,16 @@ android {
         abi {
             isEnable = true
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = true
+            
+            if (project.hasProperty("emulatorOnly")) {
+                // CI Emulator tests: Only build x86 and x86_64. Skip ARM and Universal.
+                include("x86", "x86_64")
+                isUniversalApk = false
+            } else {
+                // Local or Production release: Build everything
+                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+                isUniversalApk = true
+            }
         }
     }
 
