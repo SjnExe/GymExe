@@ -187,17 +187,17 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.okhttp)
 
-    "androidTestDevImplementation"(libs.junit)
+    "androidTestImplementation"(libs.junit)
 
-    "testDevImplementation"(libs.androidx.compose.runtime)
-    "testDevImplementation"(libs.androidx.compose.ui.test)
-    "testDevImplementation"(libs.roborazzi.core)
-    "testDevImplementation"(libs.robolectric.annotations)
+    "testImplementation"(libs.androidx.compose.runtime)
+    "testImplementation"(libs.androidx.compose.ui.test)
+    "testImplementation"(libs.roborazzi.core)
+    "testImplementation"(libs.robolectric.annotations)
 
-    "androidTestDevImplementation"(libs.androidx.junit)
-    "androidTestDevImplementation"(platform(libs.androidx.compose.bom))
-    "androidTestDevImplementation"(libs.androidx.ui.test.junit4)
-    "testDevImplementation"(libs.androidx.ui.test.junit4)
+    "androidTestImplementation"(libs.androidx.junit)
+    "androidTestImplementation"(platform(libs.androidx.compose.bom))
+    "androidTestImplementation"(libs.androidx.ui.test.junit4)
+    "testImplementation"(libs.androidx.ui.test.junit4)
 
     debugImplementation(libs.bundles.compose.debug)
     debugImplementation(libs.leakcanary.android)

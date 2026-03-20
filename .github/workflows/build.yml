@@ -296,10 +296,11 @@ jobs:
           script: |
             adb install -r -t app/build/outputs/apk/dev/benchmark/GymExe-dev-benchmark-universal.apk
             adb install -r -t app/build/outputs/apk/androidTest/dev/benchmark/app-dev-benchmark-androidTest.apk
-            OUTPUT=$(adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner)
-            echo "$OUTPUT"
-            if echo "$OUTPUT" | grep -q "FAILURES!!!"; then echo "Tests failed."; exit 1; fi
-            if echo "$OUTPUT" | grep -q "Process crashed"; then echo "Test process crashed."; exit 1; fi
+            adb shell am instrument -w com.sjn.gym.dev.test/androidx.test.runner.AndroidJUnitRunner > test_output.txt
+            cat test_output.txt
+            if grep -q "FAILURES!!!" test_output.txt; then echo "Tests failed."; exit 1; fi
+            if grep -q "Process crashed" test_output.txt; then echo "Test process crashed."; exit 1; fi
+            if grep -q "INSTRUMENTATION_STATUS_CODE: -1" test_output.txt; then echo "Tests failed with status -1."; exit 1; fi
 
   release:
     name: Release APKs
