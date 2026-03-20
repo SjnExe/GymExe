@@ -282,7 +282,7 @@ jobs:
           arch: ${{ matrix.api-level == 27 && 'x86' || 'x86_64' }}
           profile: pixel_7_pro
           force-avd-creation: false
-          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics -qemu -m 2048
           disable-animations: true
           disable-linux-hw-accel: false
           emulator-boot-timeout: 300
