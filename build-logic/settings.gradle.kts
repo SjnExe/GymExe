@@ -49,6 +49,7 @@ buildCache {
     if (!r2Endpoint.isNullOrBlank()) {
         val r2AccessKey = System.getenv("R2_ACCESS_KEY_ID")
         val r2SecretKey = System.getenv("R2_SECRET_ACCESS_KEY")
+        val isPushEnabled = System.getenv("R2_ENABLE_PUSH") == "true"
 
         require(!r2AccessKey.isNullOrBlank() && !r2SecretKey.isNullOrBlank()) {
             "R2_ENDPOINT is configured, but R2_ACCESS_KEY_ID or R2_SECRET_ACCESS_KEY is missing."
@@ -60,9 +61,10 @@ buildCache {
             region = "auto"
             awsAccessKeyId = r2AccessKey
             awsSecretKey = r2SecretKey
-            isPush = true
+            isPush = isPushEnabled
             isReducedRedundancy = false
             forcePathStyle = true
+            maximumCachedObjectLength = 1_000_000_000L
         }
     }
 }
