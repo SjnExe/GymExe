@@ -57,6 +57,7 @@ buildCache {
             awsAccessKeyId = r2AccessKey
             awsSecretKey = r2SecretKey
             isPush = true
+            isReducedRedundancy = false
             forcePathStyle = true
         }
     }
