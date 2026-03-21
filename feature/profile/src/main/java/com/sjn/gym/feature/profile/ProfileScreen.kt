@@ -23,8 +23,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -223,7 +223,7 @@ fun ProfileScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                 )
                             }
-                            Divider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                             Text(
                                 text = "Historical charts will appear here in future updates.",
                                 style = MaterialTheme.typography.bodySmall,
@@ -246,7 +246,7 @@ fun ProfileScreen(
                         value = uiState.name.ifEmpty { "Not set" },
                         onClick = { showNameDialog = true },
                     )
-                    Divider()
+                    HorizontalDivider()
                     ProfileItemRow(
                         label = "Age",
                         value =
@@ -262,7 +262,7 @@ fun ProfileScreen(
                             } else "Not set",
                         onClick = { showBirthDateDialog = true },
                     )
-                    Divider()
+                    HorizontalDivider()
                     ProfileItemRow(
                         label = "Gender",
                         value =
@@ -282,7 +282,7 @@ fun ProfileScreen(
                             } else "Not set",
                         onClick = { showWeightDialog = true },
                     )
-                    Divider()
+                    HorizontalDivider()
                     ProfileItemRow(
                         label = "Height",
                         value =
@@ -307,7 +307,7 @@ fun ProfileScreen(
                         value = uiState.experienceLevel ?: "Not set",
                         onClick = { showLevelDialog = true },
                     )
-                    Divider()
+                    HorizontalDivider()
                     ProfileItemRow(
                         label = "Equipment Access",
                         value =
