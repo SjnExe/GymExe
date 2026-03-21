@@ -1,6 +1,9 @@
 pluginManagement {
     includeBuild("build-logic")
+    val develocityVersion = file("gradle/libs.versions.toml").readLines()
+        .find { it.startsWith("develocity =") }?.substringAfter("\"")?.substringBefore("\"")
     plugins {
+        id("com.gradle.develocity") version develocityVersion
         id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     }
     repositories {
@@ -10,7 +13,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("com.gradle.develocity") version "4.3.2"
+    id("com.gradle.develocity")
     id("org.gradle.toolchains.foojay-resolver-convention")
 }
 
