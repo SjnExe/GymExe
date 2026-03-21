@@ -25,7 +25,7 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.bundles.room)
+    implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.datastore.preferences)
@@ -36,5 +36,5 @@ dependencies {
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
 
-    implementation(libs.kotlinx.coroutines.android)
+    runtimeOnly(libs.kotlinx.coroutines.android)
 }

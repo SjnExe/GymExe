@@ -6,6 +6,8 @@ dependencies {
     api(libs.dagger)
     api(libs.javax.inject)
     api(libs.kotlinx.coroutines.core)
+    api(project(":core:data"))
+    api(project(":core:model"))
 
     implementation(libs.androidx.compose.ui.geometry)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
@@ -13,4 +15,6 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }

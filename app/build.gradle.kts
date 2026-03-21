@@ -167,7 +167,6 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.compose.ui.unit)
     implementation(libs.androidx.core)
     implementation(libs.androidx.fragment)
@@ -175,17 +174,22 @@ dependencies {
     implementation(libs.androidx.lifecycle.common)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.common)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime)
 
-    implementation(libs.dagger)
+    api(libs.dagger)
     implementation(libs.hilt.core)
-    implementation(libs.javax.inject)
+    api(libs.javax.inject)
+    api(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.okhttp)
+    implementation(libs.retrofit)
 
     "androidTestImplementation"(libs.junit)
 
@@ -200,10 +204,17 @@ dependencies {
     "testImplementation"(libs.androidx.ui.test.junit4)
 
     debugImplementation(libs.bundles.compose.debug)
-    debugImplementation(libs.leakcanary.android)
+
+    "debugRuntimeOnly"(libs.leakcanary.android)
+    "debugRuntimeOnly"(libs.androidx.ui.test.manifest)
 
     "devImplementation"(libs.chucker.debug)
     "stableImplementation"(libs.chucker.release)
+
+    "benchmarkImplementation"(libs.kermit.core)
+    "debugImplementation"(libs.kermit.android.debug)
+    "debugImplementation"(libs.kermit.core.android.debug)
+    "releaseImplementation"(libs.kermit.core)
 
     // Modular dependencies
     implementation(project(":core:ui"))
