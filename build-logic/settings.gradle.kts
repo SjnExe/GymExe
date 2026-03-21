@@ -45,10 +45,15 @@ buildCache {
     }
 
     val r2Endpoint = System.getenv("R2_ENDPOINT")
-    val r2AccessKey = System.getenv("R2_ACCESS_KEY_ID")
-    val r2SecretKey = System.getenv("R2_SECRET_ACCESS_KEY")
 
     if (!r2Endpoint.isNullOrBlank()) {
+        val r2AccessKey = System.getenv("R2_ACCESS_KEY_ID")
+        val r2SecretKey = System.getenv("R2_SECRET_ACCESS_KEY")
+
+        require(!r2AccessKey.isNullOrBlank() && !r2SecretKey.isNullOrBlank()) {
+            "R2_ENDPOINT is configured, but R2_ACCESS_KEY_ID or R2_SECRET_ACCESS_KEY is missing."
+        }
+
         remote<com.github.burrunan.s3cache.AwsS3BuildCache> {
             bucket = "gradle-cache"
             endpoint = r2Endpoint
@@ -56,6 +61,7 @@ buildCache {
             awsAccessKeyId = r2AccessKey
             awsSecretKey = r2SecretKey
             isPush = true
+            forcePathStyle = true
         }
     }
 }
