@@ -1,4 +1,12 @@
 pluginManagement {
+    val libsToml = file("../gradle/libs.versions.toml").readLines()
+    val develocityVersion = libsToml.find { it.startsWith("develocity =") }?.substringAfter("\"")?.substringBefore("\"")
+    val s3BuildCacheVersion = libsToml.find { it.startsWith("s3BuildCache =") }?.substringAfter("\"")?.substringBefore("\"")
+    plugins {
+        id("com.gradle.develocity") version develocityVersion
+        id("com.github.burrunan.s3-build-cache") version s3BuildCacheVersion
+        id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    }
     repositories {
         gradlePluginPortal()
         google()
@@ -7,9 +15,9 @@ pluginManagement {
 }
 
 plugins {
-    id("com.gradle.develocity") version "4.3.2"
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    id("com.github.burrunan.s3-build-cache") version "1.9.5"
+    id("com.gradle.develocity")
+    id("org.gradle.toolchains.foojay-resolver-convention")
+    id("com.github.burrunan.s3-build-cache")
 }
 
 develocity {
