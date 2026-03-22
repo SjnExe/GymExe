@@ -30,6 +30,23 @@ jobs:
       - name: Run Spotless Check
         run: ./gradlew spotlessCheck -s
 
+  build_health_check:
+    name: Build Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      - name: Run Build Health Check
+        run: ./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -s
+
   lint_check:
     name: Lint Check
     runs-on: ubuntu-latest
@@ -230,7 +247,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [spotless_check, lint_check, unit_tests, build_apks, instrumented_tests]
+    needs: [spotless_check, build_health_check, lint_check, unit_tests, build_apks, instrumented_tests]
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     steps:
       - name: Checkout Repository
