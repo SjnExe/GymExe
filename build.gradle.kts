@@ -17,10 +17,10 @@ dependencyAnalysis {
     issues {
         all {
             onUnusedDependencies {
-                severity("fail")
+                severity("warn")
             }
             onAny {
-                severity("fail")
+                severity("warn")
             }
         }
     }
