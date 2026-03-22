@@ -125,12 +125,11 @@ Run this before submitting any change:
 ```bash
 ./gradlew vCU
 ```
-*   **Dependency Analysis:**
-> **Build Health**
+*   **Dependency Analysis: Build Health**
 ```bash
 ./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false --continue
 ```
-> **Auto Fixer**
+*   **Dependency Analysis: Auto Fixer**
 ```bash
 ./gradlew fixDependencies -Dorg.gradle.unsafe.isolated-projects=false --continue
 ```
