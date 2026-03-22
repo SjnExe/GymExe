@@ -64,7 +64,7 @@ To initialize the environment and run initial checks:
 Run this before submitting any change:
 ```bash
 ./gradlew vCU sA tDDUT aDD -s --continue
-./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false --continue
+./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -s --continue
 ```
 
 ### Building
