@@ -126,7 +126,7 @@ Run this before submitting any change:
 ```
 *   **Dependency Analysis: Build Health**
 ```bash
-./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false --continue
+./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies --continue
 ```
 *   **Dependency Analysis: Auto Fixer**
 ```bash
