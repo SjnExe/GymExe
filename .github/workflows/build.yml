@@ -45,7 +45,7 @@ jobs:
             jdks
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       - name: Run Build Health Check
-        run: ./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -s
+        run: ./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies -s
 
   lint_check:
     name: Lint Check
