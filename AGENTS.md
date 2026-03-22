@@ -54,8 +54,7 @@ The project uses the **Foojay Toolchains Resolver**, which automatically downloa
 
 To initialize the environment and run initial checks:
 ```bash
-./gradlew sC tDDUT aDD --continue -q
-./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PwarnDependencies --continue -q
+./gradlew sC tDDUT bH aDD -PwarnDependencies --continue -q
 ```
 
 ## Useful Commands
