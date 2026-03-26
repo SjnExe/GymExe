@@ -158,6 +158,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation("androidx.test:monitor:1.8.0")
+    androidTestImplementation("androidx.test:runner:1.6.1")
     androidTestRuntimeOnly(libs.androidx.test.core)
     androidTestImplementation(libs.junit)
     testRuntimeOnly(libs.junit.jupiter)
