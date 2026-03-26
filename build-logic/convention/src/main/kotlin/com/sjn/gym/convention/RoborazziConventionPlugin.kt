@@ -16,8 +16,7 @@ class RoborazziConventionPlugin : Plugin<Project> {
             configurations.maybeCreate("testImplementation")
             configurations.maybeCreate("testRuntimeOnly")
             dependencies {
-                add("testImplementation", libs.findLibrary("robolectric").get())
-                add("testImplementation", libs.findBundle("roborazzi").get())
+
             }
 
             tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach {

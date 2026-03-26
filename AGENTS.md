@@ -54,7 +54,7 @@ The project uses the **Foojay Toolchains Resolver**, which automatically downloa
 
 To initialize the environment and run initial checks:
 ```bash
-./gradlew sC tDDUT bH aDD -PwarnDependencies --continue -q
+./gradlew sC tDDUT bH aDD --continue -q
 ```
 
 ## Useful Commands
@@ -127,10 +127,6 @@ Run this before submitting any change:
 *   **Dependency Analysis: Build Health**
 ```bash
 ./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies --continue
-```
-*   **Dependency Analysis: Auto Fixer**
-```bash
-./gradlew fixDependencies -Dorg.gradle.unsafe.isolated-projects=false --continue
 ```
 *   **Develocity Build Scans & Cache:**
 Build scans and local caching are automatically enabled via `settings.gradle.kts`. Use `--no-scan` if you wish to bypass build scan generation for a particular run.

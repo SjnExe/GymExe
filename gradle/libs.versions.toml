@@ -7,7 +7,7 @@ androidxTestCore = "1.7.0"
 appcompat = "1.7.1"
 chucker = "4.3.1"
 coil = "3.4.0"
-composeBom = "2026.03.00"
+composeBom = "2026.03.01"
 coreKtx = "1.18.0"
 coroutines = "1.10.2"
 dagger = "2.59.2"
@@ -15,7 +15,7 @@ datastore = "1.2.1"
 dependencyAnalysis = "3.6.1"
 dependencyGuard = "0.5.0"
 desugarJdkLibs = "2.1.5"
-develocity = "4.3.2"
+develocity = "4.4.0"
 espressoCore = "3.7.0"
 hilt = "2.59.2"
 hiltNavigationCompose = "1.3.0"
@@ -28,7 +28,7 @@ konsist = "0.17.3"
 kotlin = "2.3.20"
 kotlinxImmutable = "0.4.0"
 kotlinxSerialization = "1.10.0"
-kover = "0.9.7"
+kover = "0.9.8"
 ksp = "2.3.6"
 leakcanary = "2.14"
 lifecycleRuntimeKtx = "2.10.0"
@@ -154,20 +154,28 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [bundles]
 compose-core = [
+    "androidx-compose-foundation",
     "androidx-compose-foundation-layout",
     "androidx-compose-runtime",
     "androidx-compose-ui-text",
     "androidx-compose-ui-unit",
+    "androidx-ui-graphics",
 ]
-compose-debug = [
-    "androidx-ui-test-manifest",
-    "androidx-ui-tooling",
+compose-ui = [
+    "androidx-compose-material-icons-core",
+    "androidx-material-icons-extended",
+    "androidx-material3",
+    "androidx-ui",
 ]
-junit-jupiter = [
-    "junit-jupiter",
+junit-jupiter-runtime = [
     "junit-jupiter-engine",
     "junit-platform-launcher",
     "junit-vintage-engine",
+]
+logging-dev = [
+    "chucker-debug",
+    "kermit-android-debug",
+    "kermit-core-android-debug",
 ]
 roborazzi = [
     "roborazzi",
@@ -182,9 +190,11 @@ room = [
 ]
 testing-common = [
     "junit",
+    "kotlinx-coroutines-test",
     "mockk",
     "mockk-agent-android",
     "mockk-android",
+    "turbine",
 ]
 
 [plugins]
