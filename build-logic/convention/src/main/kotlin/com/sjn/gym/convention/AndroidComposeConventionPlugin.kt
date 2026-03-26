@@ -1,10 +1,11 @@
 package com.sjn.gym.convention
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 
@@ -13,22 +14,22 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
-            val extension =
-                extensions.findByType(LibraryExtension::class.java)
-                    ?: extensions.findByType(ApplicationExtension::class.java)
-                    ?: return
-
-            if (extension is ApplicationExtension) {
-                extension.buildFeatures { compose = true }
-            } else if (extension is LibraryExtension) {
-                extension.buildFeatures { compose = true }
+            pluginManager.withPlugin("com.android.application") {
+                extensions.configure<ApplicationExtension> {
+                    buildFeatures { compose = true }
+                }
             }
 
-            val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
+            pluginManager.withPlugin("com.android.library") {
+                extensions.configure<LibraryExtension> {
+                    buildFeatures { compose = true }
+                }
+            }
 
+            val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
             dependencies {
-                add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
-                add("implementation", libs.findBundle("compose-core").get())
+                add("api", platform(libs.findLibrary("androidx-compose-bom").get()))
+                add("api", libs.findBundle("compose-core").get())
                 add("debugRuntimeOnly", libs.findLibrary("androidx-ui-test-manifest").get())
                 add("lintChecks", libs.findLibrary("slack-compose-lints").get())
             }

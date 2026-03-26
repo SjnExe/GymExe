@@ -9,16 +9,38 @@ android {
     }
 }
 
+configurations.maybeCreate("devDebugImplementation")
+
+configurations.maybeCreate("devReleaseImplementation")
+
 dependencies {
+    implementation(libs.androidx.activity.compose)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk.agent.android)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.core)
+    testImplementation(libs.roborazzi.junit.rule)
+    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
+    testImplementation(libs.junit)
+    testImplementation(libs.androidx.ui.test.junit4)
+
+    testImplementation(libs.robolectric.annotations)
+    testImplementation(libs.androidx.compose.ui.test)
+    releaseImplementation(libs.kermit.core)
+    debugImplementation(libs.kermit.core.android.debug)
+    debugImplementation(libs.kermit.android.debug)
+    api(project(":core:data"))
+    api(project(":core:model"))
+    implementation(project(":core:ui"))
+    implementation(libs.androidx.activity)
+    api(libs.androidx.lifecycle.viewmodel)
     api(libs.dagger)
     api(libs.javax.inject)
     api(libs.kotlinx.coroutines.core)
-    api(project(":core:data"))
-    api(project(":core:model"))
 
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.animation.core)
-    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.core)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.common)
@@ -26,15 +48,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.hilt.core)
 
+    implementation(libs.bundles.compose.ui)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Kermit is used in main, so it must be available to all variants
     implementation(libs.kermit)
-
-    "testImplementation"(libs.androidx.compose.runtime)
-    "testImplementation"(libs.androidx.compose.ui.test)
-    "testImplementation"(libs.androidx.ui.test.junit4)
-    "testImplementation"(libs.roborazzi.core)
-    "testImplementation"(libs.robolectric.annotations)
-
-    "debugImplementation"(libs.kermit.android.debug)
-    "debugImplementation"(libs.kermit.core.android.debug)
-    "releaseImplementation"(libs.kermit.core)
+    debugRuntimeOnly(libs.androidx.ui.test.manifest)
 }
