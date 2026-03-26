@@ -15,8 +15,8 @@ configurations.maybeCreate("devReleaseImplementation")
 
 dependencies {
     implementation(libs.androidx.activity.compose)
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockk.agent.android)
+    testRuntimeOnly(libs.junit.jupiter)
+    testRuntimeOnly(libs.mockk.agent.android)
     testImplementation(libs.robolectric)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.core)
