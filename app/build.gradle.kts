@@ -161,6 +161,7 @@ dependencies {
     androidTestImplementation("androidx.test:runner:1.6.1")
     androidTestRuntimeOnly(libs.androidx.test.core)
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.kotlin.stdlib)
     testRuntimeOnly(libs.junit.jupiter)
     testRuntimeOnly(libs.mockk.agent.android)
     testRuntimeOnly(libs.robolectric)
