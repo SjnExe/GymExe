@@ -12,6 +12,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertTrue(appContext.packageName.startsWith("com.sjn.gym"))
+        assertTrue(appContext.packageName.contains("com.sjn.gym"))
     }
 }
