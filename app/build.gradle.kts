@@ -153,9 +153,12 @@ configurations.maybeCreate("devDebugImplementation")
 configurations.maybeCreate("devReleaseImplementation")
 
 dependencies {
+    implementation(libs.dagger)
+    implementation(libs.javax.inject)
     implementation(libs.androidx.activity.compose)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation("androidx.test:monitor:1.8.0")
+    androidTestRuntimeOnly(libs.androidx.test.core)
     androidTestImplementation(libs.junit)
     testRuntimeOnly(libs.junit.jupiter)
     testRuntimeOnly(libs.mockk.agent.android)

@@ -8,15 +8,16 @@ class UserProfileTest {
 
     @Test
     fun `user profile initializes correctly with provided values`() {
-        val userProfile = UserProfile(
-            id = "user123",
-            name = "John Doe",
-            birthDate = 946684800000L, // Jan 1, 2000
-            weight = 80.5,
-            height = 180.0,
-            gender = Gender.MALE,
-            profilePictureUri = "content://images/profile.jpg"
-        )
+        val userProfile =
+            UserProfile(
+                id = "user123",
+                name = "John Doe",
+                birthDate = 946684800000L, // Jan 1, 2000
+                weight = 80.5,
+                height = 180.0,
+                gender = Gender.MALE,
+                profilePictureUri = "content://images/profile.jpg",
+            )
 
         assertEquals("user123", userProfile.id)
         assertEquals("John Doe", userProfile.name)
@@ -29,14 +30,15 @@ class UserProfileTest {
 
     @Test
     fun `user profile defaults to null profile picture`() {
-        val userProfile = UserProfile(
-            id = "user456",
-            name = "Jane Doe",
-            birthDate = 946684800000L,
-            weight = 65.0,
-            height = 165.0,
-            gender = Gender.FEMALE
-        )
+        val userProfile =
+            UserProfile(
+                id = "user456",
+                name = "Jane Doe",
+                birthDate = 946684800000L,
+                weight = 65.0,
+                height = 165.0,
+                gender = Gender.FEMALE,
+            )
 
         assertNull(userProfile.profilePictureUri)
     }
