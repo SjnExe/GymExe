@@ -131,7 +131,8 @@ androidComponents {
                     }
                 }
 
-            // Use reflection to set outputFileName as it is not exposed in the VariantOutput interface
+            // Use reflection to set outputFileName as it is not exposed in the VariantOutput
+            // interface
             // but is available on the implementation (VariantOutputImpl).
             try {
                 val outputFileNameMethod = output::class.java.getMethod("getOutputFileName")
@@ -197,6 +198,7 @@ dependencies {
     // Properly split Chucker variants
     debugImplementation(libs.chucker.debug)
     releaseImplementation(libs.chucker.release)
+    "benchmarkImplementation"(libs.chucker.release)
 
     runtimeOnly(libs.androidx.profileinstaller)
     debugRuntimeOnly(libs.leakcanary.android)
