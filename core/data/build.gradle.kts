@@ -19,9 +19,9 @@ dependencies {
     api(libs.javax.inject)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.serialization.core)
-    api(libs.hilt.android)
     api(libs.retrofit)
 
+    implementation(libs.hilt.android)
     implementation(libs.androidx.collection)
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.sqlite)

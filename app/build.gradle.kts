@@ -152,8 +152,8 @@ androidComponents {
 }
 
 configurations.maybeCreate("devDebugImplementation")
-
 configurations.maybeCreate("devReleaseImplementation")
+configurations.maybeCreate("devDebugAndroidTestRuntimeOnly")
 
 dependencies {
     implementation(libs.dagger)
@@ -206,10 +206,10 @@ dependencies {
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation("androidx.test:monitor:1.8.0")
-    androidTestImplementation("androidx.test:runner:1.6.1")
+    androidTestRuntimeOnly("androidx.test:runner:1.6.1")
     androidTestRuntimeOnly(libs.androidx.test.core)
     androidTestImplementation(libs.junit)
-    androidTestImplementation(libs.kotlin.stdlib)
+    "devDebugAndroidTestRuntimeOnly"(libs.kotlin.stdlib)
     testRuntimeOnly(libs.junit.jupiter)
     testRuntimeOnly(libs.mockk.agent.android)
     testRuntimeOnly(libs.robolectric)
