@@ -152,7 +152,9 @@ androidComponents {
 }
 
 configurations.maybeCreate("devDebugImplementation")
+
 configurations.maybeCreate("devReleaseImplementation")
+
 configurations.maybeCreate("devDebugAndroidTestRuntimeOnly")
 
 dependencies {
