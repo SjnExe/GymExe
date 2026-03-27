@@ -181,11 +181,19 @@ jobs:
       run: "echo 'KERNEL==\"kvm\", GROUP=\"kvm\", MODE=\"0666\", OPTIONS+=\"static_node=kvm\"\
         ' | sudo tee /etc/udev/rules.d/99-kvm4all.rules\nsudo udevadm control --reload-rules\n\
         sudo udevadm trigger --name-match=kvm\n"
+    - name: "Adjust SDK Permissions"
+      run: "sudo mkdir -p /usr/local/lib/android/sdk/emulator /usr/local/lib/android/sdk/platform-tools && sudo chown -R $USER:$USER /usr/local/lib/android/sdk"
     - name: "Restore SDK Cache"
       uses: "actions/cache/restore@v5"
       with:
         path: "/usr/local/lib/android/sdk/emulator/\n/usr/local/lib/android/sdk/platform-tools/\n"
         key: "android-sdk-base-36.0.0"
+    - name: "AVD & System Image Cache"
+      uses: "actions/cache@v5"
+      id: "avd-cache"
+      with:
+        path: "~/.android/avd/\n~/.android/adbkey\n~/.android/adbkey.pub\n/usr/local/lib/android/sdk/system-images/\n"
+        key: "avd-${{ matrix.api-level }}"
     - name: "Download Test APKs"
       uses: "actions/download-artifact@v8"
       with:
@@ -200,7 +208,7 @@ jobs:
         target: "google_apis"
         arch: "${{ matrix.api-level <= 27 && 'x86' || 'x86_64' }}"
         profile: "pixel_7_pro"
-        emulator-options: "-no-snapshot -no-window -gpu swiftshader_indirect -noaudio\
+        emulator-options: "-no-window -gpu swiftshader_indirect -noaudio\
           \ -no-boot-anim -no-metrics -qemu -m 2048"
         script: "adb install -r -t $(find artifacts/test-apks -name \"*dev-benchmark*${TARGET_ARCH}.apk\"\
           \ | head -n 1)\nadb install -r -t $(find artifacts/test-apks -name \"*androidTest*.apk\"\
