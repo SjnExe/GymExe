@@ -1,4 +1,10 @@
 [versions]
+androidCompileSdk = "36"
+androidMinSdk = "26"
+androidTargetSdk = "36"
+javaToolchainVersion = "25"
+javaTargetVersion = "25"
+
 activityCompose = "1.13.0"
 agp = "9.1.0"
 androidxFragment = "1.8.9"
@@ -20,7 +26,7 @@ espressoCore = "3.7.0"
 hilt = "2.59.2"
 hiltNavigationCompose = "1.3.0"
 inject = "1"
-junit = "6.0.3"
+junitJupiter = "6.0.3"
 junit4 = "4.13.2"
 junitVersion = "1.3.0"
 kermit = "2.1.0"
@@ -112,10 +118,10 @@ hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "hiltNavigationCompose" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "inject" }
 junit = { module = "junit:junit", version.ref = "junit4" }
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
-junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitJupiter" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitJupiter" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kermit-android-debug = { module = "co.touchlab:kermit-android-debug", version.ref = "kermit" }
 kermit-core = { module = "co.touchlab:kermit-core", version.ref = "kermit" }
@@ -162,10 +168,17 @@ compose-core = [
     "androidx-ui-graphics",
 ]
 compose-ui = [
-    "androidx-compose-material-icons-core",
-    "androidx-material-icons-extended",
     "androidx-material3",
     "androidx-ui",
+]
+compose-icons = [
+    "androidx-compose-material-icons-core",
+    "androidx-material-icons-extended",
+]
+feature-dependencies = [
+    "androidx-lifecycle-viewmodel",
+    "hilt-lifecycle-viewmodel-compose",
+    "kotlinx-coroutines-core",
 ]
 junit-jupiter-runtime = [
     "junit-jupiter-engine",
@@ -198,6 +211,7 @@ testing-common = [
 ]
 
 [plugins]
+foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version = "1.0.0" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependencyAnalysis" }
