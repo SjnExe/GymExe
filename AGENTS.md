@@ -85,9 +85,17 @@ Run this before submitting any change:
 ```bash
 ./gradlew tDDUT -s --continue
 ```
-*   **Format Code:** 
+*   **Run Android Lint:**
 ```bash
-./gradlew sA -s --continue
+./gradlew lintDevDebug -s --continue
+```
+*   **Format Code (Kotlin & YAML):**
+```bash
+./gradlew spotlessApply -s --continue
+```
+*   **Run Architecture Linter (Konsist):**
+```bash
+./gradlew :core:model:test --tests "*Konsist*" -s --continue
 ```
 *   **Record Roborazzi Baseline:** 
 ```bash

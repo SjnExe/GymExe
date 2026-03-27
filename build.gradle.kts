@@ -6,7 +6,7 @@ alias(libs.plugins.kotlin.compose) apply false
 alias(libs.plugins.kotlin.serialization) apply false
 alias(libs.plugins.ksp) apply false
 alias(libs.plugins.hilt) apply false
-alias(libs.plugins.spotless) apply false
+alias(libs.plugins.spotless) apply true
 alias(libs.plugins.versionCatalogUpdate)
 alias(libs.plugins.kover)
 alias(libs.plugins.dependencyAnalysis)
@@ -43,4 +43,10 @@ kover(project(":feature:onboarding"))
 
 tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {
 notCompatibleWithConfigurationCache("The VersionCatalogUpdateTask is not compatible with the configuration cache")
+}
+spotless {
+    yaml {
+        target(".github/**/*.yml", ".github/**/*.yaml", "*.yml", "*.yaml")
+        jackson().yamlFeature("WRITE_DOC_START_MARKER", true)
+    }
 }

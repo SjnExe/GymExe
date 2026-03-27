@@ -4,9 +4,9 @@ android { namespace = "com.sjn.gym.feature.workout" }
 
 dependencies {
     testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockk.agent.android)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.roborazzi)
+    testRuntimeOnly(libs.mockk.agent.android)
+    testRuntimeOnly(libs.robolectric)
+    testRuntimeOnly(libs.roborazzi)
     testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     api(project(":core:data"))
     api(project(":core:model"))

@@ -27,8 +27,8 @@ jobs:
         cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
     - name: "Run Spotless Check"
       run: "./gradlew spotlessCheck -s"
-  build_health_check:
-    name: "Build Health Check"
+  dependency_checks:
+    name: "Dependency Checks"
     runs-on: "ubuntu-latest"
     steps:
     - name: "Checkout Repository"
@@ -38,9 +38,9 @@ jobs:
       with:
         gradle-home-cache-includes: "caches\nnotifications\njdks\n"
         cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
-    - name: "Run Build Health Check"
-      run: "./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies\
-        \ -s"
+    - name: "Run Build Health & Dependency Guard"
+      run: "./gradlew bH dependencyGuard -Dorg.gradle.unsafe.isolated-projects=false\
+        \ -PprintDependencies -s"
   lint_check:
     name: "Lint Check"
     runs-on: "ubuntu-latest"
@@ -72,14 +72,14 @@ jobs:
       with:
         gradle-home-cache-includes: "caches\nnotifications\njdks\n"
         cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
-    - name: "Run Unit Tests"
-      run: "./gradlew testDevDebugUnitTest -s 2>&1 | tee tests_output.log"
-    - name: "Upload Test Logs"
+    - name: "Run Unit Tests and Coverage"
+      run: "./gradlew test testDevDebugUnitTest koverHtmlReport -s 2>&1 | tee tests_output.log"
+    - name: "Upload Test Logs and Coverage"
       uses: "actions/upload-artifact@v7"
       if: "always()"
       with:
-        name: "test-logs"
-        path: "tests_output.log\n**/build/reports/tests/\n"
+        name: "test-logs-and-coverage"
+        path: "tests_output.log\n**/build/reports/tests/\n**/build/reports/kover/html/\n"
         compression-level: 0
   build_apks:
     name: "Build Release APKs"
@@ -181,6 +181,9 @@ jobs:
       run: "echo 'KERNEL==\"kvm\", GROUP=\"kvm\", MODE=\"0666\", OPTIONS+=\"static_node=kvm\"\
         ' | sudo tee /etc/udev/rules.d/99-kvm4all.rules\nsudo udevadm control --reload-rules\n\
         sudo udevadm trigger --name-match=kvm\n"
+    - name: "Adjust SDK Permissions"
+      run: "sudo mkdir -p /usr/local/lib/android/sdk/emulator /usr/local/lib/android/sdk/platform-tools\
+        \ && sudo chown -R $USER:$USER /usr/local/lib/android/sdk"
     - name: "Restore SDK Cache"
       uses: "actions/cache/restore@v5"
       with:
@@ -219,7 +222,7 @@ jobs:
     runs-on: "ubuntu-latest"
     needs:
     - "spotless_check"
-    - "build_health_check"
+    - "dependency_checks"
     - "lint_check"
     - "unit_tests"
     - "build_apks"

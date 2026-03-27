@@ -43,4 +43,8 @@ internal fun Project.configureKotlin() {
             jvmTarget.set(JvmTarget.JVM_25)
         }
     }
+
+    tasks.withType(org.gradle.api.tasks.testing.Test::class.java).configureEach {
+        useJUnitPlatform()
+    }
 }

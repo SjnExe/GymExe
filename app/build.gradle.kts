@@ -6,7 +6,10 @@ plugins {
     id("gymexe.android.hilt")
     id("gymexe.roborazzi")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dependencyGuard)
 }
+
+dependencyGuard { configuration("devReleaseRuntimeClasspath") }
 
 android {
     namespace = "com.sjn.gym"
@@ -153,11 +156,19 @@ configurations.maybeCreate("devDebugImplementation")
 configurations.maybeCreate("devReleaseImplementation")
 
 dependencies {
+    implementation(libs.dagger)
+    implementation(libs.javax.inject)
     implementation(libs.androidx.activity.compose)
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockk.agent.android)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.roborazzi)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation("androidx.test:monitor:1.8.0")
+    androidTestImplementation("androidx.test:runner:1.6.1")
+    androidTestRuntimeOnly(libs.androidx.test.core)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.kotlin.stdlib)
+    testRuntimeOnly(libs.junit.jupiter)
+    testRuntimeOnly(libs.mockk.agent.android)
+    testRuntimeOnly(libs.robolectric)
+    testRuntimeOnly(libs.roborazzi)
     testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     releaseImplementation(libs.kermit.core)
     debugImplementation(libs.kermit.core.android.debug)
@@ -203,4 +214,5 @@ dependencies {
     runtimeOnly(libs.androidx.profileinstaller)
     debugRuntimeOnly(libs.leakcanary.android)
     debugRuntimeOnly(libs.androidx.ui.test.manifest)
+    lintChecks(libs.slack.compose.lints)
 }
