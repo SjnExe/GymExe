@@ -153,7 +153,15 @@ androidComponents {
 
 configurations.maybeCreate("devDebugImplementation")
 
+configurations.maybeCreate("stableDebugImplementation")
+
 configurations.maybeCreate("devReleaseImplementation")
+
+configurations.maybeCreate("stableReleaseImplementation")
+
+configurations.maybeCreate("devBenchmarkImplementation")
+
+configurations.maybeCreate("stableBenchmarkImplementation")
 
 configurations.maybeCreate("devDebugAndroidTestRuntimeOnly")
 
@@ -162,8 +170,10 @@ dependencies {
     implementation(libs.javax.inject)
     implementation(libs.androidx.activity.compose)
     releaseImplementation(libs.kermit.core)
-    debugImplementation(libs.kermit.core.android.debug)
-    debugImplementation(libs.kermit.android.debug)
+    "devDebugImplementation"(libs.kermit.core.android.debug)
+    "stableDebugImplementation"(libs.kermit.core.android.debug)
+    "devDebugImplementation"(libs.kermit.android.debug)
+    "stableDebugImplementation"(libs.kermit.android.debug)
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.core)
@@ -199,9 +209,12 @@ dependencies {
     implementation(libs.kermit)
 
     // Properly split Chucker variants
-    debugImplementation(libs.chucker.debug)
-    releaseImplementation(libs.chucker.release)
-    "benchmarkImplementation"(libs.chucker.release)
+    "devDebugImplementation"(libs.chucker.debug)
+    "stableDebugImplementation"(libs.chucker.debug)
+    "devReleaseImplementation"(libs.chucker.release)
+    "stableReleaseImplementation"(libs.chucker.release)
+    "devBenchmarkImplementation"(libs.chucker.release)
+    "stableBenchmarkImplementation"(libs.chucker.release)
 
     runtimeOnly(libs.androidx.profileinstaller)
     debugRuntimeOnly(libs.leakcanary.android)
