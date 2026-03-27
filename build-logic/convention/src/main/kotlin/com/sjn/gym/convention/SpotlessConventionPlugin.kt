@@ -11,6 +11,11 @@ class SpotlessConventionPlugin : Plugin<Project> {
             pluginManager.apply("com.diffplug.spotless")
 
             extensions.configure<SpotlessExtension> {
+                yaml {
+                    target("**/*.yml", "**/*.yaml")
+                    targetExclude("**/build/**/*.yml")
+                    jackson().yamlFeature("WRITE_DOC_START_MARKER", true)
+                }
                 kotlin {
                     target("**/*.kt")
                     targetExclude("**/build/**/*.kt")
