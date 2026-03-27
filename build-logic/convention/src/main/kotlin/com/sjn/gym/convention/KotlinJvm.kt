@@ -13,19 +13,26 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+import org.gradle.api.artifacts.VersionCatalogsExtension
+
 internal fun Project.configureKotlinJvm() {
+    val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
+    val javaToolchainVersionString = libs.findVersion("javaToolchainVersion").get().toString()
+    val javaTargetVersionString = libs.findVersion("javaTargetVersion").get().toString()
+    val javaTargetVersion = JavaVersion.toVersion(javaTargetVersionString)
+
     extensions.configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
+        sourceCompatibility = javaTargetVersion
+        targetCompatibility = javaTargetVersion
     }
 
-    configureKotlin()
+    configureKotlin(javaToolchainVersionString, javaTargetVersionString)
 }
 
-internal fun Project.configureKotlin() {
+internal fun Project.configureKotlin(javaToolchainVersionString: String, javaTargetVersionString: String) {
     // Configure Kotlin toolchain
     extensions.configure<KotlinProjectExtension> {
-        jvmToolchain(25)
+        jvmToolchain(javaToolchainVersionString.toInt())
     }
 
     // Ensure JavaCompile tasks use the same toolchain
@@ -33,14 +40,14 @@ internal fun Project.configureKotlin() {
     tasks.withType<JavaCompile>().configureEach {
         javaCompiler.set(
             javaToolchains.compilerFor {
-                languageVersion.set(JavaLanguageVersion.of(25))
+                languageVersion.set(JavaLanguageVersion.of(javaToolchainVersionString.toInt()))
             },
         )
     }
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_25)
+            jvmTarget.set(JvmTarget.fromTarget(javaTargetVersionString))
         }
     }
 

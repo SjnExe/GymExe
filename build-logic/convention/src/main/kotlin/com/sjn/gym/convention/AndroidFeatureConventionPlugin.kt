@@ -20,23 +20,11 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("api", project(":core:model"))
                 add("api", project(":core:data"))
                                 
-                add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel").get())
-                add("implementation", libs.findLibrary("hilt-lifecycle-viewmodel-compose").get())
-
-                add("implementation", libs.findLibrary("kotlinx-coroutines-core").get())
-
-                add("implementation", libs.findLibrary("androidx-compose-material-icons-core").get())
-                add("implementation", libs.findLibrary("androidx-material-icons-extended").get())
-
-                add("implementation", platform(libs.findLibrary("androidx-compose-bom").get()))
-                add("implementation", libs.findBundle("compose-core").get())
-                add("implementation", libs.findLibrary("androidx-ui").get())
-                add("implementation", libs.findLibrary("androidx-ui-graphics").get())
-                add("implementation", libs.findLibrary("androidx-material3").get())
+                add("implementation", libs.findBundle("feature-dependencies").get())
+                add("implementation", libs.findBundle("compose-ui").get())
+                add("implementation", libs.findBundle("compose-icons").get())
 
                 add("androidTestRuntimeOnly", libs.findLibrary("androidx-test-core").get())
-
-                add("lintChecks", libs.findLibrary("slack-compose-lints").get())
             }
         }
     }

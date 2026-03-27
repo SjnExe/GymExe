@@ -13,23 +13,30 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+import org.gradle.api.artifacts.VersionCatalogsExtension
+
 internal fun Project.configureKotlinAndroid(commonExtension: ExtensionAware) {
+    val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
+    val javaToolchainVersionString = libs.findVersion("javaToolchainVersion").get().toString()
+    val javaTargetVersionString = libs.findVersion("javaTargetVersion").get().toString()
+    val javaTargetVersion = JavaVersion.toVersion(javaTargetVersionString)
+
     if (commonExtension is ApplicationExtension) {
         commonExtension.compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_25
-            targetCompatibility = JavaVersion.VERSION_25
+            sourceCompatibility = javaTargetVersion
+            targetCompatibility = javaTargetVersion
         }
     } else if (commonExtension is LibraryExtension) {
         commonExtension.compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_25
-            targetCompatibility = JavaVersion.VERSION_25
+            sourceCompatibility = javaTargetVersion
+            targetCompatibility = javaTargetVersion
         }
     }
 
     // Configure Kotlin toolchain
     pluginManager.withPlugin("org.jetbrains.kotlin.android") {
         extensions.configure<KotlinAndroidProjectExtension> {
-            jvmToolchain(25)
+            jvmToolchain(javaToolchainVersionString.toInt())
         }
     }
 
@@ -38,14 +45,14 @@ internal fun Project.configureKotlinAndroid(commonExtension: ExtensionAware) {
     tasks.withType<JavaCompile>().configureEach {
         javaCompiler.set(
             javaToolchains.compilerFor {
-                languageVersion.set(JavaLanguageVersion.of(25))
+                languageVersion.set(JavaLanguageVersion.of(javaToolchainVersionString.toInt()))
             },
         )
     }
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(javaTargetVersionString))
         }
     }
 }

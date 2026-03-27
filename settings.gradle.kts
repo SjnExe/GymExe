@@ -3,11 +3,12 @@ includeBuild("build-logic")
 val libsToml = file("gradle/libs.versions.toml").readLines()
 val develocityVersion = libsToml.find { it.startsWith("develocity =") }?.substringAfter("\"")?.substringBefore("\"")
 val s3BuildCacheVersion = libsToml.find { it.startsWith("s3BuildCache =") }?.substringAfter("\"")?.substringBefore("\"")
+val foojayVersion = libsToml.find { it.startsWith("foojay-resolver =") }?.substringAfter("version = \"")?.substringBefore("\"") ?: "1.0.0"
 
 plugins {
 id("com.gradle.develocity") version develocityVersion
 id("com.github.burrunan.s3-build-cache") version s3BuildCacheVersion
-id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+id("org.gradle.toolchains.foojay-resolver-convention") version foojayVersion
 }
 repositories {
 gradlePluginPortal()

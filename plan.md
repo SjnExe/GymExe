@@ -161,7 +161,7 @@ The app follows a modular architecture:
 - [x] **Dependency Bundling**: Group related dependencies in `libs.versions.toml` (e.g., `compose-ui`, `unit-test`) for cleaner build files.
 
 ### Code Quality & Architecture
-- [ ] **Konsist Tests**: Integrate `Konsist` to enforce architectural rules (e.g., "Repositories must reside in `data` package").
+- [x] **Konsist Tests**: Integrated `Konsist` to enforce architectural rules (e.g., ViewModels must reside in feature packages).
 - [ ] **Detekt Refinement**: Review strict rules (e.g., `MagicNumber` for UI definitions) and adjust excludes.
 
 ### CI/CD Enhancements

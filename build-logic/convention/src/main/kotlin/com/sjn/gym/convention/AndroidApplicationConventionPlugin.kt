@@ -20,9 +20,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             dependencies.add("runtimeOnly", libs.findLibrary("androidx-profileinstaller").get())
 
             extensions.configure<ApplicationExtension> {
-                defaultConfig.targetSdk = 36
-                defaultConfig.minSdk = 26
-                compileSdk = 36
+                defaultConfig.targetSdk = libs.findVersion("androidTargetSdk").get().toString().toInt()
+                defaultConfig.minSdk = libs.findVersion("androidMinSdk").get().toString().toInt()
+                compileSdk = libs.findVersion("androidCompileSdk").get().toString().toInt()
 
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
