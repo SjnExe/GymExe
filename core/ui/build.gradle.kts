@@ -7,8 +7,8 @@ plugins {
 android { namespace = "com.sjn.gym.core.ui" }
 
 dependencies {
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockk.agent.android)
+    testRuntimeOnly(libs.junit.jupiter)
+    testRuntimeOnly(libs.mockk.agent.android)
     testImplementation(libs.robolectric)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.core)
@@ -24,4 +24,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.ui.test.junit4)
     debugRuntimeOnly(libs.androidx.ui.test.manifest)
+    lintChecks(libs.slack.compose.lints)
 }
