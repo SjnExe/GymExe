@@ -10,7 +10,7 @@ configurations.maybeCreate("devDebugImplementation")
 configurations.maybeCreate("devReleaseImplementation")
 
 dependencies {
-    testImplementation(libs.mockk.agent.android)
+    testRuntimeOnly(libs.mockk.agent.android)
     testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     api(project(":core:model"))
     api(libs.androidx.datastore.core)
