@@ -24,4 +24,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.ui.test.junit4)
     debugRuntimeOnly(libs.androidx.ui.test.manifest)
+    lintChecks(libs.slack.compose.lints)
 }

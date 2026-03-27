@@ -6,7 +6,10 @@ plugins {
     id("gymexe.android.hilt")
     id("gymexe.roborazzi")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dependencyGuard)
 }
+
+dependencyGuard { configuration("devReleaseRuntimeClasspath") }
 
 android {
     namespace = "com.sjn.gym"
@@ -211,4 +214,5 @@ dependencies {
     runtimeOnly(libs.androidx.profileinstaller)
     debugRuntimeOnly(libs.leakcanary.android)
     debugRuntimeOnly(libs.androidx.ui.test.manifest)
+    lintChecks(libs.slack.compose.lints)
 }

@@ -35,6 +35,8 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("androidx-material3").get())
 
                 add("androidTestRuntimeOnly", libs.findLibrary("androidx-test-core").get())
+
+                add("lintChecks", libs.findLibrary("slack-compose-lints").get())
             }
         }
     }
