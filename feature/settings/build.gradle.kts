@@ -11,7 +11,15 @@ android {
 
 configurations.maybeCreate("devDebugImplementation")
 
+configurations.maybeCreate("stableDebugImplementation")
+
 configurations.maybeCreate("devReleaseImplementation")
+
+configurations.maybeCreate("stableReleaseImplementation")
+
+configurations.maybeCreate("devBenchmarkImplementation")
+
+configurations.maybeCreate("stableBenchmarkImplementation")
 
 dependencies {
     implementation(libs.androidx.activity.compose)
@@ -34,8 +42,10 @@ dependencies {
     // Kermit is used in main, so it must be available to all variants
     implementation(libs.kermit)
     releaseImplementation(libs.kermit.core)
-    debugImplementation(libs.kermit.core.android.debug)
-    debugImplementation(libs.kermit.android.debug)
+    "devDebugImplementation"(libs.kermit.core.android.debug)
+    "stableDebugImplementation"(libs.kermit.core.android.debug)
+    "devDebugImplementation"(libs.kermit.android.debug)
+    "stableDebugImplementation"(libs.kermit.android.debug)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.ui.test.junit4)
