@@ -73,7 +73,7 @@ jobs:
         gradle-home-cache-includes: "caches\nnotifications\njdks\n"
         cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
     - name: "Run Unit Tests"
-      run: "./gradlew testDevDebugUnitTest -s 2>&1 | tee tests_output.log"
+      run: "./gradlew test testDevDebugUnitTest -s 2>&1 | tee tests_output.log"
     - name: "Upload Test Logs"
       uses: "actions/upload-artifact@v7"
       if: "always()"
