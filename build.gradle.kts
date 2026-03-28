@@ -42,10 +42,17 @@ kover(project(":feature:onboarding"))
 
 tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {
 notCompatibleWithConfigurationCache("The VersionCatalogUpdateTask is not compatible with the configuration cache")
-}
+
 spotless {
     yaml {
         target(".github/**/*.yml", ".github/**/*.yaml", "*.yml", "*.yaml")
-        jackson().yamlFeature("WRITE_DOC_START_MARKER", true)
+        jackson()
+            .yamlFeature("SPLIT_LINES", false)
+            .yamlFeature("MINIMIZE_QUOTES", true)
+            .yamlFeature("LITERAL_BLOCK_STYLE", true)
+            .yamlFeature("INDENT_ARRAYS", true)
+            .yamlFeature("WRITE_DOC_START_MARKER", false)
+            .yamlFeature("ALWAYS_QUOTE_NUMBERS_AS_STRINGS", true)
+            .yamlFeature("USE_PLATFORM_LINE_BREAKS", false)
     }
 }
