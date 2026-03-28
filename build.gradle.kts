@@ -21,21 +21,6 @@ val printToConsole = project.hasProperty("printDependencies")
             onAny {
                 severity("warn")
             }
-            onIncorrectConfiguration {
-                exclude(
-                    "com.github.chuckerteam.chucker:library",
-                    "com.github.chuckerteam.chucker:library-no-op",
-                    "co.touchlab:kermit",
-                    "co.touchlab:kermit-core",
-                    "co.touchlab:kermit-android-debug",
-                    "co.touchlab:kermit-core-android-debug",
-                    "com.google.dagger:dagger",
-                    "javax.inject:javax.inject",
-                    "org.jetbrains.kotlin:kotlin-stdlib",
-                    "androidx.test:runner",
-                    "com.google.dagger:hilt-android"
-                )
-            }
         }
     }
 
