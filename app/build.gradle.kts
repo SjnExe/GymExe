@@ -83,7 +83,6 @@ android {
 // Enable AndroidTest ONLY for devBenchmark to allow testing R8 builds
 // We disable it for standard Release to save build time and keep it pure.
 
-
 androidComponents {
     beforeVariants(selector().withBuildType("benchmark")) { variantBuilder ->
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)

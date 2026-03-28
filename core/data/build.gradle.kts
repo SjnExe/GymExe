@@ -3,8 +3,6 @@ plugins {
     id("gymexe.android.hilt")
 }
 
-
-
 android { namespace = "com.sjn.gym.core.data" }
 
 configurations.maybeCreate("devDebugImplementation")
