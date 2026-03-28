@@ -54,7 +54,7 @@ The project uses the **Foojay Toolchains Resolver**, which automatically downloa
 
 To initialize the environment and run initial checks:
 ```bash
-./gradlew sC tDDUT bH aDD --continue -q
+./gradlew sC lDD tDDUT bH aDD --continue -q
 ```
 
 ## Useful Commands
@@ -62,8 +62,7 @@ To initialize the environment and run initial checks:
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew vCU sA tDDUT aDD -s --continue
-./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies -s --continue
+./gradlew vCU sA lDD tDDUT aDD bH -PprintDependencies -s --continue
 ```
 
 ### Building
@@ -99,23 +98,23 @@ Run this before submitting any change:
 ```
 *   **Record Roborazzi Baseline:** 
 ```bash
-./gradlew rRDD -s --continue
+./gradlew rRDD -s
 ```
 *   **Verify Roborazzi Baseline:** 
 ```bash
-./gradlew vRDD -s --continue
+./gradlew vRDD -s
 ```
 *   **Compare Roborazzi Baseline:** 
 ```bash
-./gradlew cRDD -s --continue
+./gradlew cRDD -s
 ```
 *   **Generate HTML Test Coverage:** 
 ```bash
-./gradlew kHR -s --continue
+./gradlew kHR -s
 ```
 *   **Generate XML Test Coverage:** 
 ```bash
-./gradlew kXR -s --continue
+./gradlew kXR -s
 ```
 
 ### Modularization
@@ -134,7 +133,7 @@ Run this before submitting any change:
 ```
 *   **Dependency Analysis: Build Health**
 ```bash
-./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies --continue
+./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies
 ```
 *   **Develocity Build Scans & Cache:**
 Build scans and local caching are automatically enabled via `settings.gradle.kts`. Use `--no-scan` if you wish to bypass build scan generation for a particular run.
