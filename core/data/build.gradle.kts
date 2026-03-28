@@ -18,8 +18,6 @@ configurations.maybeCreate("devBenchmarkImplementation")
 configurations.maybeCreate("stableBenchmarkImplementation")
 
 dependencies {
-    testRuntimeOnly(libs.mockk.agent.android)
-    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     api(project(":core:model"))
     api(libs.androidx.datastore.core)
     api(libs.androidx.datastore.preferences.core)
@@ -29,24 +27,34 @@ dependencies {
     api(libs.kotlinx.serialization.core)
     api(libs.retrofit)
 
-    implementation(libs.hilt.android)
     implementation(libs.androidx.collection)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite)
+    implementation(libs.hilt.android)
     implementation(libs.hilt.core)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+
     runtimeOnly(libs.kotlinx.coroutines.android)
+
+    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
+    testRuntimeOnly(libs.mockk.agent.android)
+
+    "devBenchmarkImplementation"(libs.chucker.release)
 
     // Properly split Chucker variants
     "devDebugImplementation"(libs.chucker.debug)
-    "stableDebugImplementation"(libs.chucker.debug)
+
     "devReleaseImplementation"(libs.chucker.release)
-    "stableReleaseImplementation"(libs.chucker.release)
-    "devBenchmarkImplementation"(libs.chucker.release)
+
+    ksp(libs.androidx.room.compiler)
+
     "stableBenchmarkImplementation"(libs.chucker.release)
+
+    "stableDebugImplementation"(libs.chucker.debug)
+
+    "stableReleaseImplementation"(libs.chucker.release)
 }

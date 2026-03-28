@@ -13,6 +13,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
                 apply("gymexe.dependency.analysis")
+                apply("com.squareup.sort-dependencies")
             }
             configureKotlinJvm()
         }

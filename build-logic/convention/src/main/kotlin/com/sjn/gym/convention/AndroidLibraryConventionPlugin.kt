@@ -17,6 +17,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 apply("gymexe.kover")
                 apply("gymexe.android.test")
                 apply("gymexe.dependency.analysis")
+                apply("com.squareup.sort-dependencies")
             }
 
             extensions.configure<LibraryExtension> {
@@ -46,6 +47,11 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     }
                 }
 
+                lint {
+                    lintConfig = file("${target.rootDir}/lint.xml")
+                    abortOnError = true
+                    checkDependencies = true
+                }
 
                 configureKotlinAndroid(this)
 

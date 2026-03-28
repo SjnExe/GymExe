@@ -3,22 +3,23 @@ plugins { id("gymexe.android.feature") }
 android { namespace = "com.sjn.gym.feature.onboarding" }
 
 dependencies {
-    implementation(libs.androidx.activity.compose)
-    implementation(project(":core:ui"))
-    implementation(libs.androidx.activity)
     api(libs.dagger)
     api(libs.javax.inject)
 
-    implementation(libs.hilt.core)
+    implementation(project(":core:ui"))
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.core)
 
     testImplementation(libs.kotlinx.coroutines.test)
+
+    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     testRuntimeOnly(libs.junit.jupiter)
     testRuntimeOnly(libs.mockk.agent.android)
     testRuntimeOnly(libs.robolectric)
     testRuntimeOnly(libs.roborazzi)
-    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
+
+    ksp(libs.hilt.compiler)
 }

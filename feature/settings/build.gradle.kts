@@ -22,40 +22,43 @@ configurations.maybeCreate("devBenchmarkImplementation")
 configurations.maybeCreate("stableBenchmarkImplementation")
 
 dependencies {
-    implementation(libs.androidx.activity.compose)
-    implementation(project(":core:ui"))
-    implementation(libs.androidx.activity)
     api(libs.dagger)
     api(libs.javax.inject)
 
+    implementation(project(":core:ui"))
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.animation.core)
     implementation(libs.androidx.core)
     implementation(libs.androidx.lifecycle.common)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.hilt.core)
-
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
+    implementation(libs.hilt.core)
     // Kermit is used in main, so it must be available to all variants
     implementation(libs.kermit)
-    releaseImplementation(libs.kermit.core)
-    "devDebugImplementation"(libs.kermit.core.android.debug)
-    "stableDebugImplementation"(libs.kermit.core.android.debug)
-    "devDebugImplementation"(libs.kermit.android.debug)
-    "stableDebugImplementation"(libs.kermit.android.debug)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.androidx.ui.test.junit4)
-    testImplementation(libs.robolectric.annotations)
+    releaseImplementation(libs.kermit.core)
+
     testImplementation(libs.androidx.compose.ui.test)
+    testImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.robolectric.annotations)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.core)
     testImplementation(libs.roborazzi.junit.rule)
-    testImplementation(libs.robolectric)
+
+    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     testRuntimeOnly(libs.junit.jupiter)
     testRuntimeOnly(libs.mockk.agent.android)
-    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
+
+    "devDebugImplementation"(libs.kermit.android.debug)
+    "devDebugImplementation"(libs.kermit.core.android.debug)
+
+    ksp(libs.hilt.compiler)
+
+    "stableDebugImplementation"(libs.kermit.android.debug)
+    "stableDebugImplementation"(libs.kermit.core.android.debug)
 }

@@ -14,6 +14,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("gymexe.kover")
                 apply("gymexe.android.test")
                 apply("gymexe.dependency.analysis")
+                apply("com.squareup.sort-dependencies")
             }
 
             val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
@@ -39,6 +40,12 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         testTask?.setProperty("failOnNoDiscoveredTests", false)
                         testTask?.jvmArgs("--enable-native-access=ALL-UNNAMED")
                     }
+                }
+
+                lint {
+                    lintConfig = file("${target.rootDir}/lint.xml")
+                    abortOnError = true
+                    checkDependencies = true
                 }
 
                 // Common configuration function

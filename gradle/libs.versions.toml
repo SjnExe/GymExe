@@ -5,6 +5,7 @@ androidTargetSdk = "36"
 javaToolchainVersion = "25"
 javaTargetVersion = "25"
 
+sortDependencies = "0.10"
 activityCompose = "1.13.0"
 agp = "9.1.0"
 androidxFragment = "1.8.9"
@@ -225,5 +226,6 @@ kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 s3BuildCache = { id = "com.github.burrunan.s3-build-cache", version.ref = "s3BuildCache" }
+sortDependencies = { id = "com.squareup.sort-dependencies", version.ref = "sortDependencies" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 versionCatalogUpdate = { id = "nl.littlerobots.version-catalog-update", version.ref = "versionCatalogUpdate" }
