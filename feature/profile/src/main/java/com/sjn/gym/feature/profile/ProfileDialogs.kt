@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.WeightUnit
 import com.sjn.gym.core.ui.components.SegmentedButton
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
 
 @Composable
@@ -210,7 +212,7 @@ fun EditWeightDialog(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 SegmentedButton(
-                    options = listOf("KG", "LBS"),
+                    options = persistentListOf("KG", "LBS"),
                     selectedOption = weightUnit.name,
                     onOptionSelected = { newUnitStr ->
                         val newUnit = WeightUnit.valueOf(newUnitStr)
@@ -339,7 +341,7 @@ fun EditHeightDialog(
                     contentAlignment = Alignment.Center,
                 ) {
                     com.sjn.gym.core.ui.components.SegmentedButton(
-                        options = listOf("CM", "FT"),
+                        options = persistentListOf("CM", "FT"),
                         selectedOption = heightUnit.name,
                         onOptionSelected = { newUnitStr ->
                             val newUnit = HeightUnit.valueOf(newUnitStr)
@@ -426,7 +428,7 @@ fun EditLevelDialog(initialLevel: String?, onDismiss: () -> Unit, onSave: (Strin
 
 @Composable
 fun EditEquipmentDialog(
-    initialEquipment: Set<String>,
+    initialEquipment: ImmutableSet<String>,
     onDismiss: () -> Unit,
     onSave: (Set<String>) -> Unit,
 ) {
@@ -459,7 +461,7 @@ fun EditEquipmentDialog(
                                     val isChecked = !selectedEquipment.contains(option)
                                     val newSet = selectedEquipment.toMutableSet()
                                     if (isChecked) newSet.add(option) else newSet.remove(option)
-                                    selectedEquipment = newSet
+                                    selectedEquipment = kotlinx.collections.immutable.persistentSetOf(*newSet.toTypedArray())
                                 }
                                 .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,

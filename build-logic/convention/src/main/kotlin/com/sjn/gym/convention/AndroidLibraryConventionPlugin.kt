@@ -48,9 +48,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 }
 
                 lint {
-                    lintConfig = file("${target.rootDir}/lint.xml")
+                    lintConfig = file("${target.rootDir}/gradle/lint.xml")
                     abortOnError = true
                     checkDependencies = true
+                    warningsAsErrors = true
                 }
 
                 configureKotlinAndroid(this)

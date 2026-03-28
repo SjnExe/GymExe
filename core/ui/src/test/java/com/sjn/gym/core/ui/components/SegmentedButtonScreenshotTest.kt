@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onRoot
 import com.github.takahirom.roborazzi.RoborazziRule
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.sjn.gym.core.ui.theme.GymExeTheme
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +32,7 @@ class SegmentedButtonScreenshotTest {
         composeRule.setContent {
             GymExeTheme {
                 SegmentedButton(
-                    options = listOf("Option 1", "Option 2", "Option 3"),
+                    options = persistentListOf("Option 1", "Option 2", "Option 3"),
                     selectedOption = "Option 1",
                     onOptionSelected = {},
                 )

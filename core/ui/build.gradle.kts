@@ -12,6 +12,7 @@ dependencies {
 
     implementation(libs.androidx.core)
     implementation(libs.androidx.material3)
+    implementation(libs.kotlinx.collections.immutable)
 
     testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.androidx.ui.test.junit4)

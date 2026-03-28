@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.sjn.gym.core.ui.components.SegmentedButton
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun ProfileSetupScreen(
@@ -120,7 +121,7 @@ fun ProfileSetupScreen(
             // SegmentedButton might need explicit size or container
             Box(modifier = Modifier.height(56.dp), contentAlignment = Alignment.Center) {
                 SegmentedButton(
-                    options = listOf("KG", "LBS"),
+                    options = persistentListOf("KG", "LBS"),
                     selectedOption = weightUnit,
                     onOptionSelected = { weightUnit = it },
                 )
@@ -201,7 +202,7 @@ fun ProfileSetupScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 SegmentedButton(
-                    options = listOf("CM", "FT"),
+                    options = persistentListOf("CM", "FT"),
                     selectedOption = heightUnit,
                     onOptionSelected = {
                         // Reset value when switching units to prevent invalid states

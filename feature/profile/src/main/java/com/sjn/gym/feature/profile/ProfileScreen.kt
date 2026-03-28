@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.sjn.gym.core.model.HeightUnit
+import kotlinx.collections.immutable.toImmutableSet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -393,7 +394,7 @@ fun ProfileScreen(
 
         if (showEquipmentDialog) {
             EditEquipmentDialog(
-                initialEquipment = uiState.equipmentList,
+                initialEquipment = uiState.equipmentList.toImmutableSet(),
                 onDismiss = { showEquipmentDialog = false },
                 onSave = {
                     viewModel.setEquipmentList(it)

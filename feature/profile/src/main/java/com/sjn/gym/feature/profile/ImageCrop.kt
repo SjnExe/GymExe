@@ -78,7 +78,7 @@ fun ImageCropScreen(
     var size by remember { mutableStateOf(IntSize.Zero) }
 
     val cropSize = 300.dp
-    val density = context.resources.displayMetrics.density
+    val density = androidx.compose.ui.platform.LocalDensity.current.density
     val cropDiameterPx = cropSize.value * density
 
     Scaffold(
