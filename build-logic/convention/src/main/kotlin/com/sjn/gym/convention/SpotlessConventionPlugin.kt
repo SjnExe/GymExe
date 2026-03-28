@@ -14,7 +14,14 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 yaml {
                     target("**/*.yml", "**/*.yaml")
                     targetExclude("**/build/**/*.yml")
-                    jackson().yamlFeature("WRITE_DOC_START_MARKER", true)
+                    jackson()
+                        .yamlFeature("SPLIT_LINES", false)
+                        .yamlFeature("MINIMIZE_QUOTES", true)
+                        .yamlFeature("LITERAL_BLOCK_STYLE", false)
+                        .yamlFeature("INDENT_ARRAYS_WITH_INDICATOR", true)
+                        .yamlFeature("WRITE_DOC_START_MARKER", false)
+                        .yamlFeature("ALWAYS_QUOTE_NUMBERS_AS_STRINGS", true)
+                        .yamlFeature("USE_PLATFORM_LINE_BREAKS", false)
                 }
                 kotlin {
                     target("**/*.kt")
@@ -26,6 +33,43 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 kotlinGradle {
                     target("*.gradle.kts")
                     ktfmt().kotlinlangStyle()
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
+                java {
+                    target("**/*.java")
+                    targetExclude("**/build/**/*.java")
+                    googleJavaFormat()
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
+                format("xml") {
+                    target("**/*.xml")
+                    targetExclude("**/build/**/*.xml")
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
+                format("toml") {
+                    target("**/*.toml")
+                    targetExclude("**/build/**/*.toml")
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
+                format("properties") {
+                    target("**/*.properties")
+                    targetExclude("**/build/**/*.properties")
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
+                format("markdown") {
+                    target("**/*.md")
+                    targetExclude("**/build/**/*.md")
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
+                format("proguard") {
+                    target("**/*.pro")
+                    targetExclude("**/build/**/*.pro")
                     trimTrailingWhitespace()
                     endWithNewline()
                 }

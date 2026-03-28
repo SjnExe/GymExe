@@ -90,12 +90,16 @@ implementationClass = "com.sjn.gym.convention.DependencyAnalysisConventionPlugin
 }
 
 spotless {
-kotlin {
-target("**/*.kt")
-ktfmt().kotlinlangStyle()
-}
-kotlinGradle {
-target("*.gradle.kts")
-ktfmt().kotlinlangStyle()
-}
+    kotlin {
+        target("**/*.kt")
+        ktfmt().kotlinlangStyle()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    kotlinGradle {
+        target("*.gradle.kts", "../settings.gradle.kts")
+        ktfmt().kotlinlangStyle()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
