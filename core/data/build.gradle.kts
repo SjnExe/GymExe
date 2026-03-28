@@ -3,6 +3,8 @@ plugins {
     id("gymexe.android.hilt")
 }
 
+
+
 android { namespace = "com.sjn.gym.core.data" }
 
 configurations.maybeCreate("devDebugImplementation")
@@ -32,7 +34,7 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite)
-    api(libs.hilt.android)
+    implementation(libs.hilt.android)
     implementation(libs.hilt.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)

@@ -16,18 +16,7 @@ dependencyAnalysis {
     val warnOnly = project.hasProperty("warnDependencies")
     val printToConsole = project.hasProperty("printDependencies")
 
-    issues {
-        all {
-            onAny { severity("warn") }
-            onIncorrectConfiguration {
-                exclude(
-                    "com.google.dagger:dagger",
-                    "javax.inject:javax.inject",
-                    "com.google.dagger:hilt-android",
-                )
-            }
-        }
-    }
+    issues { all { onAny { severity("warn") } } }
 
     reporting { printBuildHealth(printToConsole) }
 }

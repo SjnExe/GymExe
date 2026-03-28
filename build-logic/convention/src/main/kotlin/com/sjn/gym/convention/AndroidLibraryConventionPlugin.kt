@@ -20,6 +20,14 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 apply("com.squareup.sort-dependencies")
             }
 
+            extensions.configure<com.autonomousapps.DependencyAnalysisSubExtension> {
+                issues {
+                    onIncorrectConfiguration {
+                        exclude("com.google.dagger:hilt-android")
+                    }
+                }
+            }
+
             extensions.configure<LibraryExtension> {
                 defaultConfig.minSdk = 26
                 compileSdk = 36

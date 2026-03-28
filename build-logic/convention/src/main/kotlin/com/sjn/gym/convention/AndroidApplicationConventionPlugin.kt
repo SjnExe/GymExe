@@ -17,6 +17,14 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 apply("com.squareup.sort-dependencies")
             }
 
+            extensions.configure<com.autonomousapps.DependencyAnalysisSubExtension> {
+                issues {
+                    onIncorrectConfiguration {
+                        exclude("com.google.dagger:dagger", "javax.inject:javax.inject")
+                    }
+                }
+            }
+
             val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
             dependencies.add("runtimeOnly", libs.findLibrary("androidx-profileinstaller").get())
 

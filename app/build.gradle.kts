@@ -82,6 +82,8 @@ android {
 
 // Enable AndroidTest ONLY for devBenchmark to allow testing R8 builds
 // We disable it for standard Release to save build time and keep it pure.
+
+
 androidComponents {
     beforeVariants(selector().withBuildType("benchmark")) { variantBuilder ->
         (variantBuilder as? com.android.build.api.variant.HasAndroidTestBuilder)
@@ -190,9 +192,9 @@ dependencies {
     implementation(libs.androidx.navigation.runtime)
     implementation(libs.bundles.compose.icons)
     implementation(libs.bundles.compose.ui)
-    implementation(libs.dagger)
+    api(libs.dagger)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
-    implementation(libs.javax.inject)
+    api(libs.javax.inject)
     // Kermit used directly in main source set
     implementation(libs.kermit)
     implementation(libs.kotlin.stdlib)
