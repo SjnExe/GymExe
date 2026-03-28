@@ -51,23 +51,23 @@ spotless {
             .yamlFeature("USE_PLATFORM_LINE_BREAKS", false)
     }
     kotlinGradle {
-        target("*.gradle.kts", "build-logic/*.gradle.kts")
+        target("*.gradle.kts")
         ktfmt().kotlinlangStyle()
         trimTrailingWhitespace()
         endWithNewline()
     }
     format("toml") {
-        target("**/*.toml")
+        target("*.toml", "gradle/*.toml")
         trimTrailingWhitespace()
         endWithNewline()
     }
     format("properties") {
-        target("**/*.properties")
+        target("*.properties", "gradle/*.properties")
         trimTrailingWhitespace()
         endWithNewline()
     }
     format("markdown") {
-        target("**/*.md")
+        target("*.md")
         trimTrailingWhitespace()
         endWithNewline()
     }
