@@ -20,7 +20,11 @@ dependencyAnalysis {
         all {
             onAny { severity("warn") }
             onIncorrectConfiguration {
-                exclude("com.google.dagger:dagger", "javax.inject:javax.inject", "com.google.dagger:hilt-android")
+                exclude(
+                    "com.google.dagger:dagger",
+                    "javax.inject:javax.inject",
+                    "com.google.dagger:hilt-android",
+                )
             }
         }
     }
