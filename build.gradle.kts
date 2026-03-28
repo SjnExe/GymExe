@@ -54,5 +54,8 @@ spotless {
             .yamlFeature("WRITE_DOC_START_MARKER", false)
             .yamlFeature("ALWAYS_QUOTE_NUMBERS_AS_STRINGS", true)
             .yamlFeature("USE_PLATFORM_LINE_BREAKS", false)
-    }
+
+
+             }
+}
 }
