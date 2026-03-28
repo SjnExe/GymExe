@@ -28,7 +28,6 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(libs.androidx.activity)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.animation.core)
     implementation(libs.androidx.core)
