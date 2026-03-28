@@ -32,7 +32,7 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite)
-    implementation(libs.hilt.android)
+    api(libs.hilt.android)
     implementation(libs.hilt.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
