@@ -66,21 +66,21 @@ Run this before submitting any change:
 ```
 
 ### Building
-*   **Build Debug APK (Dev):** 
+*   **Build Debug APK (Dev):**
 ```bash
 ./gradlew aDD -s --continue
 ```
-*   **Build Release APK (Dev):** 
+*   **Build Release APK (Dev):**
 ```bash
 ./gradlew aDR -s --continue
 ```
-*   **Build Release APK (Stable):** 
+*   **Build Release APK (Stable):**
 ```bash
 ./gradlew aSR -s --continue
 ```
 
 ### Quality & Testing
-*   **Run Unit Tests:** 
+*   **Run Unit Tests:**
 ```bash
 ./gradlew tDDUT -s --continue
 ```
@@ -96,23 +96,23 @@ Run this before submitting any change:
 ```bash
 ./gradlew :core:model:test --tests "*Konsist*" -s --continue
 ```
-*   **Record Roborazzi Baseline:** 
+*   **Record Roborazzi Baseline:**
 ```bash
 ./gradlew rRDD -s
 ```
-*   **Verify Roborazzi Baseline:** 
+*   **Verify Roborazzi Baseline:**
 ```bash
 ./gradlew vRDD -s
 ```
-*   **Compare Roborazzi Baseline:** 
+*   **Compare Roborazzi Baseline:**
 ```bash
 ./gradlew cRDD -s
 ```
-*   **Generate HTML Test Coverage:** 
+*   **Generate HTML Test Coverage:**
 ```bash
 ./gradlew kHR -s
 ```
-*   **Generate XML Test Coverage:** 
+*   **Generate XML Test Coverage:**
 ```bash
 ./gradlew kXR -s
 ```

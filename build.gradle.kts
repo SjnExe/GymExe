@@ -1,47 +1,42 @@
 plugins {
-alias(libs.plugins.android.application) apply false
-alias(libs.plugins.android.library) apply false
-alias(libs.plugins.kotlin.android) apply false
-alias(libs.plugins.kotlin.compose) apply false
-alias(libs.plugins.kotlin.serialization) apply false
-alias(libs.plugins.ksp) apply false
-alias(libs.plugins.hilt) apply false
-alias(libs.plugins.spotless) apply true
-alias(libs.plugins.versionCatalogUpdate)
-alias(libs.plugins.kover)
-alias(libs.plugins.dependencyAnalysis)
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.spotless) apply true
+    alias(libs.plugins.versionCatalogUpdate)
+    alias(libs.plugins.kover)
+    alias(libs.plugins.dependencyAnalysis)
 }
 
 dependencyAnalysis {
-val warnOnly = project.hasProperty("warnDependencies")
-val printToConsole = project.hasProperty("printDependencies")
+    val warnOnly = project.hasProperty("warnDependencies")
+    val printToConsole = project.hasProperty("printDependencies")
 
-    issues {
-        all {
-            onAny {
-                severity("warn")
-            }
-        }
-    }
+    issues { all { onAny { severity("warn") } } }
 
-reporting {
-printBuildHealth(printToConsole)
-}
+    reporting { printBuildHealth(printToConsole) }
 }
 
 dependencies {
-kover(project(":app"))
-kover(project(":core:ui"))
-kover(project(":core:data"))
-kover(project(":core:model"))
-kover(project(":feature:settings"))
-kover(project(":feature:workout"))
-kover(project(":feature:profile"))
-kover(project(":feature:onboarding"))
+    kover(project(":app"))
+    kover(project(":core:ui"))
+    kover(project(":core:data"))
+    kover(project(":core:model"))
+    kover(project(":feature:settings"))
+    kover(project(":feature:workout"))
+    kover(project(":feature:profile"))
+    kover(project(":feature:onboarding"))
 }
 
 tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {
-notCompatibleWithConfigurationCache("The VersionCatalogUpdateTask is not compatible with the configuration cache")
+    notCompatibleWithConfigurationCache(
+        "The VersionCatalogUpdateTask is not compatible with the configuration cache"
+    )
+}
 
 spotless {
     yaml {
@@ -49,13 +44,31 @@ spotless {
         jackson()
             .yamlFeature("SPLIT_LINES", false)
             .yamlFeature("MINIMIZE_QUOTES", true)
-            .yamlFeature("LITERAL_BLOCK_STYLE", true)
-            .yamlFeature("INDENT_ARRAYS", true)
+            .yamlFeature("LITERAL_BLOCK_STYLE", false)
+            .yamlFeature("INDENT_ARRAYS_WITH_INDICATOR", true)
             .yamlFeature("WRITE_DOC_START_MARKER", false)
             .yamlFeature("ALWAYS_QUOTE_NUMBERS_AS_STRINGS", true)
             .yamlFeature("USE_PLATFORM_LINE_BREAKS", false)
-
-
-             }
-}
+    }
+    kotlinGradle {
+        target("*.gradle.kts", "build-logic/*.gradle.kts")
+        ktfmt().kotlinlangStyle()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format("toml") {
+        target("**/*.toml")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format("properties") {
+        target("**/*.properties")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format("markdown") {
+        target("**/*.md")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
