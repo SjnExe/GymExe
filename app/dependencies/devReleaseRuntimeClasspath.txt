@@ -188,6 +188,8 @@ org.jetbrains.compose.ui:ui-util:1.9.3
 org.jetbrains.compose.ui:ui:1.9.3
 org.jetbrains.kotlin:kotlin-stdlib-common:2.3.20
 org.jetbrains.kotlin:kotlin-stdlib:2.3.20
+org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.4.0
+org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0
 org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2
 org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.2
 org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2

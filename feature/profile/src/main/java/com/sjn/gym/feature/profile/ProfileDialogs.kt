@@ -40,9 +40,9 @@ import androidx.compose.ui.unit.dp
 import com.sjn.gym.core.model.HeightUnit
 import com.sjn.gym.core.model.WeightUnit
 import com.sjn.gym.core.ui.components.SegmentedButton
+import java.time.LocalDate
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
-import java.time.LocalDate
 
 @Composable
 fun EditNameDialog(initialName: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
@@ -461,7 +461,10 @@ fun EditEquipmentDialog(
                                     val isChecked = !selectedEquipment.contains(option)
                                     val newSet = selectedEquipment.toMutableSet()
                                     if (isChecked) newSet.add(option) else newSet.remove(option)
-                                    selectedEquipment = kotlinx.collections.immutable.persistentSetOf(*newSet.toTypedArray())
+                                    selectedEquipment =
+                                        kotlinx.collections.immutable.persistentSetOf(
+                                            *newSet.toTypedArray()
+                                        )
                                 }
                                 .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
