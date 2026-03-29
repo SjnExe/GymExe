@@ -36,8 +36,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.hilt.android)
     implementation(libs.hilt.core)
-    // Kermit is used in main, so it must be available to all variants
     implementation(libs.kermit)
+    implementation(libs.kotlinx.collections.immutable)
 
     releaseImplementation(libs.kermit.core)
 
