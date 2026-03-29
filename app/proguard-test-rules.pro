@@ -99,3 +99,7 @@
 # These rules are only applied to the 'dev' flavor to prevent test crashes
 # when running against minified builds (R8 full mode).
 # Rules required for the production app should go in 'proguard-rules.pro'.
+
+# Keep Kotlin stdlib for instrumented tests
+-keep class kotlin.** { *; }
+-dontwarn kotlin.**

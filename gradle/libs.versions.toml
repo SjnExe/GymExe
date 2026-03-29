@@ -7,6 +7,8 @@ androidTargetSdk = "36"
 androidxFragment = "1.8.9"
 androidxSqlite = "2.6.2"
 androidxTestCore = "1.7.0"
+androidxTestMonitor = "1.8.0"
+androidxTestRunner = "1.7.0"
 appcompat = "1.7.1"
 chucker = "4.3.1"
 coil = "3.4.0"
@@ -101,6 +103,8 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "androidxSqlite" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
+androidx-test-monitor = { module = "androidx.test:monitor", version.ref = "androidxTestMonitor" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 androidx-tracing = { module = "androidx.tracing:tracing", version.ref = "tracing" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }

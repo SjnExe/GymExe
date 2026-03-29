@@ -81,6 +81,8 @@ import com.sjn.gym.core.model.ThemeStyle
 import com.sjn.gym.core.model.WeightUnit
 import com.sjn.gym.core.ui.components.RestoreOptionsDialog
 import java.util.Locale
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -268,21 +270,21 @@ fun SettingsScreenContent(
 
             SettingsUnitRow(
                 title = "Weight Unit",
-                options = WeightUnit.entries,
+                options = WeightUnit.entries.toImmutableList(),
                 selectedOption = state.weightUnit,
                 onOptionSelected = onWeightUnitSelected,
             )
 
             SettingsUnitRow(
                 title = "Height Unit",
-                options = HeightUnit.entries,
+                options = HeightUnit.entries.toImmutableList(),
                 selectedOption = state.heightUnit,
                 onOptionSelected = onHeightUnitSelected,
             )
 
             SettingsUnitRow(
                 title = "Distance Unit",
-                options = DistanceUnit.entries,
+                options = DistanceUnit.entries.toImmutableList(),
                 selectedOption = state.distanceUnit,
                 onOptionSelected = onDistanceUnitSelected,
             )
@@ -479,7 +481,7 @@ private fun formatFileSize(bytes: Long): String {
 @Composable
 fun <T : Enum<T>> SettingsUnitRow(
     title: String,
-    options: List<T>,
+    options: ImmutableList<T>,
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
@@ -800,7 +802,7 @@ fun SettingsSectionTitle(title: String, modifier: Modifier = Modifier) {
 @Composable
 fun <T : Enum<T>> SelectionDialog(
     title: String,
-    options: List<T>,
+    options: ImmutableList<T>,
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
     onDismissRequest: () -> Unit,
