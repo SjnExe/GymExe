@@ -223,7 +223,7 @@ dependencies {
 
     "devBenchmarkImplementation"(libs.chucker.release)
 
-    androidTestImplementation(libs.kotlin.stdlib)
+    androidTestRuntimeOnly(libs.kotlin.stdlib)
 
     // Properly split Chucker variants
     "devDebugImplementation"(libs.chucker.debug)
