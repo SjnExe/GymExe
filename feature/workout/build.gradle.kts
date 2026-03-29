@@ -8,17 +8,18 @@ dependencies {
     api(libs.javax.inject)
 
     implementation(libs.androidx.lifecycle.common)
-    implementation(libs.hilt.core)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.core)
 
-    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     testRuntimeOnly(libs.mockk.agent.android)
     testRuntimeOnly(libs.robolectric)
     testRuntimeOnly(libs.roborazzi)
-    testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
+
+    ksp(libs.hilt.compiler)
 }

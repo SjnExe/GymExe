@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint abortOnError="true" warningsAsErrors="true" checkDependencies="true">
+    <!-- Ignore issues that are usually false positives or handled by other tools -->
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+    <issue id="GradleDependency" severity="ignore" /> <!-- Handled by Version Catalogs/Dependency Updates -->
+    <issue id="OldTargetApi" severity="ignore" /> <!-- Often triggers prematurely when a new API is released -->
+    
+    <!-- Enforce stricter checks for important Android issues -->
+    <issue id="HardcodedText" severity="error" />
+    <issue id="MissingTranslation" severity="warning" />
+    <issue id="UnusedResources" severity="error" />
+    <issue id="ContentDescription" severity="error" />
+    <issue id="RtlHardcoded" severity="error" />
+    <issue id="TypographyQuotes" severity="warning" />
+
+    <!-- Security rules -->
+    <issue id="ExportedPreferenceActivity" severity="error" />
+    <issue id="SetJavaScriptEnabled" severity="error" />
+    
+    <!-- Architecture & Correctness -->
+    <issue id="DrawAllocation" severity="error" />
+    <issue id="ObsoleteLayoutParam" severity="error" />
+    <issue id="InefficientWeight" severity="error" />
+    <issue id="UseCompoundDrawables" severity="error" />
+    <issue id="MergeRootFrame" severity="error" />
+
+    <!-- Performance -->
+    <issue id="Overdraw" severity="error" />
+    <issue id="UnusedNamespace" severity="error" />
+    
+    <!-- Ignore UnknownIssueId since not all modules apply the Slack Compose Lints (e.g. data layers) -->
+    <issue id="UnknownIssueId" severity="ignore" />
+
+    <!-- Treat Compose-specific issues seriously (assuming Slack Lints are used) -->
+    <issue id="ComposeModifierMissing" severity="error" />
+    <issue id="ComposeMultipleContentEmitters" severity="error" />
+    <issue id="ComposeUnstableCollections" severity="error" />
+</lint>
