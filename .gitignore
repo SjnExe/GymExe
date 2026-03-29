@@ -10,10 +10,6 @@
 .gradle/
 build/
 .kotlin/
-gradle/
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/libs.versions.toml
-!gradle/gradle-daemon-jvm.properties
 
 # Android
 local.properties
@@ -49,5 +45,4 @@ fastlane/test_output
 **/src/test/snapshots/images/
 
 # Miscellaneous
-.DS_Store
 Thumbs.db
