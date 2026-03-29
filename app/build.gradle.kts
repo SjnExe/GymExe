@@ -208,7 +208,7 @@ dependencies {
 
     debugRuntimeOnly(libs.leakcanary.android)
 
-    androidTestRuntimeOnly("androidx.test:runner:1.6.1")
+    androidTestRuntimeOnly(libs.androidx.test.runner)
     androidTestRuntimeOnly(libs.androidx.test.core)
 
     testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
@@ -217,7 +217,7 @@ dependencies {
     testRuntimeOnly(libs.robolectric)
     testRuntimeOnly(libs.roborazzi)
 
-    androidTestImplementation("androidx.test:monitor:1.8.0")
+    androidTestImplementation(libs.androidx.test.monitor)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.junit)
 
