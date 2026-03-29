@@ -72,3 +72,13 @@ spotless {
         endWithNewline()
     }
 }
+
+versionCatalogUpdate {
+    keep {
+        versions.add("androidCompileSdk")
+        versions.add("androidMinSdk")
+        versions.add("androidTargetSdk")
+        versions.add("javaToolchainVersion")
+        versions.add("javaTargetVersion")
+    }
+}

@@ -9,10 +9,7 @@ pluginManagement {
             ?.substringAfter("\"")
             ?.substringBefore("\"")
     val foojayVersion =
-        libsToml
-            .find { it.startsWith("foojay-resolver =") }
-            ?.substringAfter("version = \"")
-            ?.substringBefore("\"") ?: "1.0.0"
+        libsToml.find { it.startsWith("foojay =") }?.substringAfter("\"")?.substringBefore("\"")
 
     plugins {
         id("com.gradle.develocity") version develocityVersion
