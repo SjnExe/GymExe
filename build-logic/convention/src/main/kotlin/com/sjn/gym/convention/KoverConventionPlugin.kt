@@ -6,7 +6,7 @@ import org.gradle.api.Project
 class KoverConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("org.jetbrains.kotlinx.kover")
+            pluginManager.apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("kover").get().get().pluginId)
         }
     }
 }

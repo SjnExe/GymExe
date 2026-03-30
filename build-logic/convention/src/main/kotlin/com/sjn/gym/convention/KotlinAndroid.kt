@@ -34,7 +34,7 @@ internal fun Project.configureKotlinAndroid(commonExtension: ExtensionAware) {
     }
 
     // Configure Kotlin toolchain
-    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+    pluginManager.withPlugin(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("kotlin-android").get().get().pluginId) {
         extensions.configure<KotlinAndroidProjectExtension> {
             jvmToolchain(javaToolchainVersionString.toInt())
         }

@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.getByType
 class RoborazziConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("io.github.takahirom.roborazzi")
+            pluginManager.apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("roborazzi").get().get().pluginId)
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 

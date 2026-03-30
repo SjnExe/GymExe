@@ -9,12 +9,12 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.application")
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("android-application").get().get().pluginId)
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
                 apply("gymexe.android.test")
                 apply("gymexe.dependency.analysis")
-                apply("com.squareup.sort-dependencies")
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("sortDependencies").get().get().pluginId)
             }
 
             extensions.configure<com.autonomousapps.DependencyAnalysisSubExtension> {

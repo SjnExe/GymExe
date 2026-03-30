@@ -12,15 +12,15 @@ import org.gradle.kotlin.dsl.getByType
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
+            pluginManager.apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("kotlin-compose").get().get().pluginId)
 
-            pluginManager.withPlugin("com.android.application") {
+            pluginManager.withPlugin(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("android-application").get().get().pluginId) {
                 extensions.configure<ApplicationExtension> {
                     buildFeatures { compose = true }
                 }
             }
 
-            pluginManager.withPlugin("com.android.library") {
+            pluginManager.withPlugin(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("android-library").get().get().pluginId) {
                 extensions.configure<LibraryExtension> {
                     buildFeatures { compose = true }
                 }

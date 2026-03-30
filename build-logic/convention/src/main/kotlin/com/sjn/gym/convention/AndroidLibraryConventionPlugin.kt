@@ -12,18 +12,18 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.android.library")
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("android-library").get().get().pluginId)
                 apply("gymexe.spotless")
                 apply("gymexe.kover")
                 apply("gymexe.android.test")
                 apply("gymexe.dependency.analysis")
-                apply("com.squareup.sort-dependencies")
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("sortDependencies").get().get().pluginId)
             }
 
             extensions.configure<com.autonomousapps.DependencyAnalysisSubExtension> {
                 issues {
                     onIncorrectConfiguration {
-                        exclude("com.google.dagger:hilt-android")
+                        exclude(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("hilt").get().get().pluginId)
                     }
                 }
             }

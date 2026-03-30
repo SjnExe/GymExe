@@ -8,12 +8,12 @@ import org.gradle.kotlin.dsl.configure
 class SpotlessConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("com.diffplug.spotless")
+            pluginManager.apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("spotless").get().get().pluginId)
 
             extensions.configure<SpotlessExtension> {
                 yaml {
                     target("**/*.yml", "**/*.yaml")
-                    targetExclude("**/build/**/*.yml")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     jackson()
                         .yamlFeature("SPLIT_LINES", false)
                         .yamlFeature("MINIMIZE_QUOTES", true)
@@ -25,51 +25,52 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 }
                 kotlin {
                     target("**/*.kt")
-                    targetExclude("**/build/**/*.kt")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     ktfmt().kotlinlangStyle()
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 kotlinGradle {
                     target("*.gradle.kts")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     ktfmt().kotlinlangStyle()
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 java {
                     target("**/*.java")
-                    targetExclude("**/build/**/*.java")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     googleJavaFormat()
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 format("xml") {
                     target("**/*.xml")
-                    targetExclude("**/build/**/*.xml")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 format("toml") {
                     target("**/*.toml")
-                    targetExclude("**/build/**/*.toml")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 format("properties") {
                     target("**/*.properties")
-                    targetExclude("**/build/**/*.properties")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 format("markdown") {
                     target("**/*.md")
-                    targetExclude("**/build/**/*.md")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
                 format("proguard") {
                     target("**/*.pro")
-                    targetExclude("**/build/**/*.pro")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                 }

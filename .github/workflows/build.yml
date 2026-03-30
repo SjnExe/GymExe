@@ -60,7 +60,9 @@ jobs:
             jdks
           cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
       - name: Run Linting
-        run: ./gradlew lintDevDebug -s 2>&1 | tee lint_output.log
+        run: |
+          set -o pipefail
+          ./gradlew lintDevDebug -s 2>&1 | tee lint_output.log
       - name: Upload Lint Logs
         uses: actions/upload-artifact@v7
         if: always()
@@ -85,7 +87,9 @@ jobs:
             jdks
           cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
       - name: Run Unit Tests and Coverage
-        run: ./gradlew test testDevDebugUnitTest koverHtmlReport -s 2>&1 | tee tests_output.log
+        run: |
+          set -o pipefail
+          ./gradlew test testDevDebugUnitTest koverHtmlReport -s 2>&1 | tee tests_output.log
       - name: Upload Test Logs and Coverage
         uses: actions/upload-artifact@v7
         if: always()
