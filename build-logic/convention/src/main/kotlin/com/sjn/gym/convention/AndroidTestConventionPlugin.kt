@@ -8,7 +8,7 @@ import org.gradle.kotlin.dsl.getByType
 class AndroidTestConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
+            val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
             
             configurations.maybeCreate("testImplementation")
             configurations.maybeCreate("testRuntimeOnly")

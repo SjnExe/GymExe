@@ -9,10 +9,10 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.google.devtools.ksp")
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("ksp").get().get().pluginId)
             }
 
-            val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
+            val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
             configurations.maybeCreate("testImplementation")
             configurations.maybeCreate("testRuntimeOnly")
             dependencies {

@@ -9,11 +9,11 @@ class AndroidHiltConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
-                apply("com.google.dagger.hilt.android")
-                apply("com.google.devtools.ksp")
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("hilt").get().get().pluginId)
+                apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("ksp").get().get().pluginId)
             }
 
-            val libs = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
+            val libs = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs")
             dependencies {
                 add("api", libs.findLibrary("dagger").get())
                 add("api", libs.findLibrary("javax-inject").get())

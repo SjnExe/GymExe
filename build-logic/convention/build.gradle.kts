@@ -33,8 +33,8 @@ implementation(libs.kotlin.gradlePlugin)
 implementation(libs.kover.gradlePlugin)
 implementation(libs.roborazzi.gradlePlugin)
 implementation(libs.spotless.gradlePlugin)
-implementation("com.autonomousapps:dependency-analysis-gradle-plugin:3.6.1")
-implementation("com.squareup:sort-dependencies-gradle-plugin:0.10")
+implementation(libs.dependencyAnalysis.gradlePlugin)
+implementation(libs.sortDependencies.gradlePlugin)
 }
 
 gradlePlugin {

@@ -8,7 +8,7 @@ import org.gradle.kotlin.dsl.configure
 class SpotlessConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("com.diffplug.spotless")
+            pluginManager.apply(extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension::class.java).named("libs").findPlugin("spotless").get().get().pluginId)
 
             extensions.configure<SpotlessExtension> {
                 yaml {
