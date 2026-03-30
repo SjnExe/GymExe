@@ -93,6 +93,7 @@ implementationClass = "com.sjn.gym.convention.DependencyAnalysisConventionPlugin
 spotless {
     kotlin {
         target("**/*.kt")
+        targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
         ktfmt().kotlinlangStyle()
         trimTrailingWhitespace()
         endWithNewline()
