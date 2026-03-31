@@ -13,10 +13,12 @@
   ],
   "packageRules": [
     {
-      "matchPackagePatterns": ["*"],
       "groupName": "all dependencies",
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "matchPackageNames": [
+        "*"
+      ]
     }
   ]
 }
