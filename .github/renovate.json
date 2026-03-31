@@ -1,19 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:best-practices"
+    "config:best-practices",
+    ":pinDigestsDisabled"
   ],
   "dependencyDashboard": true,
   "rangeStrategy": "replace",
   "pin": { "enabled": false },
   "platformAutomerge": true,
-  "rebaseWhen": "behind-base-branch",
   "reviewers": ["SjnExe"],
   "assignees": ["SjnExe"],
   "packageRules": [
     {
       "matchPackageNames": ["*"],
-      "groupName": null, 
+      "groupName": "all dependencies",
       "automerge": true,
       "automergeType": "branch"
     }
