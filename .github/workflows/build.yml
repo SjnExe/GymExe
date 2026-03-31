@@ -28,7 +28,7 @@ jobs:
             jdks
           cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
       - name: Run Spotless Check
-        run: ./gradlew spotlessCheck -s
+        run: ./gradlew spotlessCheck --no-watch-fs -s
   dependency_checks:
     name: Dependency Checks
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
             jdks
           cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
       - name: Run Build Health & Dependency Guard
-        run: ./gradlew bH dependencyGuard -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies -s
+        run: ./gradlew bH dependencyGuard -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies --no-watch-fs -s
   lint_check:
     name: Lint Check
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
       - name: Run Linting
         run: |
           set -o pipefail
-          ./gradlew lintDevDebug -s 2>&1 | tee lint_output.log
+          ./gradlew lintDevDebug --no-watch-fs -s 2>&1 | tee lint_output.log
       - name: Upload Lint Logs
         uses: actions/upload-artifact@v7
         if: always()
@@ -89,7 +89,7 @@ jobs:
       - name: Run Unit Tests and Coverage
         run: |
           set -o pipefail
-          ./gradlew test testDevDebugUnitTest koverHtmlReport -s 2>&1 | tee tests_output.log
+          ./gradlew test testDevDebugUnitTest koverHtmlReport --no-watch-fs -s 2>&1 | tee tests_output.log
       - name: Upload Test Logs and Coverage
         uses: actions/upload-artifact@v7
         if: always()
@@ -127,9 +127,9 @@ jobs:
       - name: Assemble APKs
         run: |
           if [ "${{ steps.version.outputs.BUILD_TYPE }}" == "stable" ]; then
-            ./gradlew assembleStableRelease -s -PversionName=${GITHUB_REF_NAME#v} -PversionCode=${{ github.run_number }}
+            ./gradlew assembleStableRelease --no-watch-fs -s -PversionName=${GITHUB_REF_NAME#v} -PversionCode=${{ github.run_number }}
           else
-            ./gradlew assembleDevRelease assembleDevDebug -s
+            ./gradlew assembleDevRelease assembleDevDebug --no-watch-fs -s
           fi
       - name: Stage Release APKs
         run: |
@@ -156,7 +156,7 @@ jobs:
             jdks
           cache-encryption-key: "${{ secrets.GRADLE_ENCRYPTION_KEY }}"
       - name: Assemble Benchmark and Test APKs
-        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest -s
+        run: ./gradlew assembleDevBenchmark assembleDevBenchmarkAndroidTest --no-watch-fs -s
       - name: Stage Test APKs
         run: |
           mkdir -p staging-apks
