@@ -62,7 +62,7 @@ To initialize the environment and run initial checks:
 ### Pre-commit Verification
 Run this before submitting any change:
 ```bash
-./gradlew vCU sA lDD tDDUT aDD bH -PprintDependencies -s --continue
+./gradlew sA lDD tDDUT aDD bH -PprintDependencies -s --continue
 ```
 
 ### Building
@@ -127,10 +127,8 @@ Run this before submitting any change:
 ./gradlew clean build
 ```
 ### Maintenance
-*   **Update Dependencies:**
-```bash
-./gradlew vCU
-```
+*   **Dependency Management:**
+We now use **Mend Renovate** for fully automated dependency updates.
 *   **Dependency Analysis: Build Health**
 ```bash
 ./gradlew bH -Dorg.gradle.unsafe.isolated-projects=false -PprintDependencies

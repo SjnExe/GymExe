@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices"
+  ],
+  "dependencyDashboard": true,
+  "platformAutomerge": true,
+  "reviewers": [
+    "SjnExe"
+  ],
+  "assignees": [
+    "SjnExe"
+  ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "groupName": "all dependencies",
+      "automerge": true,
+      "automergeType": "branch"
+    }
+  ]
+}
