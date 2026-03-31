@@ -6,7 +6,6 @@
   ],
   "pin": { "enabled": false },
   "pinDigests": false,
-  "pinDependencies": false,
   "rangeStrategy": "replace",
   "dependencyDashboard": true,
   "packageRules": [
