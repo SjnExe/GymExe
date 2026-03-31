@@ -4,12 +4,11 @@
     "config:best-practices",
     ":pinDigestsDisabled"
   ],
-  "dependencyDashboard": true,
-  "rangeStrategy": "replace",
   "pin": { "enabled": false },
-  "platformAutomerge": true,
-  "reviewers": ["SjnExe"],
-  "assignees": ["SjnExe"],
+  "pinDigests": false,
+  "pinDependencies": false,
+  "rangeStrategy": "replace",
+  "dependencyDashboard": true,
   "packageRules": [
     {
       "matchPackageNames": ["*"],
