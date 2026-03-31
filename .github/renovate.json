@@ -9,7 +9,7 @@
   "platformAutomerge": true,
   "reviewers": ["SjnExe"],
   "assignees": ["SjnExe"],
-  "allowedPostUpgradeCommands": [
+  "allowedCommands": [
     "^./gradlew spotlessApply$"
   ],
   "postUpgradeTasks": {
