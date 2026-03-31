@@ -20,7 +20,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-includes: |
             caches
@@ -36,7 +36,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-includes: |
             caches
@@ -52,7 +52,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-includes: |
             caches
@@ -79,7 +79,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-includes: |
             caches
@@ -109,7 +109,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-includes: |
             caches
@@ -148,7 +148,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-home-cache-includes: |
             caches
