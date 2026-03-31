@@ -40,7 +40,17 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 java {
                     target("**/*.java")
                     targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
-                    googleJavaFormat()
+                    licenseHeader("/* This is a generated file, do not edit it. */\n")
+                    custom("NoJavaAllowed", object : java.io.Serializable, com.diffplug.spotless.FormatterFunc {
+                        override fun apply(input: String): String {
+                            throw org.gradle.api.GradleException("Java files are not allowed, use Kotlin instead.")
+                        }
+                    })
+                }
+                format("json") {
+                    target("**/*.json")
+                    targetExclude("**/.gradle/**", "**/.kotlin/**", "**/build/**", "**/generated/**", "**/bin/**")
+                    prettier().config(mapOf("parser" to "json", "tabWidth" to 2))
                     trimTrailingWhitespace()
                     endWithNewline()
                 }
