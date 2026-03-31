@@ -7,20 +7,13 @@
   "rangeStrategy": "replace",
   "pin": { "enabled": false },
   "platformAutomerge": true,
+  "rebaseWhen": "behind-base-branch",
   "reviewers": ["SjnExe"],
   "assignees": ["SjnExe"],
-  "allowedPostUpgradeCommands": [
-    "^./gradlew spotlessApply$"
-  ],
-  "postUpgradeTasks": {
-    "commands": ["./gradlew spotlessApply"],
-    "fileFilters": ["**/*.kt", "**/*.kts", "**/libs.versions.toml"],
-    "executionMode": "branch"
-  },
   "packageRules": [
     {
       "matchPackageNames": ["*"],
-      "groupName": "all dependencies",
+      "groupName": null, 
       "automerge": true,
       "automergeType": "branch"
     }
