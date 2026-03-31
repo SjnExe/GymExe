@@ -45,12 +45,15 @@ develocity {
 buildCache {
     local { isEnabled = true }
 
-    val r2Endpoint = System.getProperty("R2_") ?: System.getenv("R2_ENDPOINT")
+    val r2Endpoint = System.getProperty("R2_ENDPOINT") ?: System.getenv("R2_ENDPOINT")
 
     if (!r2Endpoint.isNullOrBlank()) {
-        val r2AccessKey = System.getProperty("R2_") ?: System.getenv("R2_ACCESS_KEY_ID")
-        val r2SecretKey = System.getProperty("R2_") ?: System.getenv("R2_SECRET_ACCESS_KEY")
-        val isPushEnabled = System.getProperty("R2_") ?: System.getenv("R2_ENABLE_PUSH") == "true"
+        val r2AccessKey =
+            System.getProperty("R2_ACCESS_KEY_ID") ?: System.getenv("R2_ACCESS_KEY_ID")
+        val r2SecretKey =
+            System.getProperty("R2_SECRET_ACCESS_KEY") ?: System.getenv("R2_SECRET_ACCESS_KEY")
+        val isPushEnabled =
+            (System.getProperty("R2_ENABLE_PUSH") ?: System.getenv("R2_ENABLE_PUSH")) == "true"
 
         require(!r2AccessKey.isNullOrBlank() && !r2SecretKey.isNullOrBlank()) {
             "R2_ENDPOINT is configured, but R2_ACCESS_KEY_ID or R2_SECRET_ACCESS_KEY is missing."
