@@ -6,6 +6,7 @@
   ],
   "pin": { "enabled": false },
   "pinDigests": false,
+  "lockFileMaintenance": { "enabled": false },
   "rangeStrategy": "replace",
   "dependencyDashboard": true,
   "packageRules": [
