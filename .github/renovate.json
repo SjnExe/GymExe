@@ -4,6 +4,10 @@
     "config:best-practices"
   ],
   "dependencyDashboard": true,
+  "rangeStrategy": "replace",
+  "pin": {
+    "enabled": false
+  },
   "platformAutomerge": true,
   "reviewers": [
     "SjnExe"
@@ -13,12 +17,12 @@
   ],
   "packageRules": [
     {
-      "groupName": "all dependencies",
-      "automerge": true,
-      "automergeType": "branch",
       "matchPackageNames": [
         "*"
-      ]
+      ],
+      "groupName": "all dependencies",
+      "automerge": true,
+      "automergeType": "branch"
     }
   ]
 }
