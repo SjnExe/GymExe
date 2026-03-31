@@ -7,9 +7,9 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.spotless) apply true
-    alias(libs.plugins.versionCatalogUpdate)
     alias(libs.plugins.kover)
     alias(libs.plugins.dependencyAnalysis)
+    alias(libs.plugins.sortDependencies) apply false
 }
 
 dependencyAnalysis {
@@ -30,12 +30,6 @@ dependencies {
     kover(project(":feature:workout"))
     kover(project(":feature:profile"))
     kover(project(":feature:onboarding"))
-}
-
-tasks.withType<nl.littlerobots.vcu.plugin.VersionCatalogUpdateTask>().configureEach {
-    notCompatibleWithConfigurationCache(
-        "The VersionCatalogUpdateTask is not compatible with the configuration cache"
-    )
 }
 
 spotless {
@@ -70,15 +64,5 @@ spotless {
         target("*.md")
         trimTrailingWhitespace()
         endWithNewline()
-    }
-}
-
-versionCatalogUpdate {
-    keep {
-        versions.add("androidCompileSdk")
-        versions.add("androidMinSdk")
-        versions.add("androidTargetSdk")
-        versions.add("javaToolchainVersion")
-        versions.add("javaTargetVersion")
     }
 }
