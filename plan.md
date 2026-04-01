@@ -8,9 +8,9 @@
 **Philosophy:** Modular architecture, latest stable tools, absolute control over data (backups, logs), and "intelligent" input methods.
 
 ## 2. Environment & Tooling (Implemented)
-*   **Language:** Kotlin 2.3.10
+*   **Language:** Kotlin 2.3.20
 *   **JDK:** Java 25 (OpenJDK). Build logic uses Java 25 Toolchain.
-*   **Build System:** Gradle 9.4.0 (Wrapper included)
+*   **Build System:** Gradle 9.4.1 (Wrapper included)
 *   **Android SDK:** Compile 36, Min 26.
 *   **UI Framework:** Jetpack Compose (Material 3).
 *   **Dependency Injection:** Hilt.
@@ -20,7 +20,7 @@
 *   **Dev Tools:** Chucker (Network Inspection), Timber (Logging), LeakCanary.
 
 ## 3. Architecture (Implemented)
-The app follows a modular architecture:
+The app follows a fully modular architecture optimized with convention plugins (`build-logic`), Gradle Isolated Projects, and Configuration Cache for faster builds and easier debugging:
 *   `:app`: Main entry point, navigation graph, flavor configuration.
 *   `:core:ui`: Design system, themes (GymExeTheme), common components.
 *   `:core:data`: Room Database, Repository implementations, DataStore.
@@ -38,9 +38,8 @@ The app follows a modular architecture:
 *   **Signing**: Uses repo-stored `app/debug.keystore` with default `android` credentials for simplicity.
 *   **Versioning**:
     *   **Stable**: Tag `v*` -> Version `1.2.3`.
-    *   **Dev**: `v{LatestTag}-dev-PR{Num}.{Commits}` or `v{LatestTag}-dev-run{Num}`.
-    *   **Fallback**: Defaults to `v0.0.0` if no tags exist.
-    *   **Version Code**: `Total Commits - 1`.
+    *   **Dev**: Hardcoded to `0.0.1` (versionName) and `1` (versionCode) to preserve configuration cache.
+    *   **Fallback**: Defaults to `0.0.1` if no tags exist.
 *   **Flavors**: Builds `dev` (debuggable, suffixed) and `stable` (minified) variants.
 *   **Artifacts**:
     *   `GymExe-dev-release.apk` / `GymExe-dev-debug.apk` (Dev builds).
