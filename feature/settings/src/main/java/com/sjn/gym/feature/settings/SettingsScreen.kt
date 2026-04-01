@@ -263,7 +263,7 @@ fun SettingsScreenContent(
                 )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider()
 
             // Units Section
             SettingsSectionHeader("Units")
@@ -289,7 +289,7 @@ fun SettingsScreenContent(
                 onOptionSelected = onDistanceUnitSelected,
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider()
 
             // Data Section
             SettingsSectionHeader("Data Management")
@@ -306,7 +306,7 @@ fun SettingsScreenContent(
                 onClick = { openDocumentLauncher.launch(arrayOf("*/*")) },
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider()
 
             // Developer Options
             if (isDevMode) {
@@ -489,7 +489,7 @@ fun <T : Enum<T>> SettingsUnitRow(
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp),
         )
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -509,9 +509,9 @@ fun <T : Enum<T>> SettingsUnitRow(
 fun SettingsSectionHeader(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     )
 }
 
@@ -566,7 +566,7 @@ fun SettingsSwitchRow(
         }
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f),
         )
         Switch(checked = checked, onCheckedChange = onCheckedChange)
@@ -585,11 +585,11 @@ fun SettingsDetailRow(
             modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = title, style = MaterialTheme.typography.bodyLarge)
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
@@ -611,7 +611,7 @@ fun SettingsActionRow(
             modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
@@ -623,9 +623,9 @@ fun SettingsActionRow(
             )
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
             if (subtitle != null) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
@@ -721,14 +721,14 @@ fun LoadingOverlay(
 @Composable
 fun AboutSection(appVersion: String, onCheckForUpdates: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
-        SettingsSectionTitle("About")
+        SettingsSectionHeader("About")
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
-                Text(text = "Version", style = MaterialTheme.typography.bodyLarge)
+                Text(text = "Version", style = MaterialTheme.typography.titleMedium)
                 Text(
                     text = appVersion,
                     style = MaterialTheme.typography.bodyMedium,
@@ -790,16 +790,6 @@ fun rememberSettingsState(viewModel: SettingsViewModel): SettingsState {
 }
 
 @Composable
-fun SettingsSectionTitle(title: String, modifier: Modifier = Modifier) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp),
-    )
-}
-
-@Composable
 fun <T : Enum<T>> SelectionDialog(
     title: String,
     options: ImmutableList<T>,
@@ -853,27 +843,26 @@ fun <T : Enum<T>> SelectionDialog(
 object ThemeColors {
     val PALETTE =
         listOf(
-                0xFFF44336,
-                0xFFE91E63,
-                0xFF9C27B0,
-                0xFF673AB7,
-                0xFF3F51B5,
-                0xFF2196F3,
-                0xFF03A9F4,
-                0xFF00BCD4,
-                0xFF009688,
-                0xFF4CAF50,
-                0xFF8BC34A,
-                0xFFCDDC39,
-                0xFFFFEB3B,
-                0xFFFFC107,
-                0xFFFF9800,
-                0xFFFF5722,
-                0xFF795548,
-                0xFF9E9E9E,
-                0xFF607D8B,
-            )
-            .map { it.toInt() }
+            0xFFF44336.toInt(),
+            0xFFE91E63.toInt(),
+            0xFF9C27B0.toInt(),
+            0xFF673AB7.toInt(),
+            0xFF3F51B5.toInt(),
+            0xFF2196F3.toInt(),
+            0xFF03A9F4.toInt(),
+            0xFF00BCD4.toInt(),
+            0xFF009688.toInt(),
+            0xFF4CAF50.toInt(),
+            0xFF8BC34A.toInt(),
+            0xFFCDDC39.toInt(),
+            0xFFFFEB3B.toInt(),
+            0xFFFFC107.toInt(),
+            0xFFFF9800.toInt(),
+            0xFFFF5722.toInt(),
+            0xFF795548.toInt(),
+            0xFF9E9E9E.toInt(),
+            0xFF607D8B.toInt(),
+        )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
