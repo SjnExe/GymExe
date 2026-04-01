@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sjn.gym.core.model.Routine
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun RoutineListScreen(
@@ -58,7 +59,7 @@ fun RoutineListScreen(
 
 @Composable
 fun RoutineList(
-    routines: List<Routine>,
+    routines: ImmutableList<Routine>,
     onRoutineClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
