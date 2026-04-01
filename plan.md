@@ -101,22 +101,22 @@ The app follows a fully modular architecture optimized with convention plugins (
 - [x] **DAO**: `ExerciseDao` implemented.
 - [x] **Migrations**: Logic for merging user vs built-in data needed later.
 
-### Phase 6: Workout & Intelligent Input (Partially Implemented)
+### Phase 6: Workout & Intelligent Input (Implemented)
 - [x] **Intelligent Text Box**: `PlateCalculator` and `WeightInputParser` implemented and tested.
 - [x] **Auto-Merger**: Logic to merge weights (e.g., `5 5` -> `2x5`) for Stackable equipment.
 - [x] **Strict Mode**: Validation for non-stackable equipment (Dumbbells/Selectorized Machines).
 - [x] **UI Integration**: `WorkoutScreen` connects input to parser and validation.
 - [x] **Syntax Highlighting**: Text box colors Quantity, Operator, and Weight.
-- [x] **Library UI**: Revamped. Routines tab (Weekly/Rolling) and Exercises tab (Body Part Grid).
+- [x] **Library UI**: Revamped. Routines tab prioritized and fully implemented with lists. Exercises tab accessible alongside it.
 - [x] **Exercise Detail**: UI skeleton implemented.
 - [x] **Workout Session**:
     *   **Sets**: Types (Warmup, Failure, Drop set, etc.).
     *   **Timers**: Quick timer, Rest timer.
     *   **Notifications**: Ongoing workout notification.
 
-### Phase 7: Profile & Stats (Placeholder)
-- [x] **Basic Screen**: Placeholder UI with revamped Height Input supporting Feet & Inches.
-- [x] **Graphs**: Charts and stats logic needed.
+### Phase 7: Profile & Stats (Partially Implemented)
+- [x] **Basic Screen**: UI with revamped Height Input supporting Feet & Inches, and structured sections.
+- [x] **Graphs**: Weight History Line Chart UI implemented in Canvas, ready for real data.
 
 ### Phase 8: Stability & Debugging (New)
 - [x] **R8 Support**: ProGuard rules added for Room, Serialization, and Retrofit to support `android.enableR8.fullMode=true`.

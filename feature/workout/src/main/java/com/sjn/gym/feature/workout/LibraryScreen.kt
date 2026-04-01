@@ -15,13 +15,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(onNavigateToWorkout: (String) -> Unit, modifier: Modifier = Modifier) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Exercises", "Routines")
+    val tabs = listOf("Routines", "Exercises")
 
     Scaffold(modifier = modifier, topBar = { TopAppBar(title = { Text("Library") }) }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -37,19 +36,20 @@ fun LibraryScreen(onNavigateToWorkout: (String) -> Unit, modifier: Modifier = Mo
 
             when (selectedTab) {
                 0 -> {
-                    // Exercises (reuse existing screen but wrap it appropriately)
-                    // Assuming ExerciseListScreen handles its own data
-                    ExerciseListScreen(
+                    // Routines
+                    RoutineListScreen(
                         modifier = Modifier.weight(1f),
-                        onExerciseClick = onNavigateToWorkout,
+                        onRoutineClick = { /* Handle navigation to routine details/workout later */
+                        },
                     )
                 }
 
                 1 -> {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("My Routines")
-                        Text("Saved Splits")
-                    }
+                    // Exercises
+                    ExerciseListScreen(
+                        modifier = Modifier.weight(1f),
+                        onExerciseClick = onNavigateToWorkout,
+                    )
                 }
             }
         }
