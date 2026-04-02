@@ -225,11 +225,7 @@ fun ProfileScreen(
                                 )
                             }
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                            Text(
-                                text = "Historical charts will appear here in future updates.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            WeightHistoryChart()
                         } else {
                             Text(
                                 "No weight data available.",
