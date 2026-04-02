@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * A simple line chart to visualize weight history. Currently uses placeholder data. Later, actual
@@ -23,7 +25,8 @@ import kotlin.math.max
 @Composable
 fun WeightHistoryChart(
     modifier: Modifier = Modifier,
-    dataPoints: List<Float> = listOf(70f, 72f, 71.5f, 73f, 72.8f, 74f, 75f), // Placeholder data
+    dataPoints: ImmutableList<Float> =
+        persistentListOf(0f, 0f, 0f, 0f, 0f, 0f, 0f), // Default zero data
     lineColor: Color = MaterialTheme.colorScheme.primary,
 ) {
     if (dataPoints.isEmpty()) {
