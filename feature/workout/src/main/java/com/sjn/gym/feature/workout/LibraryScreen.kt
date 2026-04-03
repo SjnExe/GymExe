@@ -48,7 +48,7 @@ fun LibraryScreen(onNavigateToWorkout: (String) -> Unit, modifier: Modifier = Mo
                     // Exercises
                     ExerciseListScreen(
                         modifier = Modifier.weight(1f),
-                        onExerciseClick = onNavigateToWorkout,
+                        onExerciseClick = { exerciseId -> onNavigateToWorkout(exerciseId) },
                     )
                 }
             }

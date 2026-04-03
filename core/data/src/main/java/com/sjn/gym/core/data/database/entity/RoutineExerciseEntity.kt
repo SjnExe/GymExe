@@ -7,10 +7,12 @@ import androidx.room.PrimaryKey
 data class RoutineExerciseEntity(
     @PrimaryKey val id: String,
     val routineId: String,
+    val routineDayId: String = "",
     val exerciseId: Long,
     val orderIndex: Int,
     val targetSets: Int,
     val targetReps: Int?,
     val restTimeSeconds: Int?,
+    val setType: String = "NORMAL",
     val note: String,
 )

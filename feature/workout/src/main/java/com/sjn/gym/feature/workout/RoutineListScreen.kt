@@ -34,99 +34,116 @@ fun RoutineListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = modifier.fillMaxSize()) {
-        when (val state = uiState) {
-            is RoutineListUiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            is RoutineListUiState.Error -> {
-                Text(
-                    text = state.message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+    androidx.compose.material3.Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            androidx.compose.material3.FloatingActionButton(
+                onClick = { /* TODO: Create routine */ }
+            ) {
+                androidx.compose.material3.Icon(
+                    androidx.compose.material.icons.Icons.Default.Add,
+                    contentDescription = "Create Routine",
                 )
             }
-            is RoutineListUiState.Success -> {
-                if (state.routines.isEmpty()) {
-                    EmptyRoutinesState(modifier = Modifier.align(Alignment.Center))
-                } else {
-                    RoutineList(routines = state.routines, onRoutineClick = onRoutineClick)
+        },
+    ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            when (val state = uiState) {
+                is RoutineListUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                is RoutineListUiState.Error -> {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                    )
+                }
+                is RoutineListUiState.Success -> {
+                    if (state.routines.isEmpty()) {
+                        EmptyRoutinesState(modifier = Modifier.align(Alignment.Center))
+                    } else {
+                        RoutineList(routines = state.routines, onRoutineClick = onRoutineClick)
+                    }
                 }
             }
         }
     }
-}
 
-@Composable
-fun RoutineList(
-    routines: ImmutableList<Routine>,
-    onRoutineClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 80.dp), // Room for FAB or bottom nav if present
+    @Composable
+    fun RoutineList(
+        routines: ImmutableList<Routine>,
+        onRoutineClick: (String) -> Unit,
+        modifier: Modifier = Modifier,
     ) {
-        items(routines, key = { it.id }) { routine ->
-            RoutineItem(routine = routine, onClick = { onRoutineClick(routine.id) })
-            HorizontalDivider()
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 80.dp), // Room for FAB or bottom nav if present
+        ) {
+            items(routines, key = { it.id }) { routine ->
+                RoutineItem(routine = routine, onClick = { onRoutineClick(routine.id) })
+                HorizontalDivider()
+            }
         }
     }
-}
 
-@Composable
-fun RoutineItem(routine: Routine, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    ListItem(
-        headlineContent = {
-            Text(
-                text = routine.name,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        supportingContent =
-            if (routine.description.isNotEmpty() || routine.exercises.isNotEmpty()) {
-                {
-                    Column {
-                        if (routine.description.isNotEmpty()) {
-                            Text(
-                                text = routine.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        if (routine.exercises.isNotEmpty()) {
-                            Text(
-                                text = "${routine.exercises.size} exercises",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = 4.dp),
-                            )
+    @Composable
+    fun RoutineItem(routine: Routine, onClick: () -> Unit, modifier: Modifier = Modifier) {
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = routine.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            supportingContent =
+                if (routine.description.isNotEmpty() || routine.exercises.isNotEmpty()) {
+                    {
+                        Column {
+                            if (routine.description.isNotEmpty()) {
+                                Text(
+                                    text = routine.description,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            if (routine.exercises.isNotEmpty()) {
+                                Text(
+                                    text = "${routine.exercises.size} exercises",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
                         }
                     }
-                }
-            } else null,
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = modifier.clickable(onClick = onClick),
-    )
-}
+                } else null,
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            modifier = modifier.clickable(onClick = onClick),
+        )
+    }
 
-@Composable
-fun EmptyRoutinesState(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "No Routines Yet",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "Create a routine to start logging your workouts.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp),
-        )
+    @Composable
+    fun EmptyRoutinesState(modifier: Modifier = Modifier) {
+        Column(
+            modifier = modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "No Routines Yet",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Create a routine to start logging your workouts.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
     }
 }

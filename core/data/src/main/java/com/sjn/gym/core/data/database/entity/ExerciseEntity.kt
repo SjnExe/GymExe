@@ -15,4 +15,6 @@ data class ExerciseEntity(
     val type: ExerciseType,
     val isCustom: Boolean,
     val instructions: String = "",
+    val muscleAffectionSeverity: Int = 0,
+    val instructions: String = "",
 )

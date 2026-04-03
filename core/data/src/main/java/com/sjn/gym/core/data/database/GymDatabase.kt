@@ -25,9 +25,11 @@ import com.sjn.gym.core.data.database.entity.WorkoutSetEntity
             WorkoutExerciseEntity::class,
             WorkoutSetEntity::class,
             RoutineEntity::class,
+            com.sjn.gym.core.data.database.entity.RoutineDayEntity::class,
+            com.sjn.gym.core.data.database.entity.ExercisePreferencesEntity::class,
             RoutineExerciseEntity::class,
         ],
-    version = 4,
+    version = 6,
     exportSchema = false,
 )
 @TypeConverters(Converters::class, LocalDateTimeConverter::class)
@@ -37,6 +39,8 @@ abstract class GymDatabase : RoomDatabase() {
     abstract fun workoutSessionDao(): WorkoutSessionDao
 
     abstract fun routineDao(): RoutineDao
+
+    abstract fun exercisePreferencesDao(): com.sjn.gym.core.data.database.dao.ExercisePreferencesDao
 
     companion object {
         val MIGRATION_1_2 =
@@ -71,6 +75,34 @@ abstract class GymDatabase : RoomDatabase() {
                     )
                     db.execSQL(
                         "CREATE TABLE IF NOT EXISTS `routine_exercises` (`id` TEXT NOT NULL, `routineId` TEXT NOT NULL, `exerciseId` INTEGER NOT NULL, `orderIndex` INTEGER NOT NULL, `targetSets` INTEGER NOT NULL, `targetReps` INTEGER, `restTimeSeconds` INTEGER, `note` TEXT NOT NULL, PRIMARY KEY(`id`))"
+                    )
+                }
+            }
+        val MIGRATION_4_5 =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "ALTER TABLE exercises ADD COLUMN muscleAffectionSeverity INTEGER NOT NULL DEFAULT 0"
+                    )
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `exercise_preferences` (`exerciseId` TEXT NOT NULL, `defaultRestTimeSeconds` INTEGER NOT NULL, `defaultSets` INTEGER NOT NULL, `defaultReps` INTEGER NOT NULL, `defaultWeight` REAL NOT NULL, PRIMARY KEY(`exerciseId`))"
+                    )
+                }
+            }
+        val MIGRATION_5_6 =
+            object : Migration(5, 6) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "ALTER TABLE routines ADD COLUMN routineType TEXT NOT NULL DEFAULT 'REPEAT'"
+                    )
+                    db.execSQL(
+                        "ALTER TABLE routine_exercises ADD COLUMN routineDayId TEXT NOT NULL DEFAULT ''"
+                    )
+                    db.execSQL(
+                        "ALTER TABLE routine_exercises ADD COLUMN setType TEXT NOT NULL DEFAULT 'NORMAL'"
+                    )
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS `routine_days` (`id` TEXT NOT NULL, `routineId` TEXT NOT NULL, `dayName` TEXT NOT NULL, `dayIndex` INTEGER NOT NULL, `isRestDay` INTEGER NOT NULL, `universalRestTimeSeconds` INTEGER NOT NULL, PRIMARY KEY(`id`))"
                     )
                 }
             }

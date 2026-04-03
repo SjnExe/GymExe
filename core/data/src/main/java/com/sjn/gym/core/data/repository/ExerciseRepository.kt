@@ -36,6 +36,8 @@ class ExerciseRepository @Inject constructor(private val exerciseDao: ExerciseDa
             equipment = equipmentValue,
             type = type,
             isCustom = isCustom,
+            instructions = instructions,
+            muscleAffectionSeverity = muscleAffectionSeverity,
         )
     }
 }

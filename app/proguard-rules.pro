@@ -34,10 +34,21 @@
 # Broadly keep serialization and networking libraries to identify the culprit.
 # TODO: Narrow these down after the crash is resolved.
 
--keep class kotlinx.serialization.** { *; }
+# Serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+# Retrofit
+-dontwarn retrofit2.**
 -keep class retrofit2.** { *; }
--keep class okhttp3.** { *; }
--keep class com.google.gson.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+# Gson
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
 
 # Preserve all Room Database implementations
 -keep class * extends androidx.room.RoomDatabase { *; }
