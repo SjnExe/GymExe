@@ -12,14 +12,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sjn.gym.core.model.Exercise
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ExerciseListScreen(
     modifier: Modifier = Modifier,
@@ -42,14 +47,33 @@ fun ExerciseListScreen(
 ) {
     val exercises by viewModel.exercises.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val selectedEqFilter by viewModel.selectedEquipmentFilter.collectAsStateWithLifecycle()
+    val selectedMusFilter by viewModel.selectedMuscleFilter.collectAsStateWithLifecycle()
+
+    val availableEquipments by viewModel.availableEquipments.collectAsStateWithLifecycle()
+    val availableMuscles by viewModel.availableMuscles.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
-        Text(
-            text = "Exercises",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
-        )
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp, bottom = 8.dp, end = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Exercises",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            androidx.compose.material3.TextButton(
+                onClick = { /* TODO: Navigate to CreateCustomExercise */ }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Create")
+            }
+        }
 
         OutlinedTextField(
             value = searchQuery,
@@ -60,6 +84,26 @@ fun ExerciseListScreen(
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
         )
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(availableMuscles, key = { "muscle_$it" }) { muscle ->
+                FilterChip(
+                    selected = selectedMusFilter == muscle,
+                    onClick = { viewModel.onMuscleFilterChange(muscle) },
+                    label = { Text(muscle) },
+                )
+            }
+            items(availableEquipments, key = { "eq_$it" }) { eq ->
+                FilterChip(
+                    selected = selectedEqFilter == eq,
+                    onClick = { viewModel.onEquipmentFilterChange(eq) },
+                    label = { Text(eq) },
+                )
+            }
+        }
 
         LazyColumn(
             contentPadding = PaddingValues(16.dp),

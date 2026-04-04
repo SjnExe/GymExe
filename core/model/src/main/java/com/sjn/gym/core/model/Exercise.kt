@@ -12,6 +12,8 @@ data class Exercise(
     val equipment: String, // "Barbell", "Dumbbell", "Machine", "None"
     val type: ExerciseType = ExerciseType.WEIGHT_REPS,
     val isCustom: Boolean = false,
+    val instructions: String = "",
+    val muscleAffectionSeverity: Int = 0,
 )
 
 enum class ExerciseType {

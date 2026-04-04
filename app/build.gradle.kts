@@ -167,6 +167,9 @@ configurations.maybeCreate("stableBenchmarkImplementation")
 configurations.maybeCreate("devDebugAndroidTestRuntimeOnly")
 
 dependencies {
+    api(libs.dagger)
+    api(libs.javax.inject)
+
     implementation(project(":core:data"))
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
@@ -191,9 +194,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime)
     implementation(libs.bundles.compose.icons)
     implementation(libs.bundles.compose.ui)
-    api(libs.dagger)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
-    api(libs.javax.inject)
     // Kermit used directly in main source set
     implementation(libs.kermit)
     implementation(libs.kotlin.stdlib)
@@ -208,8 +209,9 @@ dependencies {
 
     debugRuntimeOnly(libs.leakcanary.android)
 
-    androidTestRuntimeOnly(libs.androidx.test.runner)
     androidTestRuntimeOnly(libs.androidx.test.core)
+    androidTestRuntimeOnly(libs.androidx.test.runner)
+    androidTestRuntimeOnly(libs.kotlin.stdlib)
 
     testRuntimeOnly(libs.bundles.junit.jupiter.runtime)
     testRuntimeOnly(libs.junit.jupiter)
@@ -217,13 +219,11 @@ dependencies {
     testRuntimeOnly(libs.robolectric)
     testRuntimeOnly(libs.roborazzi)
 
-    androidTestImplementation(libs.androidx.test.monitor)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.monitor)
     androidTestImplementation(libs.junit)
 
     "devBenchmarkImplementation"(libs.chucker.release)
-
-    androidTestRuntimeOnly(libs.kotlin.stdlib)
 
     // Properly split Chucker variants
     "devDebugImplementation"(libs.chucker.debug)
