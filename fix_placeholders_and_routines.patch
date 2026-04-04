@@ -1,0 +1,541 @@
+--- a/app/proguard-rules.pro
++++ b/app/proguard-rules.pro
+@@ -30,14 +30,24 @@
+ # Keep Dagger/Hilt generated code
+ -keep class com.sjn.gym.GymExeApp_HiltComponents { *; }
+
+-# --- TEMPORARY DEBUGGING RULES FOR R8 CRASH ---
+-# Broadly keep serialization and networking libraries to identify the culprit.
+-# TODO: Narrow these down after the crash is resolved.
++# Serialization
++-keepattributes *Annotation*, InnerClasses
++-dontnote kotlinx.serialization.AnnotationsKt
+
+--keep class kotlinx.serialization.** { *; }
++# Retrofit
++-dontwarn retrofit2.**
+ -keep class retrofit2.** { *; }
+--keep class okhttp3.** { *; }
+--keep class com.google.gson.** { *; }
++-keepattributes Signature
++-keepattributes Exceptions
++
++# OkHttp
++-dontwarn okhttp3.**
++-dontwarn okio.**
++-dontwarn javax.annotation.**
++
++# Gson
++-keep class sun.misc.Unsafe { *; }
++-keep class com.google.gson.stream.** { *; }
+
+ # Preserve all Room Database implementations
+ -keep class * extends androidx.room.RoomDatabase { *; }
+--- a/feature/profile/src/main/java/com/sjn/gym/feature/profile/ProfileScreen.kt
++++ b/feature/profile/src/main/java/com/sjn/gym/feature/profile/ProfileScreen.kt
+@@ -225,7 +225,12 @@
+                                 )
+                             }
+                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+-                            WeightHistoryChart()
++                            val weight = uiState.weightValue
++                            if (weight != null) {
++                                WeightHistoryChart(dataPoints = kotlinx.collections.immutable.persistentListOf(weight.toFloat(), weight.toFloat()))
++                            } else {
++                                WeightHistoryChart()
++                            }
+                         } else {
+                             Text(
+                                 "No weight data available.",
+--- a/feature/workout/src/main/java/com/sjn/gym/feature/workout/ExerciseListViewModel.kt
++++ b/feature/workout/src/main/java/com/sjn/gym/feature/workout/ExerciseListViewModel.kt
+@@ -19,17 +19,41 @@
+     private val _searchQuery = MutableStateFlow("")
+     val searchQuery: StateFlow<String> = _searchQuery
+
++    private val _selectedEquipmentFilter = MutableStateFlow<String?>(null)
++    val selectedEquipmentFilter: StateFlow<String?> = _selectedEquipmentFilter
++
++    private val _selectedMuscleFilter = MutableStateFlow<String?>(null)
++    val selectedMuscleFilter: StateFlow<String?> = _selectedMuscleFilter
++
+     val exercises: StateFlow<List<Exercise>> =
+-        combine(exerciseRepository.getAllExercises(), _searchQuery) { exercises, query ->
+-                if (query.isBlank()) {
+-                    exercises
+-                } else {
+-                    exercises.filter {
++        combine(
++            exerciseRepository.getAllExercises(),
++            _searchQuery,
++            _selectedEquipmentFilter,
++            _selectedMuscleFilter
++        ) { exercises, query, equipmentFilter, muscleFilter ->
++                var filtered = exercises
++
++                if (query.isNotBlank()) {
++                    filtered = filtered.filter {
+                         it.name.contains(query, ignoreCase = true) ||
+                             it.targetMuscle.contains(query, ignoreCase = true) ||
+                             it.bodyPart.contains(query, ignoreCase = true)
+                     }
+                 }
++
++                if (equipmentFilter != null) {
++                    filtered = filtered.filter { it.equipment.equals(equipmentFilter, ignoreCase = true) }
++                }
++
++                if (muscleFilter != null) {
++                    filtered = filtered.filter {
++                        it.targetMuscle.equals(muscleFilter, ignoreCase = true) ||
++                            it.bodyPart.equals(muscleFilter, ignoreCase = true)
++                    }
++                }
++
++                filtered
+             }
+             .stateIn(
+                 scope = viewModelScope,
+@@ -37,7 +61,30 @@
+                 initialValue = emptyList(),
+             )
+
++    // For filter chips options
++    val availableEquipments: StateFlow<List<String>> =
++        exerciseRepository.getAllExercises()
++            .combine(exerciseRepository.getAllExercises()) { list, _ ->
++                list.map { it.equipment }.filter { it.isNotBlank() }.distinct().sorted()
++            }
++            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
++
++    val availableMuscles: StateFlow<List<String>> =
++        exerciseRepository.getAllExercises()
++            .combine(exerciseRepository.getAllExercises()) { list, _ ->
++                list.map { it.targetMuscle }.filter { it.isNotBlank() }.distinct().sorted()
++            }
++            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
++
+     fun onSearchQueryChange(newQuery: String) {
+         _searchQuery.value = newQuery
+     }
++
++    fun onEquipmentFilterChange(equipment: String?) {
++        _selectedEquipmentFilter.value = if (_selectedEquipmentFilter.value == equipment) null else equipment
++    }
++
++    fun onMuscleFilterChange(muscle: String?) {
++        _selectedMuscleFilter.value = if (_selectedMuscleFilter.value == muscle) null else muscle
++    }
+ }
+--- a/feature/workout/src/main/java/com/sjn/gym/feature/workout/ExerciseListScreen.kt
++++ b/feature/workout/src/main/java/com/sjn/gym/feature/workout/ExerciseListScreen.kt
+@@ -13,10 +13,14 @@
+ import androidx.compose.foundation.layout.height
+ import androidx.compose.foundation.layout.padding
+ import androidx.compose.foundation.lazy.LazyColumn
++import androidx.compose.foundation.lazy.LazyRow
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.filled.Add
+ import androidx.compose.material.icons.filled.FitnessCenter
+ import androidx.compose.material.icons.filled.Search
+ import androidx.compose.material3.AssistChip
+@@ -24,6 +28,7 @@
+ import androidx.compose.material3.ElevatedCard
++import androidx.compose.material3.FilterChip
+ import androidx.compose.material3.Icon
+ import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.OutlinedTextField
+@@ -32,6 +37,7 @@
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+ import androidx.compose.ui.Alignment
++import androidx.compose.foundation.layout.width
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.unit.dp
+@@ -40,6 +46,7 @@
+ import androidx.lifecycle.compose.collectAsStateWithLifecycle
+ import com.sjn.gym.core.model.Exercise
+
++@OptIn(ExperimentalLayoutApi::class)
+ @Composable
+ fun ExerciseListScreen(
+     modifier: Modifier = Modifier,
+@@ -48,14 +55,29 @@
+ ) {
+     val exercises by viewModel.exercises.collectAsStateWithLifecycle()
+     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
++    val selectedEqFilter by viewModel.selectedEquipmentFilter.collectAsStateWithLifecycle()
++    val selectedMusFilter by viewModel.selectedMuscleFilter.collectAsStateWithLifecycle()
++
++    val availableEquipments by viewModel.availableEquipments.collectAsStateWithLifecycle()
++    val availableMuscles by viewModel.availableMuscles.collectAsStateWithLifecycle()
+
+     Column(modifier = modifier.fillMaxSize()) {
+-        Text(
+-            text = "Exercises",
+-            style = MaterialTheme.typography.headlineMedium,
+-            color = MaterialTheme.colorScheme.primary,
+-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
+-        )
++        Row(
++            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, bottom = 8.dp, end = 16.dp),
++            horizontalArrangement = Arrangement.SpaceBetween,
++            verticalAlignment = Alignment.CenterVertically
++        ) {
++            Text(
++                text = "Exercises",
++                style = MaterialTheme.typography.headlineMedium,
++                color = MaterialTheme.colorScheme.primary,
++            )
++            androidx.compose.material3.TextButton(onClick = { /* TODO: Navigate to CreateCustomExercise */ }) {
++                Icon(Icons.Default.Add, contentDescription = null)
++                Spacer(modifier = Modifier.width(4.dp))
++                Text("Create")
++            }
++        }
+
+         OutlinedTextField(
+             value = searchQuery,
+@@ -66,6 +88,26 @@
+             singleLine = true,
+             shape = MaterialTheme.shapes.medium,
+         )
++
++        LazyRow(
++            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
++            horizontalArrangement = Arrangement.spacedBy(8.dp)
++        ) {
++            items(availableMuscles, key = { "muscle_$it" }) { muscle ->
++                FilterChip(
++                    selected = selectedMusFilter == muscle,
++                    onClick = { viewModel.onMuscleFilterChange(muscle) },
++                    label = { Text(muscle) }
++                )
++            }
++            items(availableEquipments, key = { "eq_$it" }) { eq ->
++                FilterChip(
++                    selected = selectedEqFilter == eq,
++                    onClick = { viewModel.onEquipmentFilterChange(eq) },
++                    label = { Text(eq) }
++                )
++            }
++        }
+
+         LazyColumn(
+             contentPadding = PaddingValues(16.dp),
+--- a/feature/workout/src/main/java/com/sjn/gym/feature/workout/LibraryScreen.kt
++++ b/feature/workout/src/main/java/com/sjn/gym/feature/workout/LibraryScreen.kt
+@@ -48,7 +48,9 @@
+                     // Exercises
+                     ExerciseListScreen(
+                         modifier = Modifier.weight(1f),
+-                        onExerciseClick = onNavigateToWorkout,
++                        onExerciseClick = { exerciseId ->
++                            onNavigateToWorkout(exerciseId)
++                        },
+                     )
+                 }
+             }
+--- a/app/src/main/java/com/sjn/gym/navigation/GymExeNavHost.kt
++++ b/app/src/main/java/com/sjn/gym/navigation/GymExeNavHost.kt
+@@ -26,6 +26,7 @@
+ import androidx.navigation.compose.composable
+ import androidx.navigation.compose.currentBackStackEntryAsState
+ import androidx.navigation.compose.rememberNavController
++import androidx.navigation.toRoute
+ import com.chuckerteam.chucker.api.Chucker
+ import com.sjn.gym.BuildConfig
+ import com.sjn.gym.R
+@@ -36,6 +37,7 @@
+ import com.sjn.gym.feature.workout.HomeScreen
+ import com.sjn.gym.feature.workout.LibraryScreen
+ import com.sjn.gym.feature.workout.WorkoutScreen
++import com.sjn.gym.feature.workout.ExerciseDetailsScreen
+ import kotlinx.serialization.Serializable
+
+ @Serializable object Home
+@@ -46,6 +48,8 @@
+
+ @Serializable data class Workout(val exerciseId: String? = null)
+
++@Serializable data class ExerciseDetails(val exerciseId: String)
++
+ @Serializable object ExerciseList
+
+ @Serializable object Library
+@@ -153,16 +157,23 @@
+                 // ViewModel will retrieve arguments via SavedStateHandle
+                 WorkoutScreen()
+             }
++            composable<ExerciseDetails> { backStackEntry ->
++                val args = backStackEntry.toRoute<ExerciseDetails>()
++                ExerciseDetailsScreen(
++                    exerciseId = args.exerciseId,
++                    onNavigateUp = { navController.navigateUp() }
++                )
++            }
+             composable<Library> {
+                 LibraryScreen(
+                     onNavigateToWorkout = { exerciseId ->
+-                        navController.navigate(Workout(exerciseId))
++                        navController.navigate(ExerciseDetails(exerciseId))
+                     }
+                 )
+             }
+             composable<ExerciseList> {
+                 ExerciseListScreen(
+-                    onExerciseClick = { exerciseId -> navController.navigate(Workout(exerciseId)) }
++                    onExerciseClick = { exerciseId -> navController.navigate(ExerciseDetails(exerciseId)) }
+                 )
+             }
+             composable<Settings> {
+--- a/feature/workout/src/main/java/com/sjn/gym/feature/workout/RoutineListScreen.kt
++++ b/feature/workout/src/main/java/com/sjn/gym/feature/workout/RoutineListScreen.kt
+@@ -12,6 +12,11 @@
+ import androidx.compose.material3.HorizontalDivider
+ import androidx.compose.material3.ListItem
+ import androidx.compose.material3.ListItemDefaults
++import androidx.compose.material3.FloatingActionButton
++import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.filled.Add
++import androidx.compose.material3.Icon
++import androidx.compose.material3.Scaffold
+ import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+@@ -39,23 +44,32 @@
+ ) {
+     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+-    Box(modifier = modifier.fillMaxSize()) {
+-        when (val state = uiState) {
+-            is RoutineListUiState.Loading -> {
+-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
++    Scaffold(
++        modifier = modifier,
++        floatingActionButton = {
++            FloatingActionButton(onClick = { /* TODO: Navigate to create routine screen */ }) {
++                Icon(Icons.Default.Add, contentDescription = "Create Routine")
+             }
+-            is RoutineListUiState.Error -> {
+-                Text(
+-                    text = state.message,
+-                    color = MaterialTheme.colorScheme.error,
+-                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+-                )
+-            }
+-            is RoutineListUiState.Success -> {
+-                if (state.routines.isEmpty()) {
+-                    EmptyRoutinesState(modifier = Modifier.align(Alignment.Center))
+-                } else {
+-                    RoutineList(routines = state.routines, onRoutineClick = onRoutineClick)
++        }
++    ) { padding ->
++        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
++            when (val state = uiState) {
++                is RoutineListUiState.Loading -> {
++                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
++                }
++                is RoutineListUiState.Error -> {
++                    Text(
++                        text = state.message,
++                        color = MaterialTheme.colorScheme.error,
++                        modifier = Modifier.align(Alignment.Center).padding(16.dp),
++                    )
++                }
++                is RoutineListUiState.Success -> {
++                    if (state.routines.isEmpty()) {
++                        EmptyRoutinesState(modifier = Modifier.align(Alignment.Center))
++                    } else {
++                        RoutineList(routines = state.routines, onRoutineClick = onRoutineClick)
++                    }
+                 }
+             }
+         }
+--- a/core/model/src/main/java/com/sjn/gym/core/model/Exercise.kt
++++ b/core/model/src/main/java/com/sjn/gym/core/model/Exercise.kt
+@@ -12,6 +12,8 @@
+     val equipment: String, // "Barbell", "Dumbbell", "Machine", "None"
+     val type: ExerciseType = ExerciseType.WEIGHT_REPS,
+     val isCustom: Boolean = false,
++    val instructions: String = "",
++    val muscleAffectionSeverity: Int = 0, // 0 = Unknown, 1 = Low, 2 = Medium, 3 = High
+ )
+
+ enum class ExerciseType {
+--- a/core/data/src/main/java/com/sjn/gym/core/data/database/entity/ExerciseEntity.kt
++++ b/core/data/src/main/java/com/sjn/gym/core/data/database/entity/ExerciseEntity.kt
+@@ -15,4 +15,5 @@
+     val type: ExerciseType,
+     val isCustom: Boolean,
+     val instructions: String = "",
++    val muscleAffectionSeverity: Int = 0,
+ )
+--- a/core/data/src/main/java/com/sjn/gym/core/data/repository/ExerciseRepository.kt
++++ b/core/data/src/main/java/com/sjn/gym/core/data/repository/ExerciseRepository.kt
+@@ -36,6 +36,8 @@
+             equipment = equipmentValue,
+             type = type,
+             isCustom = isCustom,
++            instructions = instructions,
++            muscleAffectionSeverity = muscleAffectionSeverity,
+         )
+     }
+ }
+--- a/core/data/src/main/java/com/sjn/gym/core/data/database/GymDatabase.kt
++++ b/core/data/src/main/java/com/sjn/gym/core/data/database/GymDatabase.kt
+@@ -14,6 +14,8 @@
+ import com.sjn.gym.core.data.database.entity.RoutineEntity
+ import com.sjn.gym.core.data.database.entity.RoutineExerciseEntity
+ import com.sjn.gym.core.data.database.entity.WorkoutExerciseEntity
++import com.sjn.gym.core.data.database.entity.RoutineDayEntity
++import com.sjn.gym.core.data.database.dao.ExercisePreferencesDao
++import com.sjn.gym.core.data.database.entity.ExercisePreferencesEntity
+ import com.sjn.gym.core.data.database.entity.WorkoutSessionEntity
+ import com.sjn.gym.core.data.database.entity.WorkoutSetEntity
+
+@@ -26,8 +28,10 @@
+             WorkoutSetEntity::class,
+             RoutineEntity::class,
++            RoutineDayEntity::class,
+             RoutineExerciseEntity::class,
++            ExercisePreferencesEntity::class,
+         ],
+-    version = 4,
++    version = 6,
+     exportSchema = false,
+ )
+ @TypeConverters(Converters::class, LocalDateTimeConverter::class)
+@@ -38,6 +42,8 @@
+
+     abstract fun routineDao(): RoutineDao
+
++    abstract fun exercisePreferencesDao(): ExercisePreferencesDao
++
+     companion object {
+         val MIGRATION_1_2 =
+             object : Migration(1, 2) {
+@@ -79,5 +85,34 @@
+                     )
+                 }
+             }
++
++        val MIGRATION_4_5 =
++            object : Migration(4, 5) {
++                override fun migrate(db: SupportSQLiteDatabase) {
++                    db.execSQL(
++                        "ALTER TABLE exercises ADD COLUMN muscleAffectionSeverity INTEGER NOT NULL DEFAULT 0"
++                    )
++                    db.execSQL(
++                        "CREATE TABLE IF NOT EXISTS `exercise_preferences` (`exerciseId` TEXT NOT NULL, `defaultRestTimeSeconds` INTEGER NOT NULL, `defaultSets` INTEGER NOT NULL, `defaultReps` INTEGER NOT NULL, `defaultWeight` REAL NOT NULL, PRIMARY KEY(`exerciseId`))"
++                    )
++                }
++            }
++
++        val MIGRATION_5_6 =
++            object : Migration(5, 6) {
++                override fun migrate(db: SupportSQLiteDatabase) {
++                    db.execSQL(
++                        "ALTER TABLE routines ADD COLUMN routineType TEXT NOT NULL DEFAULT 'REPEAT'"
++                    )
++                    db.execSQL(
++                        "ALTER TABLE routine_exercises ADD COLUMN routineDayId TEXT NOT NULL DEFAULT ''"
++                    )
++                    db.execSQL(
++                        "ALTER TABLE routine_exercises ADD COLUMN setType TEXT NOT NULL DEFAULT 'NORMAL'"
++                    )
++                    db.execSQL(
++                        "CREATE TABLE IF NOT EXISTS `routine_days` (`id` TEXT NOT NULL, `routineId` TEXT NOT NULL, `dayName` TEXT NOT NULL, `dayIndex` INTEGER NOT NULL, `isRestDay` INTEGER NOT NULL, `universalRestTimeSeconds` INTEGER NOT NULL, PRIMARY KEY(`id`))"
++                    )
++                }
++            }
+     }
+ }
+--- a/core/data/src/main/java/com/sjn/gym/core/data/di/DatabaseModule.kt
++++ b/core/data/src/main/java/com/sjn/gym/core/data/di/DatabaseModule.kt
+@@ -24,6 +24,8 @@
+                 GymDatabase.MIGRATION_1_2,
+                 GymDatabase.MIGRATION_2_3,
+                 GymDatabase.MIGRATION_3_4,
++                GymDatabase.MIGRATION_4_5,
++                GymDatabase.MIGRATION_5_6,
+             )
+             .fallbackToDestructiveMigration(false) // Data persistence required.
+             .addCallback(
+@@ -33,24 +35,24 @@
+                         // Seed data
+                         val exercises =
+                             listOf(
+-                                "('Bench Press', 'Chest', 'Pectoralis Major', 'Triceps,Anterior Deltoid', 'Barbell', 'WEIGHT_REPS', 0, 'Lie flat on your back on a bench. Grasp the barbell with an overhand grip, slightly wider than shoulder-width apart. Lower the bar to your mid-chest, then press it back up to the starting position.')",
+-                                "('Squat', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Barbell', 'WEIGHT_REPS', 0, 'Stand with feet shoulder-width apart. Rest the barbell across your upper back. Bend your knees and hips to lower your body as if sitting in a chair, keeping your chest up and back straight. Push through your heels to return to the starting position.')",
+-                                "('Deadlift', 'Back', 'Erector Spinae', 'Glutes,Hamstrings,Traps', 'Barbell', 'WEIGHT_REPS', 0, 'Stand with feet hip-width apart, barbell over your mid-foot. Bend at the hips and knees to grip the bar. Keeping your back flat, lift the bar by extending your hips and knees until you are standing fully upright.')",
+-                                "('Overhead Press', 'Shoulders', 'Anterior Deltoid', 'Triceps,Lateral Deltoid', 'Barbell', 'WEIGHT_REPS', 0, 'Stand with feet shoulder-width apart. Hold the barbell at shoulder level with an overhand grip. Press the bar straight up overhead until your arms are fully extended, then lower it back to the starting position.')",
+-                                "('Pull Up', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Bodyweight', 'REPS_ONLY', 0, 'Grasp a pull-up bar with an overhand grip slightly wider than shoulder-width apart. Hang freely, then pull yourself up until your chin clears the bar. Lower yourself back down with control.')",
+-                                "('Dumbbell Row', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Dumbbell', 'WEIGHT_REPS', 0, 'Place one knee and hand on a bench. Hold a dumbbell in the other hand. Pull the dumbbell up to your side, keeping your elbow close to your body. Lower the weight under control.')",
+-                                "('Lunges', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Dumbbell', 'WEIGHT_REPS', 0, 'Hold a dumbbell in each hand. Step forward with one leg and lower your hips until both knees are bent at a 90-degree angle. Push back to the starting position and repeat on the other side.')",
+-                                "('Bicep Curl', 'Arms', 'Biceps Brachii', 'Brachialis,Brachioradialis', 'Dumbbell', 'WEIGHT_REPS', 0, 'Stand tall holding a dumbbell in each hand, arms fully extended and palms facing forward. Curl the weights upward towards your shoulders, contracting your biceps. Lower back down with control.')",
+-                                "('Tricep Extension', 'Arms', 'Triceps Brachii', '', 'Dumbbell', 'WEIGHT_REPS', 0, 'Hold a single dumbbell with both hands behind your head, elbows pointing up. Extend your arms to raise the dumbbell, then slowly lower it back to the starting position.')",
+-                                "('Leg Press', 'Legs', 'Quadriceps', 'Glutes,Hamstrings,Calves', 'Machine', 'WEIGHT_REPS', 0, 'Sit in the leg press machine and place your feet on the platform shoulder-width apart. Lower the platform by bending your knees to 90 degrees, then push it back up.')",
+-                                "('Lat Pulldown', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Machine', 'WEIGHT_REPS', 0, 'Sit at a lat pulldown machine and grasp the wide bar with an overhand grip. Pull the bar down to your upper chest, squeezing your shoulder blades together. Return the bar with control.')",
+-                                "('Plank', 'Core', 'Rectus Abdominis', 'Obliques,Transverse Abdominis', 'Bodyweight', 'TIME', 0, 'Start in a push-up position, but rest your weight on your forearms instead of your hands. Keep your body in a straight line from head to heels and brace your core. Hold this position.')",
+-                                "('Crunch', 'Core', 'Rectus Abdominis', 'Obliques', 'Bodyweight', 'REPS_ONLY', 0, 'Lie on your back with knees bent and feet flat on the floor. Place your hands lightly behind your head. Contract your abs to lift your shoulder blades off the floor, then slowly lower back down.')",
++                                "('Bench Press', 'Chest', 'Pectoralis Major', 'Triceps,Anterior Deltoid', 'Barbell', 'WEIGHT_REPS', 0, 'Lie flat on your back on a bench. Grasp the barbell with an overhand grip, slightly wider than shoulder-width apart. Lower the bar to your mid-chest, then press it back up to the starting position.', 3)",
++                                "('Squat', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Barbell', 'WEIGHT_REPS', 0, 'Stand with feet shoulder-width apart. Rest the barbell across your upper back. Bend your knees and hips to lower your body as if sitting in a chair, keeping your chest up and back straight. Push through your heels to return to the starting position.', 3)",
++                                "('Deadlift', 'Back', 'Erector Spinae', 'Glutes,Hamstrings,Traps', 'Barbell', 'WEIGHT_REPS', 0, 'Stand with feet hip-width apart, barbell over your mid-foot. Bend at the hips and knees to grip the bar. Keeping your back flat, lift the bar by extending your hips and knees until you are standing fully upright.', 3)",
++                                "('Overhead Press', 'Shoulders', 'Anterior Deltoid', 'Triceps,Lateral Deltoid', 'Barbell', 'WEIGHT_REPS', 0, 'Stand with feet shoulder-width apart. Hold the barbell at shoulder level with an overhand grip. Press the bar straight up overhead until your arms are fully extended, then lower it back to the starting position.', 2)",
++                                "('Pull Up', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Bodyweight', 'REPS_ONLY', 0, 'Grasp a pull-up bar with an overhand grip slightly wider than shoulder-width apart. Hang freely, then pull yourself up until your chin clears the bar. Lower yourself back down with control.', 2)",
++                                "('Dumbbell Row', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Dumbbell', 'WEIGHT_REPS', 0, 'Place one knee and hand on a bench. Hold a dumbbell in the other hand. Pull the dumbbell up to your side, keeping your elbow close to your body. Lower the weight under control.', 2)",
++                                "('Lunges', 'Legs', 'Quadriceps', 'Glutes,Hamstrings', 'Dumbbell', 'WEIGHT_REPS', 0, 'Hold a dumbbell in each hand. Step forward with one leg and lower your hips until both knees are bent at a 90-degree angle. Push back to the starting position and repeat on the other side.', 2)",
++                                "('Bicep Curl', 'Arms', 'Biceps Brachii', 'Brachialis,Brachioradialis', 'Dumbbell', 'WEIGHT_REPS', 0, 'Stand tall holding a dumbbell in each hand, arms fully extended and palms facing forward. Curl the weights upward towards your shoulders, contracting your biceps. Lower back down with control.', 1)",
++                                "('Tricep Extension', 'Arms', 'Triceps Brachii', '', 'Dumbbell', 'WEIGHT_REPS', 0, 'Hold a single dumbbell with both hands behind your head, elbows pointing up. Extend your arms to raise the dumbbell, then slowly lower it back to the starting position.', 1)",
++                                "('Leg Press', 'Legs', 'Quadriceps', 'Glutes,Hamstrings,Calves', 'Machine', 'WEIGHT_REPS', 0, 'Sit in the leg press machine and place your feet on the platform shoulder-width apart. Lower the platform by bending your knees to 90 degrees, then push it back up.', 2)",
++                                "('Lat Pulldown', 'Back', 'Latissimus Dorsi', 'Biceps,Rear Deltoid', 'Machine', 'WEIGHT_REPS', 0, 'Sit at a lat pulldown machine and grasp the wide bar with an overhand grip. Pull the bar down to your upper chest, squeezing your shoulder blades together. Return the bar with control.', 2)",
++                                "('Plank', 'Core', 'Rectus Abdominis', 'Obliques,Transverse Abdominis', 'Bodyweight', 'TIME', 0, 'Start in a push-up position, but rest your weight on your forearms instead of your hands. Keep your body in a straight line from head to heels and brace your core. Hold this position.', 1)",
++                                "('Crunch', 'Core', 'Rectus Abdominis', 'Obliques', 'Bodyweight', 'REPS_ONLY', 0, 'Lie on your back with knees bent and feet flat on the floor. Place your hands lightly behind your head. Contract your abs to lift your shoulder blades off the floor, then slowly lower back down.', 1)",
+                             )
+
+                         exercises.forEach { values ->
+                             db.execSQL(
+-                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom, instructions) VALUES $values"
++                                "INSERT INTO exercises (name, bodyPart, targetMuscle, secondaryMuscles, equipment, type, isCustom, instructions, muscleAffectionSeverity) VALUES $values"
+                             )
+                         }
+                     }
+@@ -61,4 +63,6 @@
+     @Provides fun provideExerciseDao(db: GymDatabase): ExerciseDao = db.exerciseDao()
+
+     @Provides fun provideRoutineDao(db: GymDatabase) = db.routineDao()
++
++    @Provides fun provideExercisePreferencesDao(db: GymDatabase) = db.exercisePreferencesDao()
+ }
+--- a/core/data/src/main/java/com/sjn/gym/core/data/database/entity/RoutineEntity.kt
++++ b/core/data/src/main/java/com/sjn/gym/core/data/database/entity/RoutineEntity.kt
+@@ -4,4 +4,9 @@
+ import androidx.room.PrimaryKey
+
+ @Entity(tableName = "routines")
+-data class RoutineEntity(@PrimaryKey val id: String, val name: String, val description: String)
++data class RoutineEntity(
++    @PrimaryKey val id: String,
++    val name: String,
++    val description: String,
++    val routineType: String = "REPEAT", // REPEAT or FIXED
++)
+--- a/core/data/src/main/java/com/sjn/gym/core/data/database/entity/RoutineExerciseEntity.kt
++++ b/core/data/src/main/java/com/sjn/gym/core/data/database/entity/RoutineExerciseEntity.kt
+@@ -7,10 +7,12 @@
+ data class RoutineExerciseEntity(
+     @PrimaryKey val id: String,
+     val routineId: String,
++    val routineDayId: String = "", // Links to RoutineDayEntity
+     val exerciseId: Long,
+     val orderIndex: Int,
+     val targetSets: Int,
+     val targetReps: Int?,
+-    val restTimeSeconds: Int?,
++    val restTimeSeconds: Int?, // Specific rest time (overrides day's universal rest time)
++    val setType: String = "NORMAL", // NORMAL, DROP_SET, FAILURE
+     val note: String,
+ )

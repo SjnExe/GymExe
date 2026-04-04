@@ -225,7 +225,18 @@ fun ProfileScreen(
                                 )
                             }
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                            WeightHistoryChart()
+                            val weight = uiState.weightValue
+                            if (weight != null) {
+                                WeightHistoryChart(
+                                    dataPoints =
+                                        kotlinx.collections.immutable.persistentListOf(
+                                            weight.toFloat(),
+                                            weight.toFloat(),
+                                        )
+                                )
+                            } else {
+                                WeightHistoryChart()
+                            }
                         } else {
                             Text(
                                 "No weight data available.",
