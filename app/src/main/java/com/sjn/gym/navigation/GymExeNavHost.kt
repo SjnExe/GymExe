@@ -26,12 +26,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.chuckerteam.chucker.api.Chucker
 import com.sjn.gym.BuildConfig
 import com.sjn.gym.R
 import com.sjn.gym.feature.onboarding.OnboardingScreen
 import com.sjn.gym.feature.profile.ProfileScreen
 import com.sjn.gym.feature.settings.SettingsScreen
+import com.sjn.gym.feature.workout.ExerciseDetailsScreen
 import com.sjn.gym.feature.workout.ExerciseListScreen
 import com.sjn.gym.feature.workout.HomeScreen
 import com.sjn.gym.feature.workout.LibraryScreen
@@ -45,6 +47,8 @@ import kotlinx.serialization.Serializable
 @Serializable object Profile
 
 @Serializable data class Workout(val exerciseId: String? = null)
+
+@Serializable data class ExerciseDetails(val exerciseId: String)
 
 @Serializable object ExerciseList
 
@@ -150,16 +154,25 @@ fun GymExeNavHost(isOnboardingCompleted: Boolean, modifier: Modifier = Modifier)
                 // ViewModel will retrieve arguments via SavedStateHandle
                 WorkoutScreen()
             }
+            composable<ExerciseDetails> { backStackEntry ->
+                val args = backStackEntry.toRoute<ExerciseDetails>()
+                ExerciseDetailsScreen(
+                    exerciseId = args.exerciseId,
+                    onNavigateUp = { navController.navigateUp() },
+                )
+            }
             composable<Library> {
                 LibraryScreen(
                     onNavigateToWorkout = { exerciseId ->
-                        navController.navigate(Workout(exerciseId))
+                        navController.navigate(ExerciseDetails(exerciseId))
                     }
                 )
             }
             composable<ExerciseList> {
                 ExerciseListScreen(
-                    onExerciseClick = { exerciseId -> navController.navigate(Workout(exerciseId)) }
+                    onExerciseClick = { exerciseId ->
+                        navController.navigate(ExerciseDetails(exerciseId))
+                    }
                 )
             }
             composable<Settings> {
